@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2, LogIn, User, Lock } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { ApiError } from "@/lib/api";
-import { LogoMark } from "@/components/Logo";
+import { LogoLockup } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,17 +58,21 @@ export function LoginPage() {
         style={{ background: "radial-gradient(circle, #f5c518, transparent 70%)" }}
       />
 
-      <div className="relative w-full max-w-md">
-        <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <LogoMark className="size-16" />
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              Tribo de Davi
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Portal Administrativo
-            </p>
-          </div>
+      {/* Símbolo do instituto em destaque, como marca-d'água de fundo */}
+      <img
+        src="/simbolo.png"
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        className="pointer-events-none absolute left-1/2 top-1/2 w-[46rem] max-w-none -translate-x-1/2 -translate-y-1/2 select-none opacity-[0.08] blur-[1px]"
+      />
+
+      <div className="relative z-10 w-full max-w-md">
+        <div className="mb-8 flex flex-col items-center gap-4 text-center">
+          <LogoLockup className="h-24" />
+          <p className="text-sm text-muted-foreground">
+            Portal Administrativo
+          </p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-8 shadow-xl">

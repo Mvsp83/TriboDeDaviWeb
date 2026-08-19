@@ -123,8 +123,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-5">
-        <LogoLockup />
+      <div className="flex h-20 items-center justify-between border-b border-sidebar-border px-5">
+        <LogoLockup className="h-14" />
         {onNavigate && (
           <button
             onClick={onNavigate}
