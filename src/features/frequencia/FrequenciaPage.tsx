@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas } from "@/features/aulas/aulasApi";
+import { useAlunos } from "@/features/alunos/alunosApi";
 import { usePolos } from "@/features/polos/polosApi";
 import { usePresencas } from "@/features/presencas/presencasApi";
 import { useTableSort, type SortValue } from "@/lib/useTableSort";
@@ -35,6 +36,7 @@ export function FrequenciaPage() {
 
   const { data: aulas, isLoading: carregandoAulas } = useAulas(admin);
   const { data: polos } = usePolos();
+  const { data: alunos } = useAlunos(admin);
   const aulaIds = useMemo(() => (aulas ?? []).map((a) => a.id), [aulas]);
   const { data: presencas, isLoading: carregandoPresencas } = usePresencas(
     admin,
@@ -50,6 +52,9 @@ export function FrequenciaPage() {
   const linhas = useMemo<Linha[]>(() => {
     const nomePolo = new Map((polos ?? []).map((p) => [p.id, p.nome]));
     const turmaPorAula = new Map((aulas ?? []).map((a) => [a.id, a.turma]));
+    // O get-all de presenças (admin) devolve NomeAluno vazio; resolvemos o nome
+    // pela lista de alunos (o endpoint por aula, do professor, já traz o nome).
+    const nomeAlunoPorId = new Map((alunos ?? []).map((a) => [a.id, a.nome]));
 
     const grupos = new Map<number, Linha>();
     for (const p of presencas ?? []) {
@@ -57,7 +62,7 @@ export function FrequenciaPage() {
       if (!linha) {
         linha = {
           alunoId: p.alunoId,
-          nomeAluno: p.nomeAluno,
+          nomeAluno: p.nomeAluno || nomeAlunoPorId.get(p.alunoId) || "-",
           poloId: p.poloId,
           nomePolo: nomePolo.get(p.poloId) ?? "-",
           turma: turmaPorAula.get(p.aulaId) ?? 0,
@@ -83,7 +88,7 @@ export function FrequenciaPage() {
       .filter((l) => !filtroPolo || norm(l.nomePolo).includes(norm(filtroPolo)))
       .filter((l) => !filtroTurma || String(l.turma) === filtroTurma)
       .sort((a, b) => a.turma - b.turma || a.nomeAluno.localeCompare(b.nomeAluno, "pt-BR"));
-  }, [presencas, aulas, polos, filtroNome, filtroPolo, filtroTurma]);
+  }, [presencas, aulas, polos, alunos, filtroNome, filtroPolo, filtroTurma]);
 
   const acessar = useCallback((l: Linha, key: string): SortValue => {
     switch (key) {

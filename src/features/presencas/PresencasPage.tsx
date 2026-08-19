@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas } from "@/features/aulas/aulasApi";
+import { useAlunos } from "@/features/alunos/alunosApi";
 import { usePolos } from "@/features/polos/polosApi";
 import { usePresencas } from "@/features/presencas/presencasApi";
 import { dataBR, horaCurta } from "@/lib/format";
@@ -32,9 +33,18 @@ export function PresencasPage() {
 
   const { data: aulas, isLoading: carregandoAulas } = useAulas(admin);
   const { data: polos } = usePolos();
+  const { data: alunos } = useAlunos(admin);
 
   const aulaIds = useMemo(() => (aulas ?? []).map((a) => a.id), [aulas]);
   const { data: presencas } = usePresencas(admin, aulaIds);
+
+  // O get-all de presenças (admin) devolve NomeAluno vazio — só o endpoint por
+  // aula faz o join com Alunos. Resolvemos o nome pela lista de alunos.
+  const nomePorAluno = useMemo(() => {
+    const m = new Map<number, string>();
+    alunos?.forEach((a) => m.set(a.id, a.nome));
+    return m;
+  }, [alunos]);
 
   const [filtroPolo, setFiltroPolo] = useState("");
   const [filtroData, setFiltroData] = useState("");
@@ -177,7 +187,7 @@ export function PresencasPage() {
                       {lista.map((p) => (
                         <TableRow key={p.id}>
                           <TableCell className="font-medium">
-                            {p.nomeAluno}
+                            {p.nomeAluno || nomePorAluno.get(p.alunoId) || "-"}
                           </TableCell>
                           <TableCell>
                             {p.estaPresente ? (
