@@ -9,6 +9,7 @@ import {
   Circle,
   ArrowDownLeft,
   ArrowUpRight,
+  ArrowLeftRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useContas, useExcluirConta } from "./contasApi";
@@ -19,6 +20,7 @@ import {
 } from "./movimentacoesApi";
 import { ContaFormDialog } from "./ContaFormDialog";
 import { MovimentacaoFormDialog } from "./MovimentacaoFormDialog";
+import { TransferenciaFormDialog } from "./TransferenciaFormDialog";
 import { saldoConta, saldoConciliado } from "./calculos";
 import { baixarCsv } from "./exportar";
 import {
@@ -93,6 +95,7 @@ export function ExtratosPage() {
   const [dialogMov, setDialogMov] = useState(false);
   const [movEdicao, setMovEdicao] = useState<MovimentacaoFinanceira | null>(null);
   const [movExcluir, setMovExcluir] = useState<MovimentacaoFinanceira | null>(null);
+  const [dialogTransf, setDialogTransf] = useState(false);
 
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
@@ -211,6 +214,14 @@ export function ExtratosPage() {
           >
             <Landmark className="size-4" />
             Nova conta
+          </Button>
+          <Button
+            variant="outline"
+            disabled={(contasTodas?.length ?? 0) < 2}
+            onClick={() => setDialogTransf(true)}
+          >
+            <ArrowLeftRight className="size-4" />
+            Transferência
           </Button>
           <Button
             disabled={contas.length === 0}
@@ -435,7 +446,15 @@ export function ExtratosPage() {
                               <ArrowUpRight className="size-4 shrink-0 text-destructive" />
                             )}
                             <div className="min-w-0">
-                              <p className="truncate font-medium">{mov.descricao}</p>
+                              <p className="flex items-center gap-1.5 truncate font-medium">
+                                {mov.descricao}
+                                {mov.transferenciaId && (
+                                  <ArrowLeftRight
+                                    className="size-3.5 shrink-0 text-muted-foreground"
+                                    aria-label="Transferência entre contas"
+                                  />
+                                )}
+                              </p>
                               <p className="text-xs text-muted-foreground">
                                 {categoriaNome(mov.categoriaId)}
                                 {mov.documento ? ` · ${mov.documento}` : ""}
@@ -466,17 +485,19 @@ export function ExtratosPage() {
                           </button>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Editar"
-                            onClick={() => {
-                              setMovEdicao(mov);
-                              setDialogMov(true);
-                            }}
-                          >
-                            <Pencil className="size-4" />
-                          </Button>
+                          {!mov.transferenciaId && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Editar"
+                              onClick={() => {
+                                setMovEdicao(mov);
+                                setDialogMov(true);
+                              }}
+                            >
+                              <Pencil className="size-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -512,6 +533,13 @@ export function ExtratosPage() {
         contaIdPadrao={contaSel?.id ?? null}
       />
 
+      <TransferenciaFormDialog
+        aberto={dialogTransf}
+        onOpenChange={setDialogTransf}
+        contas={contasTodas ?? []}
+        contaOrigemPadrao={contaSel?.id ?? null}
+      />
+
       <ConfirmDialog
         aberto={contaExcluir !== null}
         onOpenChange={(o) => !o && setContaExcluir(null)}
@@ -535,6 +563,13 @@ export function ExtratosPage() {
           <>
             Excluir <strong>{movExcluir?.descricao}</strong>? Esta ação não pode
             ser desfeita.
+            {movExcluir?.transferenciaId && (
+              <>
+                {" "}
+                Como é uma transferência, os <strong>dois lados</strong> (débito
+                e crédito) serão removidos.
+              </>
+            )}
           </>
         }
         confirmarLabel="Excluir"

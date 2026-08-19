@@ -5,12 +5,14 @@ import {
   Trash2,
   TrendingUp,
   Download,
+  ArrowLeftRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useContas, useExcluirConta } from "./contasApi";
 import { useMovimentacoes, useExcluirMovimentacao } from "./movimentacoesApi";
 import { ContaFormDialog } from "./ContaFormDialog";
 import { MovimentacaoFormDialog } from "./MovimentacaoFormDialog";
+import { TransferenciaFormDialog } from "./TransferenciaFormDialog";
 import { saldoConta } from "./calculos";
 import { baixarCsv } from "./exportar";
 import {
@@ -78,6 +80,7 @@ export function AplicacoesPage() {
   const [movEdicao, setMovEdicao] = useState<MovimentacaoFinanceira | null>(null);
   const [movExcluir, setMovExcluir] = useState<MovimentacaoFinanceira | null>(null);
   const [contaPadraoMov, setContaPadraoMov] = useState<number | null>(null);
+  const [dialogTransf, setDialogTransf] = useState(false);
 
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
@@ -183,6 +186,14 @@ export function AplicacoesPage() {
           >
             <TrendingUp className="size-4" />
             Nova aplicação
+          </Button>
+          <Button
+            variant="outline"
+            disabled={(contasTodas?.length ?? 0) < 2}
+            onClick={() => setDialogTransf(true)}
+          >
+            <ArrowLeftRight className="size-4" />
+            Transferência
           </Button>
           <Button disabled={aplicacoes.length === 0} onClick={() => novoLancamento(null)}>
             <Plus className="size-4" />
@@ -343,7 +354,17 @@ export function AplicacoesPage() {
                       <TableRow key={m.id}>
                         <TableCell className="whitespace-nowrap">{dataCurtaBR(m.data)}</TableCell>
                         <TableCell className="font-medium">{nomeConta(m.contaId)}</TableCell>
-                        <TableCell>{m.descricao}</TableCell>
+                        <TableCell>
+                          <span className="flex items-center gap-1.5">
+                            {m.descricao}
+                            {m.transferenciaId && (
+                              <ArrowLeftRight
+                                className="size-3.5 shrink-0 text-muted-foreground"
+                                aria-label="Transferência entre contas"
+                              />
+                            )}
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <Badge variant="secondary">{categoriaNome(m.categoriaId)}</Badge>
                         </TableCell>
@@ -357,18 +378,20 @@ export function AplicacoesPage() {
                           {moeda(m.valor)}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Editar"
-                            onClick={() => {
-                              setMovEdicao(m);
-                              setContaPadraoMov(m.contaId);
-                              setDialogMov(true);
-                            }}
-                          >
-                            <Pencil className="size-4" />
-                          </Button>
+                          {!m.transferenciaId && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Editar"
+                              onClick={() => {
+                                setMovEdicao(m);
+                                setContaPadraoMov(m.contaId);
+                                setDialogMov(true);
+                              }}
+                            >
+                              <Pencil className="size-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -404,6 +427,12 @@ export function AplicacoesPage() {
         contaIdPadrao={contaPadraoMov}
       />
 
+      <TransferenciaFormDialog
+        aberto={dialogTransf}
+        onOpenChange={setDialogTransf}
+        contas={contasTodas ?? []}
+      />
+
       <ConfirmDialog
         aberto={contaExcluir !== null}
         onOpenChange={(o) => !o && setContaExcluir(null)}
@@ -427,6 +456,13 @@ export function AplicacoesPage() {
           <>
             Excluir <strong>{movExcluir?.descricao}</strong>? Esta ação não pode
             ser desfeita.
+            {movExcluir?.transferenciaId && (
+              <>
+                {" "}
+                Como é uma transferência, os <strong>dois lados</strong> (débito
+                e crédito) serão removidos.
+              </>
+            )}
           </>
         }
         confirmarLabel="Excluir"

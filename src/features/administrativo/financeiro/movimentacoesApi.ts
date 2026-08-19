@@ -29,6 +29,15 @@ export function useExcluirMovimentacao() {
   });
 }
 
+export function useRegistrarTransferencia() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (dados: store.DadosTransferencia) =>
+      store.registrarTransferencia(dados),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CHAVE_MOVS }),
+  });
+}
+
 export function useDefinirConciliacao() {
   const qc = useQueryClient();
   return useMutation({

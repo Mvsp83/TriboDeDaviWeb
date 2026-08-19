@@ -86,6 +86,10 @@ src/
     com saldo acumulado, conciliação bancária e exportação CSV.
   - **Aplicações** — aportes, resgates e rendimentos das aplicações, com totais
     por período.
+  - **Transferências** — movem saldo entre duas contas criando os dois lados de
+    uma vez (débito na origem, crédito no destino, ligados por um id). A
+    categoria é derivada (aporte / resgate / transferência entre contas) e é
+    neutra na Planilha; excluir um lado remove o par.
   - **Planilha Financeira** — consolidação anual por categoria e mês (receitas,
     despesas, resultado e acumulado), exportável em CSV e PDF.
 

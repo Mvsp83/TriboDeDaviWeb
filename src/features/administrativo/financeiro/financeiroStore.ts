@@ -95,7 +95,59 @@ export async function salvarMovimentacao(
 
 export async function excluirMovimentacao(id: number): Promise<void> {
   const db = carregar();
-  db.movimentacoes = db.movimentacoes.filter((m) => m.id !== id);
+  const alvo = db.movimentacoes.find((m) => m.id === id);
+  const tid = alvo?.transferenciaId;
+  db.movimentacoes = db.movimentacoes.filter((m) => {
+    if (m.id === id) return false;
+    // Excluir um lado de uma transferência remove o par junto.
+    if (tid && m.transferenciaId === tid) return false;
+    return true;
+  });
+  persistir(db);
+}
+
+// Dados de uma transferência entre contas (aporte, resgate ou simples
+// transferência). Gera dois lançamentos ligados: débito na origem e crédito
+// no destino, ambos com o mesmo `transferenciaId`.
+export interface DadosTransferencia {
+  contaOrigemId: number;
+  contaDestinoId: number;
+  data: string;
+  valor: number;
+  categoriaId: string;
+  descricao: string;
+  documento?: string | null;
+  observacoes?: string | null;
+}
+
+export async function registrarTransferencia(
+  d: DadosTransferencia,
+): Promise<void> {
+  const db = carregar();
+  const transferenciaId = crypto.randomUUID();
+  const base = {
+    data: d.data,
+    descricao: d.descricao,
+    categoriaId: d.categoriaId,
+    valor: d.valor,
+    conciliado: false,
+    documento: d.documento ?? null,
+    observacoes: d.observacoes ?? null,
+    transferenciaId,
+  };
+  const debito: MovimentacaoFinanceira = {
+    ...base,
+    id: proximoId(db),
+    contaId: d.contaOrigemId,
+    tipo: "Debito",
+  };
+  const credito: MovimentacaoFinanceira = {
+    ...base,
+    id: proximoId(db),
+    contaId: d.contaDestinoId,
+    tipo: "Credito",
+  };
+  db.movimentacoes.push(debito, credito);
   persistir(db);
 }
 

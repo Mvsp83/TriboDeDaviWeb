@@ -99,9 +99,26 @@ export interface MovimentacaoFinanceira {
   conciliado: boolean; // conciliação bancária
   documento?: string | null; // nº do documento / comprovante
   observacoes?: string | null;
+  // Quando preenchido, liga os dois lados de uma transferência (o débito na
+  // conta de origem e o crédito na de destino compartilham o mesmo id). Esses
+  // lançamentos não são editados individualmente — só criados/excluídos em par.
+  transferenciaId?: string | null;
 }
 
 // Valor com sinal aplicado (crédito +, débito −).
 export function valorComSinal(m: MovimentacaoFinanceira): number {
   return m.tipo === "Credito" ? m.valor : -m.valor;
+}
+
+// Categoria de uma transferência conforme as contas envolvidas: aporte quando
+// o dinheiro entra numa aplicação, resgate quando sai dela, senão simples
+// transferência entre contas. Todas têm natureza "Transferencia" (neutras na
+// Planilha), então não afetam o resultado — só movem saldo entre as contas.
+export function categoriaTransferencia(
+  origem: ContaFinanceira,
+  destino: ContaFinanceira,
+): string {
+  if (destino.tipo === "Aplicacao") return "aporte";
+  if (origem.tipo === "Aplicacao") return "resgate";
+  return "transferencia";
 }
