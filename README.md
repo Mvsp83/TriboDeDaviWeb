@@ -52,6 +52,9 @@ src/
     dashboard/    painel com totais e aniversariantes
     alunos/       CRUD completo (lista, filtros, formulário, faixas)
     polos/        consulta de polos
+    administrativo/
+      contabilidade  DRE, Balanço, Relatório de Atividades (documentos)
+      financeiro/    Extratos, Aplicações e Planilha (contas + lançamentos)
   lib/            api (axios), rotas, token, utils, queryClient
   types/          modelos do domínio
 ```
@@ -71,6 +74,26 @@ src/
 - **Sincronização** (admin) — histórico, última execução e ações de sincronizar
 - **Relatórios** — construtor com 8 fontes, colunas selecionáveis, filtros,
   exportação CSV, impressão e relatórios salvos
+
+## Administrativo (admin)
+
+Área nova, além da paridade com o portal Blazor:
+
+- **Contabilidade** — **DRE**, **Balanço** e **Relatório de Atividades** guardam
+  os documentos anuais enviados pela contabilidade (upload/download via API).
+- **Financeiro → Contas** — módulo de tesouraria do instituto:
+  - **Extratos** — contas correntes e poupanças, lançamentos de crédito/débito
+    com saldo acumulado, conciliação bancária e exportação CSV.
+  - **Aplicações** — aportes, resgates e rendimentos das aplicações, com totais
+    por período.
+  - **Planilha Financeira** — consolidação anual por categoria e mês (receitas,
+    despesas, resultado e acumulado), exportável em CSV e PDF.
+
+> **Persistência do Financeiro**: hoje os dados de contas e lançamentos ficam no
+> `localStorage` do navegador — a API REST ainda não tem endpoints financeiros.
+> A camada de dados (`financeiro/financeiroStore.ts`) é isolada de propósito:
+> quando os endpoints existirem, basta reescrevê-la mantendo a assinatura dos
+> hooks, sem tocar nas telas.
 
 Duas telas ficam com aviso em vez de reconstrução, por dependerem de algo que
 não existe na API REST:

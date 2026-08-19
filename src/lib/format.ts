@@ -18,3 +18,21 @@ export function paraInputDate(iso: string | null | undefined): string {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
 }
+
+// Número para moeda brasileira (R$ 1.234,56). Nulos viram R$ 0,00.
+export function moeda(valor: number | null | undefined): string {
+  const n = typeof valor === "number" && Number.isFinite(valor) ? valor : 0;
+  return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+export const MESES_CURTOS = [
+  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez",
+];
+
+// Data "yyyy-MM-dd" (sem depender de fuso) para dd/MM/yyyy.
+export function dataCurtaBR(iso: string | null | undefined): string {
+  if (!iso) return "-";
+  const [ano, mes, dia] = iso.slice(0, 10).split("-");
+  return dia && mes && ano ? `${dia}/${mes}/${ano}` : "-";
+}
