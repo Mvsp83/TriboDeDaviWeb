@@ -72,11 +72,19 @@ function dentroPeriodo(dataIso: string, f: FiltroCtx): boolean {
 }
 
 async function carregarPresencas(admin: boolean): Promise<Presenca[]> {
-  if (admin) return apiGet<Presenca[]>(ApiRotas.presencasGetAll);
-  const aulas = await apiGet<Aula[]>(ApiRotas.aulasPorPolo);
+  // A API devolve Data: null quando não há presenças (get-all sem registros ou
+  // aula do professor sem chamada). O apiGet resolve esse null sem lançar, então
+  // normalizamos para [] — senão entram nulls na lista e quebram os relatórios
+  // de Presenças/Frequência ao acessar p.data / p.nomeAluno.
+  if (admin) {
+    return (await apiGet<Presenca[] | null>(ApiRotas.presencasGetAll)) ?? [];
+  }
+  const aulas = (await apiGet<Aula[] | null>(ApiRotas.aulasPorPolo)) ?? [];
   const listas = await Promise.all(
     aulas.map((a) =>
-      apiGet<Presenca[]>(ApiRotas.presencaPorAula(a.id)).catch(() => []),
+      apiGet<Presenca[] | null>(ApiRotas.presencaPorAula(a.id))
+        .then((r) => r ?? [])
+        .catch(() => []),
     ),
   );
   return listas.flat();
