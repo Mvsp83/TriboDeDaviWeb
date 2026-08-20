@@ -13,6 +13,27 @@ import {
 import { LogoLockup } from "@/components/Logo";
 import { cn } from "@/lib/utils";
 
+// Cor de cada seção (nível 0). A cor "desce" para os filhos, agrupando
+// visualmente as opções. No item ativo, o dourado da marca assume.
+const CORES_SECAO: Record<string, string> = {
+  Dashboard: "#38bdf8",
+  Calendário: "#a78bfa",
+  "Modelos de Documentos": "#fbbf24",
+  "Ofícios e Recibos": "#2dd4bf",
+  Cadastros: "#34d399",
+  Aula: "#818cf8",
+  Presenças: "#4ade80",
+  Frequência: "#22d3ee",
+  Aniversariantes: "#f472b6",
+  Contabilidade: "#fb923c",
+  Financeiro: "#a3e635",
+  Usuários: "#fb7185",
+  "Padrão de Documentos": "#fcd34d",
+  Importação: "#60a5fa",
+  Sincronização: "#67e8f9",
+  Relatórios: "#c084fc",
+};
+
 function rotaAtiva(href: string, pathname: string): boolean {
   return href === "/"
     ? pathname === "/"
@@ -25,12 +46,10 @@ function contemAtivo(node: NavNode, pathname: string): boolean {
     : rotaAtiva(node.href, pathname);
 }
 
-// Recuo crescente por nível, alinhando o texto sob o ícone do pai.
-const recuo = (depth: number) => 12 + depth * 16;
-
 interface NodeProps {
   node: NavNode;
   depth: number;
+  cor: string;
   onNavigate?: () => void;
 }
 
@@ -42,72 +61,83 @@ function NavNodeItem(props: NodeProps) {
   );
 }
 
-function NavLeafItem({
-  node,
-  depth,
-  onNavigate,
-}: NodeProps & { node: NavLeaf }) {
+function NavLeafItem({ node, depth, cor, onNavigate }: NodeProps & { node: NavLeaf }) {
+  const raiz = depth === 0;
   return (
     <NavLink
       to={node.href}
       end={node.href === "/"}
       onClick={onNavigate}
-      style={{ paddingLeft: recuo(depth) }}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-3 rounded-lg py-2 pr-3 text-sm font-medium transition-colors",
+          "flex items-center rounded-lg transition-colors",
+          raiz ? "gap-3 px-3 py-2.5 text-sm font-medium" : "gap-2.5 px-2.5 py-1.5 text-[13px]",
           isActive
-            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+            : raiz
+              ? "text-sidebar-foreground/85 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+              : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground",
         )
       }
     >
-      <node.icon className="size-[18px] shrink-0" />
-      {node.label}
+      {({ isActive }) => (
+        <>
+          <node.icon
+            className={cn("shrink-0", raiz ? "size-[18px]" : "size-4")}
+            style={{ color: isActive ? undefined : cor }}
+          />
+          {node.label}
+        </>
+      )}
     </NavLink>
   );
 }
 
-function NavBranchItem({
-  node,
-  depth,
-  onNavigate,
-}: NodeProps & { node: NavBranch }) {
+function NavBranchItem({ node, depth, cor, onNavigate }: NodeProps & { node: NavBranch }) {
   const { pathname } = useLocation();
   const ativo = contemAtivo(node, pathname);
-  // Abre automaticamente quando contém a rota ativa.
   const [aberto, setAberto] = useState(ativo);
+  const raiz = depth === 0;
 
   return (
     <div>
       <button
         onClick={() => setAberto((v) => !v)}
-        style={{ paddingLeft: recuo(depth) }}
         className={cn(
-          "flex w-full items-center gap-3 rounded-lg py-2 pr-2 text-sm font-medium transition-colors",
+          "flex w-full items-center rounded-lg transition-colors",
+          raiz ? "gap-3 px-3 py-2.5 text-sm font-medium" : "gap-2.5 px-2.5 py-1.5 text-[13px] font-medium",
           ativo
             ? "text-sidebar-foreground"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+            : raiz
+              ? "text-sidebar-foreground/85 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+              : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground",
         )}
         aria-expanded={aberto}
       >
-        <node.icon className="size-[18px] shrink-0" />
+        <node.icon
+          className={cn("shrink-0", raiz ? "size-[18px]" : "size-4")}
+          style={{ color: cor }}
+        />
         <span className="flex-1 text-left">{node.label}</span>
         <ChevronRight
           className={cn(
-            "size-4 shrink-0 transition-transform",
+            "size-4 shrink-0 text-sidebar-foreground/40 transition-transform",
             aberto && "rotate-90",
           )}
         />
       </button>
 
       {aberto && (
-        <div className="mt-0.5 space-y-0.5">
+        <div
+          className="mt-0.5 space-y-0.5 border-l pl-2.5"
+          style={{ marginLeft: raiz ? 22 : 14, borderColor: `${cor}55` }}
+        >
           {node.children.map((child) => (
             <NavNodeItem
               key={isBranch(child) ? child.label : child.href}
               node={child}
               depth={depth + 1}
+              cor={cor}
               onNavigate={onNavigate}
             />
           ))}
@@ -136,14 +166,20 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         )}
       </div>
 
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {navGroups.map((grupo, i) => {
           const nodes = filtrarPorPapel(grupo.nodes, admin);
           if (nodes.length === 0) return null;
           return (
-            <div key={grupo.titulo ?? i}>
+            <div
+              key={grupo.titulo ?? i}
+              className={cn(
+                "py-2",
+                i > 0 && "mt-1 border-t border-sidebar-border/50 pt-3",
+              )}
+            >
               {grupo.titulo && (
-                <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+                <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/40">
                   {grupo.titulo}
                 </p>
               )}
@@ -153,6 +189,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                     key={isBranch(node) ? node.label : node.href}
                     node={node}
                     depth={0}
+                    cor={CORES_SECAO[node.label] ?? "#94a3b8"}
                     onNavigate={onNavigate}
                   />
                 ))}
