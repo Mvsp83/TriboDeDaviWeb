@@ -70,6 +70,22 @@ export const ApiRotas = {
   configDocumentoObter: "/api/ConfiguracaoDocumento/obter",
   configDocumentoSalvar: "/api/ConfiguracaoDocumento/salvar",
 
+  calendarioPorAno: (ano: number) => `/api/EventoCalendario/ano/${ano}`,
+  calendarioAnos: "/api/EventoCalendario/anos",
+  calendarioCreate: "/api/EventoCalendario/create",
+  calendarioUpdate: "/api/EventoCalendario/update",
+  calendarioDelete: (id: number) => `/api/EventoCalendario/delete/${id}`,
+  calendarioCopiar: (origem: number, destino: number) =>
+    `/api/EventoCalendario/copiar/${origem}/${destino}`,
+
+  docOficialPorAno: (ano: number) => `/api/DocumentoOficial/ano/${ano}`,
+  docOficialAnos: "/api/DocumentoOficial/anos",
+  docOficialGet: (id: number) => `/api/DocumentoOficial/get/${id}`,
+  docOficialCreate: "/api/DocumentoOficial/create",
+  docOficialUpdate: "/api/DocumentoOficial/update",
+  docOficialDelete: (id: number) => `/api/DocumentoOficial/delete/${id}`,
+  docOficialAprovar: (id: number) => `/api/DocumentoOficial/aprovar/${id}`,
+
   relatoriosMeus: "/api/RelatorioSalvo/get-meus",
   relatorioCreate: "/api/RelatorioSalvo/create",
   relatorioDelete: (id: number) => `/api/RelatorioSalvo/delete/${id}`,

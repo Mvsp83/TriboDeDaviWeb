@@ -181,6 +181,36 @@ export interface Aniversariante {
   jaComemorado: boolean;
 }
 
+export interface EventoCalendario {
+  id: number;
+  ano: number;
+  data: string; // ISO
+  dataFim?: string | null;
+  titulo: string;
+  tipo: number;
+  descricao?: string | null;
+  poloId?: number | null;
+  notificar: boolean;
+  emailsNotificacao?: string | null; // vários emails separados por , ou ;
+  diasAntecedencia: number; // 0 = no dia do evento
+}
+
+export interface DocumentoOficial {
+  id: number;
+  tipo: number; // 0 = Ofício, 1 = Recibo
+  status: number; // 0 = Rascunho, 1 = Aprovado
+  ano: number;
+  numero: number;
+  numeroFormatado: string;
+  dataDocumento: string; // ISO
+  titulo: string; // resumo para a listagem
+  conteudo: string; // JSON dos campos do tipo
+  dataAprovacao?: string | null;
+}
+
+export const TIPO_DOC_OFICIAL = { Oficio: 0, Recibo: 1 } as const;
+export const STATUS_DOC = { Rascunho: 0, Aprovado: 1 } as const;
+
 export interface AuthData {
   token: string;
   tokenExpires: string;
