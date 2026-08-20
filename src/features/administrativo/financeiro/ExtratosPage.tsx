@@ -5,6 +5,7 @@ import {
   Trash2,
   Landmark,
   Download,
+  Upload,
   CheckCircle2,
   Circle,
   ArrowDownLeft,
@@ -21,6 +22,7 @@ import {
 import { ContaFormDialog } from "./ContaFormDialog";
 import { MovimentacaoFormDialog } from "./MovimentacaoFormDialog";
 import { TransferenciaFormDialog } from "./TransferenciaFormDialog";
+import { ImportarExtratoDialog } from "./ImportarExtratoDialog";
 import { saldoConta, saldoConciliado } from "./calculos";
 import { baixarCsv } from "./exportar";
 import {
@@ -96,6 +98,7 @@ export function ExtratosPage() {
   const [movEdicao, setMovEdicao] = useState<MovimentacaoFinanceira | null>(null);
   const [movExcluir, setMovExcluir] = useState<MovimentacaoFinanceira | null>(null);
   const [dialogTransf, setDialogTransf] = useState(false);
+  const [dialogImportar, setDialogImportar] = useState(false);
 
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
@@ -222,6 +225,14 @@ export function ExtratosPage() {
           >
             <ArrowLeftRight className="size-4" />
             Transferência
+          </Button>
+          <Button
+            variant="outline"
+            disabled={contas.length === 0}
+            onClick={() => setDialogImportar(true)}
+          >
+            <Upload className="size-4" />
+            Importar extrato
           </Button>
           <Button
             disabled={contas.length === 0}
@@ -538,6 +549,13 @@ export function ExtratosPage() {
         onOpenChange={setDialogTransf}
         contas={contasTodas ?? []}
         contaOrigemPadrao={contaSel?.id ?? null}
+      />
+
+      <ImportarExtratoDialog
+        aberto={dialogImportar}
+        onOpenChange={setDialogImportar}
+        contas={contas}
+        movimentacoes={movimentacoes}
       />
 
       <ConfirmDialog
