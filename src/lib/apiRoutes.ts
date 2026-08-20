@@ -17,6 +17,10 @@ export const ApiRotas = {
 
   presencasGetAll: "/api/Presenca/get-all",
   presencaPorAula: (aulaId: number) => `/api/Presenca/aula/${aulaId}`,
+  // Chamada: grava o lote inteiro de uma aula (trava a aula) e ajusta um
+  // registro já salvo. Ambos exigem papel Professor ou superior na API.
+  presencaBatchCreate: "/api/Presenca/batch/create",
+  presencaUpdate: "/api/Presenca/update",
 
   polos: "/api/Polo/get-por-polo",
   poloCreate: "/api/Polo/create",
@@ -62,6 +66,9 @@ export const ApiRotas = {
   sincronizarTudo: "/api/Sincronizacao/sincronizar-tudo",
   sincronizarPolo: (poloId: number) =>
     `/api/Sincronizacao/sincronizar-polo/${poloId}`,
+
+  configDocumentoObter: "/api/ConfiguracaoDocumento/obter",
+  configDocumentoSalvar: "/api/ConfiguracaoDocumento/salvar",
 
   relatoriosMeus: "/api/RelatorioSalvo/get-meus",
   relatorioCreate: "/api/RelatorioSalvo/create",

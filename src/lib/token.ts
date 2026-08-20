@@ -1,15 +1,18 @@
-// Guarda o JWT em sessionStorage — mesma estratégia do portal Blazor
-// (o token vive só enquanto a aba está aberta).
+// Guarda o JWT em localStorage para que a sessão sobreviva ao fechamento do
+// app — requisito do uso offline (PWA): o professor reabre no tatame, sem
+// internet, e ainda precisa acessar a chamada. A validade continua sendo
+// respeitada (sessaoDoToken confere o `exp`), então um token vencido força
+// novo login assim que houver conexão.
 const TOKEN_KEY = "jwt_token";
 
 export function getToken(): string | null {
-  return sessionStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 export function setToken(token: string): void {
-  sessionStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(TOKEN_KEY, token);
 }
 
 export function clearToken(): void {
-  sessionStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(TOKEN_KEY);
 }

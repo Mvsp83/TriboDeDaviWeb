@@ -5,6 +5,7 @@ import { useMeuAvatar } from "@/features/perfil/perfilApi";
 import { AvatarView } from "@/features/perfil/presets";
 import { AvatarDialog } from "@/features/perfil/AvatarDialog";
 import { Badge } from "@/components/ui/badge";
+import { SyncIndicator } from "@/components/layout/SyncIndicator";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +39,8 @@ export function Topbar({
       </button>
 
       <h1 className="flex-1 truncate text-lg font-semibold">{titulo}</h1>
+
+      <SyncIndicator />
 
       {sessao?.poloNome && (
         <Badge variant="outline" className="hidden sm:inline-flex">
