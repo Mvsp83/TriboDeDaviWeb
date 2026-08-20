@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { navGroups, coletarFolhas } from "@/components/layout/navConfig";
+import { useDocumentoPadraoRemoto } from "@/features/configuracoes/configuracaoDocumentoApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,10 @@ export function AppLayout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const titulo = tituloDaRota(location.pathname);
+
+  // Prima o cache do padrão de documentos (compartilhado via API) para que a
+  // exportação de PDF em qualquer tela use o valor mais recente.
+  useDocumentoPadraoRemoto();
 
   return (
     <div className="flex min-h-svh bg-background">

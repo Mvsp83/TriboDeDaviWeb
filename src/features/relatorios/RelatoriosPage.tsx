@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { FileBarChart, Download, Printer, BookmarkPlus, Bookmark, X, Loader2 } from "lucide-react";
+import { FileBarChart, Download, FileDown, BookmarkPlus, Bookmark, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePolos } from "@/features/polos/polosApi";
@@ -9,6 +9,7 @@ import {
   useExcluirRelatorio,
 } from "@/features/relatorios/relatoriosSalvosApi";
 import { montarFontes, type Fonte, type FiltroCtx } from "@/features/relatorios/fontes";
+import { abrirParaImpressao, esc } from "@/lib/impressaoDocumento";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { RelatorioSalvo } from "@/types";
@@ -186,33 +187,32 @@ export function RelatoriosPage() {
     URL.revokeObjectURL(url);
   }
 
-  function imprimir() {
+  // Exporta o relatório em PDF usando o padrão de documentos (cabeçalho/rodapé
+  // configuráveis) — o corpo é a tabela de colunas × linhas.
+  function exportarPdf() {
     if (!fonte || !temResultado) return;
-    const esc = (v: string) =>
-      (v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8" />
-<title>Relatório de ${esc(fonte.nome)}</title>
-<style>body{font-family:Segoe UI,Roboto,sans-serif;color:#111;margin:24px;}
-h1{font-size:18px;margin:0 0 2px 0;}p{margin:0 0 16px 0;color:#555;font-size:12px;}
-table{border-collapse:collapse;width:100%;font-size:12px;}
-th,td{border:1px solid #999;padding:4px 8px;text-align:left;}
-th{background:#eee;}tr:nth-child(even) td{background:#f7f7f7;}</style></head><body>
-<h1>Instituto Tribo de Davi — Relatório de ${esc(fonte.nome)}</h1>
-<p>Gerado em ${new Date().toLocaleString("pt-BR")} — ${linhas.length} registro(s)</p>
-<table><thead><tr>${colunasRelatorio.map((c) => `<th>${esc(c.titulo)}</th>`).join("")}</tr></thead>
-<tbody>${linhas
-      .map((l) => `<tr>${colunasRelatorio.map((c) => `<td>${esc(c.valor(l))}</td>`).join("")}</tr>`)
-      .join("")}</tbody></table></body></html>`;
+    const th = colunasRelatorio.map((c) => `<th>${esc(c.titulo)}</th>`).join("");
+    const rows = linhas
+      .map(
+        (l) =>
+          `<tr>${colunasRelatorio.map((c) => `<td>${esc(c.valor(l))}</td>`).join("")}</tr>`,
+      )
+      .join("");
+    const corpoHtml = `
+<style>
+  table.rel{border-collapse:collapse;width:100%;font-size:11px;}
+  table.rel th,table.rel td{border:1px solid #bbb;padding:4px 8px;text-align:left;}
+  table.rel th{background:#eee;}
+  table.rel tr:nth-child(even) td{background:#fafafa;}
+</style>
+<table class="rel"><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table>`;
 
-    const win = window.open("", "_blank");
-    if (!win) {
-      toast.error("Permita pop-ups para imprimir.");
-      return;
-    }
-    win.document.write(html);
-    win.document.close();
-    win.focus();
-    win.print();
+    const ok = abrirParaImpressao({
+      titulo: `Relatório de ${fonte.nome}`,
+      subtitulo: `${linhas.length} registro(s)`,
+      corpoHtml,
+    });
+    if (!ok) toast.error("Permita pop-ups para exportar o PDF.");
   }
 
   async function salvar() {
@@ -400,9 +400,9 @@ th{background:#eee;}tr:nth-child(even) td{background:#f7f7f7;}</style></head><bo
               <Download className="size-4" />
               Exportar CSV
             </Button>
-            <Button variant="outline" onClick={imprimir} disabled={!temResultado}>
-              <Printer className="size-4" />
-              Imprimir
+            <Button variant="outline" onClick={exportarPdf} disabled={!temResultado}>
+              <FileDown className="size-4" />
+              Exportar PDF
             </Button>
             <Button
               variant="outline"

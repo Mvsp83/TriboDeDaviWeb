@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Plus, Save, Loader2, PlayCircle, X, Search } from "lucide-react";
+import { ArrowLeft, Plus, Save, Loader2, PlayCircle, X, Search, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePolos } from "@/features/polos/polosApi";
@@ -8,6 +8,7 @@ import { useAtividades } from "@/features/atividades/atividadesApi";
 import { useHistoricoTurma } from "@/features/atividades/historicoApi";
 import { usePlano, useCriarPlano, useAtualizarPlano } from "@/features/planos/planosApi";
 import { AulaTimeline } from "@/features/planos/AulaTimeline";
+import { exportarPlanoPdf } from "@/features/planos/planoImpressao";
 import { BlocoCard } from "@/features/planos/BlocoCard";
 import { AtividadePicker } from "@/features/planos/AtividadePicker";
 import {
@@ -201,6 +202,17 @@ export function PlanoEditorPage() {
         <Badge variant={corSoma(planejado, plano.duracaoTotalMinutos)}>
           {planejado} / {plano.duracaoTotalMinutos} min
         </Badge>
+        <Button
+          variant="outline"
+          onClick={() => {
+            const nomePolo =
+              polos?.find((p) => p.id === plano.poloId)?.nome ?? "-";
+            const ok = exportarPlanoPdf(plano, nomePolo, atividadePorId);
+            if (!ok) toast.error("Permita pop-ups para exportar o PDF.");
+          }}
+        >
+          <FileDown className="size-4" /> Exportar PDF
+        </Button>
         <Button onClick={onSalvar} disabled={salvando}>
           {salvando ? (
             <Loader2 className="size-4 animate-spin" />
