@@ -215,6 +215,7 @@ export const CategoriaDocumento = {
   Dre: "Dre",
   Balanco: "Balanco",
   RelatorioAtividades: "RelatorioAtividades",
+  Modelos: "Modelos",
 } as const;
 
 export type CategoriaDocumento =
