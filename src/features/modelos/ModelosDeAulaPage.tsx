@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Eye, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useModelos, useExcluirModelo } from "@/features/modelos/modelosApi";
@@ -125,7 +125,15 @@ export function ModelosDeAulaPage() {
               {!isLoading &&
                 filtrados.map((m) => (
                   <TableRow key={m.id}>
-                    <TableCell className="font-medium">{m.nome}</TableCell>
+                    <TableCell className="font-medium">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/modelos-de-aula/ver/${m.id}`)}
+                        className="text-left hover:text-primary hover:underline"
+                      >
+                        {m.nome}
+                      </button>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {m.descricao || "-"}
                     </TableCell>
@@ -137,6 +145,14 @@ export function ModelosDeAulaPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => navigate(`/modelos-de-aula/ver/${m.id}`)}
+                          aria-label="Visualizar"
+                        >
+                          <Eye className="size-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"

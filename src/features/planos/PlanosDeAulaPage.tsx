@@ -4,6 +4,7 @@ import {
   Plus,
   ClipboardPaste,
   Search,
+  Eye,
   Pencil,
   Copy,
   Trash2,
@@ -303,7 +304,15 @@ export function PlanosDeAulaPage() {
                       <TableCell className="tabular-nums">
                         {dataBR(p.dataPrevista)}
                       </TableCell>
-                      <TableCell className="font-medium">{p.titulo}</TableCell>
+                      <TableCell className="font-medium">
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/planos-de-aula/ver/${p.id}`)}
+                          className="text-left hover:text-primary hover:underline"
+                        >
+                          {p.titulo}
+                        </button>
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {nomePorPolo.get(p.poloId) ?? "-"}
                       </TableCell>
@@ -319,6 +328,14 @@ export function PlanosDeAulaPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(`/planos-de-aula/ver/${p.id}`)}
+                            aria-label="Visualizar"
+                          >
+                            <Eye className="size-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"

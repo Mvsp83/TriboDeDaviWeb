@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Search, CheckCircle2, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, CheckCircle2, ChevronRight, Clock } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas } from "@/features/aulas/aulasApi";
 import { usePolos } from "@/features/polos/polosApi";
@@ -20,6 +21,7 @@ import {
 export function AulasPage() {
   const { sessao } = useAuth();
   const admin = sessao?.isAdministrador ?? false;
+  const navigate = useNavigate();
 
   const { data: aulas, isLoading, isError } = useAulas(admin);
   const { data: polos } = usePolos();
@@ -50,7 +52,9 @@ export function AulasPage() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        {isLoading ? "Carregando..." : `${filtradas.length} aula(s)`}
+        {isLoading
+          ? "Carregando..."
+          : `${filtradas.length} aula(s) · clique numa aula para ver a chamada`}
       </p>
 
       <Card>
@@ -90,13 +94,14 @@ export function AulasPage() {
                 <TableHead>Início</TableHead>
                 <TableHead>Fim</TableHead>
                 <TableHead>Presença</TableHead>
+                <TableHead className="w-10" aria-label="Abrir" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading &&
                 Array.from({ length: 6 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={7}>
                       <Skeleton className="h-6 w-full" />
                     </TableCell>
                   </TableRow>
@@ -104,7 +109,7 @@ export function AulasPage() {
 
               {!isLoading && isError && (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-destructive">
+                  <TableCell colSpan={7} className="py-10 text-center text-destructive">
                     Erro ao carregar as aulas. Tente novamente.
                   </TableCell>
                 </TableRow>
@@ -112,7 +117,7 @@ export function AulasPage() {
 
               {!isLoading && !isError && filtradas.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                     Nenhuma aula encontrada.
                   </TableCell>
                 </TableRow>
@@ -120,7 +125,11 @@ export function AulasPage() {
 
               {!isLoading &&
                 filtradas.map((a) => (
-                  <TableRow key={a.id}>
+                  <TableRow
+                    key={a.id}
+                    onClick={() => navigate(`/chamada/${a.id}`)}
+                    className="cursor-pointer transition-colors hover:bg-secondary/40"
+                  >
                     <TableCell className="font-medium tabular-nums">
                       {dataBR(a.data)}
                     </TableCell>
@@ -146,6 +155,9 @@ export function AulasPage() {
                           <Clock className="size-4" /> Pendente
                         </span>
                       )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <ChevronRight className="size-4" />
                     </TableCell>
                   </TableRow>
                 ))}

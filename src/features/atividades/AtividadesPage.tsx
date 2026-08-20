@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2, PlayCircle } from "lucide-react";
+import { Plus, Search, Eye, Pencil, Trash2, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
 import {
@@ -7,6 +7,7 @@ import {
   useExcluirAtividade,
 } from "@/features/atividades/atividadesApi";
 import { AtividadeFormDialog } from "@/features/atividades/AtividadeFormDialog";
+import { AtividadeDetalhesDialog } from "@/features/atividades/AtividadeDetalhesDialog";
 import { VideoDialog } from "@/features/atividades/VideoDialog";
 import { extrairVideoId } from "@/lib/youtube";
 import { ApiError } from "@/lib/api";
@@ -48,6 +49,7 @@ export function AtividadesPage() {
   const [emEdicao, setEmEdicao] = useState<Atividade | null>(null);
   const [paraExcluir, setParaExcluir] = useState<Atividade | null>(null);
   const [videoAtividade, setVideoAtividade] = useState<Atividade | null>(null);
+  const [detalhes, setDetalhes] = useState<Atividade | null>(null);
 
   const filtradas = useMemo(() => {
     const q = filtroTexto.toLocaleLowerCase("pt-BR");
@@ -166,7 +168,15 @@ export function AtividadesPage() {
               {!isLoading &&
                 filtradas.map((a) => (
                   <TableRow key={a.id}>
-                    <TableCell className="font-medium">{a.nome}</TableCell>
+                    <TableCell className="font-medium">
+                      <button
+                        type="button"
+                        onClick={() => setDetalhes(a)}
+                        className="text-left hover:text-primary hover:underline"
+                      >
+                        {a.nome}
+                      </button>
+                    </TableCell>
                     <TableCell>
                       <Badge variant="secondary">
                         {TIPO_BLOCO_LABEL[a.tipo]}
@@ -187,6 +197,14 @@ export function AtividadesPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDetalhes(a)}
+                          aria-label="Visualizar"
+                        >
+                          <Eye className="size-4" />
+                        </Button>
                         {extrairVideoId(a.videoUrl) && (
                           <Button
                             variant="ghost"
@@ -233,6 +251,11 @@ export function AtividadesPage() {
         aberto={dialogAberto}
         onOpenChange={setDialogAberto}
         atividade={emEdicao}
+      />
+
+      <AtividadeDetalhesDialog
+        atividade={detalhes}
+        onOpenChange={(o) => !o && setDetalhes(null)}
       />
 
       <VideoDialog
