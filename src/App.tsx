@@ -32,6 +32,19 @@ const PresencasPage = lazy(() =>
 const ChamadaPage = lazy(() =>
   import("@/features/chamada/ChamadaPage").then((m) => ({ default: m.ChamadaPage })),
 );
+const CalendarioPage = lazy(() =>
+  import("@/features/calendario/CalendarioPage").then((m) => ({ default: m.CalendarioPage })),
+);
+const DocumentosOficiaisPage = lazy(() =>
+  import("@/features/documentosOficiais/DocumentosOficiaisPage").then((m) => ({
+    default: m.DocumentosOficiaisPage,
+  })),
+);
+const DocumentoOficialEditorPage = lazy(() =>
+  import("@/features/documentosOficiais/DocumentoOficialEditorPage").then((m) => ({
+    default: m.DocumentoOficialEditorPage,
+  })),
+);
 const ChamadaAulaPage = lazy(() =>
   import("@/features/chamada/ChamadaAulaPage").then((m) => ({ default: m.ChamadaAulaPage })),
 );
@@ -117,6 +130,7 @@ export default function App() {
           <Route path="aulas" element={<AulasPage />} />
           <Route path="chamada" element={<ChamadaPage />} />
           <Route path="chamada/:aulaId" element={<ChamadaAulaPage />} />
+          <Route path="calendario" element={<CalendarioPage />} />
           <Route path="planos-de-aula" element={<PlanosDeAulaPage />} />
           <Route path="planos-de-aula/ver/:id" element={<PlanoViewPage />} />
           <Route path="planos-de-aula/editor" element={<PlanoEditorPage />} />
@@ -139,6 +153,15 @@ export default function App() {
             <Route path="sincronizacao" element={<SincronizacaoPage />} />
             <Route path="documentos" element={<DocumentosPage />} />
             <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
+            <Route path="documentos-oficiais" element={<DocumentosOficiaisPage />} />
+            <Route
+              path="documentos-oficiais/novo/:tipo"
+              element={<DocumentoOficialEditorPage />}
+            />
+            <Route
+              path="documentos-oficiais/editor/:id"
+              element={<DocumentoOficialEditorPage />}
+            />
 
             {/* Administrativo → Contabilidade */}
             <Route

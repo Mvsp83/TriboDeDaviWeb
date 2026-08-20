@@ -3,6 +3,7 @@ import {
   Users,
   MapPin,
   CalendarDays,
+  CalendarRange,
   ClipboardCheck,
   ClipboardList,
   ClipboardPaste,
@@ -11,6 +12,7 @@ import {
   BarChart3,
   Cake,
   FileText,
+  FileSignature,
   UserCog,
   Upload,
   RefreshCw,
@@ -61,10 +63,17 @@ export const navGroups: NavGroup[] = [
   {
     nodes: [
       { label: "Dashboard", href: "/", icon: LayoutDashboard },
+      { label: "Calendário", href: "/calendario", icon: CalendarRange },
       {
         label: "Modelos de Documentos",
         href: "/documentos",
         icon: FileText,
+        adminOnly: true,
+      },
+      {
+        label: "Ofícios e Recibos",
+        href: "/documentos-oficiais",
+        icon: FileSignature,
         adminOnly: true,
       },
     ],
