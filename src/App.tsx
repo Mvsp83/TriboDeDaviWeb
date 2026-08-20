@@ -29,6 +29,12 @@ const AulasPage = lazy(() =>
 const PresencasPage = lazy(() =>
   import("@/features/presencas/PresencasPage").then((m) => ({ default: m.PresencasPage })),
 );
+const ChamadaPage = lazy(() =>
+  import("@/features/chamada/ChamadaPage").then((m) => ({ default: m.ChamadaPage })),
+);
+const ChamadaAulaPage = lazy(() =>
+  import("@/features/chamada/ChamadaAulaPage").then((m) => ({ default: m.ChamadaAulaPage })),
+);
 const AtividadesPage = lazy(() =>
   import("@/features/atividades/AtividadesPage").then((m) => ({ default: m.AtividadesPage })),
 );
@@ -38,11 +44,17 @@ const PlanosDeAulaPage = lazy(() =>
 const PlanoEditorPage = lazy(() =>
   import("@/features/planos/PlanoEditorPage").then((m) => ({ default: m.PlanoEditorPage })),
 );
+const PlanoViewPage = lazy(() =>
+  import("@/features/planos/PlanoViewPage").then((m) => ({ default: m.PlanoViewPage })),
+);
 const ModelosDeAulaPage = lazy(() =>
   import("@/features/modelos/ModelosDeAulaPage").then((m) => ({ default: m.ModelosDeAulaPage })),
 );
 const ModeloEditorPage = lazy(() =>
   import("@/features/modelos/ModeloEditorPage").then((m) => ({ default: m.ModeloEditorPage })),
+);
+const ModeloViewPage = lazy(() =>
+  import("@/features/modelos/ModeloViewPage").then((m) => ({ default: m.ModeloViewPage })),
 );
 const FrequenciaPage = lazy(() =>
   import("@/features/frequencia/FrequenciaPage").then((m) => ({ default: m.FrequenciaPage })),
@@ -60,6 +72,11 @@ const SincronizacaoPage = lazy(() =>
 );
 const DocumentosPage = lazy(() =>
   import("@/features/documentos/DocumentosPage").then((m) => ({ default: m.DocumentosPage })),
+);
+const PadraoDocumentosPage = lazy(() =>
+  import("@/features/configuracoes/PadraoDocumentosPage").then((m) => ({
+    default: m.PadraoDocumentosPage,
+  })),
 );
 const DrePage = lazy(() =>
   import("@/features/administrativo/DrePage").then((m) => ({ default: m.DrePage })),
@@ -98,10 +115,14 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="alunos" element={<AlunosPage />} />
           <Route path="aulas" element={<AulasPage />} />
+          <Route path="chamada" element={<ChamadaPage />} />
+          <Route path="chamada/:aulaId" element={<ChamadaAulaPage />} />
           <Route path="planos-de-aula" element={<PlanosDeAulaPage />} />
+          <Route path="planos-de-aula/ver/:id" element={<PlanoViewPage />} />
           <Route path="planos-de-aula/editor" element={<PlanoEditorPage />} />
           <Route path="planos-de-aula/editor/:id" element={<PlanoEditorPage />} />
           <Route path="modelos-de-aula" element={<ModelosDeAulaPage />} />
+          <Route path="modelos-de-aula/ver/:id" element={<ModeloViewPage />} />
           <Route path="modelos-de-aula/editor" element={<ModeloEditorPage />} />
           <Route path="modelos-de-aula/editor/:id" element={<ModeloEditorPage />} />
           <Route path="atividades" element={<AtividadesPage />} />
@@ -117,6 +138,7 @@ export default function App() {
             <Route path="importacao" element={<ImportacaoPage />} />
             <Route path="sincronizacao" element={<SincronizacaoPage />} />
             <Route path="documentos" element={<DocumentosPage />} />
+            <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
 
             {/* Administrativo → Contabilidade */}
             <Route

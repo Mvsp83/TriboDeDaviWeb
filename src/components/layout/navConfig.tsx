@@ -3,6 +3,7 @@ import {
   Users,
   MapPin,
   CalendarDays,
+  ClipboardCheck,
   ClipboardList,
   ClipboardPaste,
   BookOpen,
@@ -13,6 +14,7 @@ import {
   UserCog,
   Upload,
   RefreshCw,
+  Stamp,
   FileBarChart,
   FolderPlus,
   GraduationCap,
@@ -82,6 +84,7 @@ export const navGroups: NavGroup[] = [
         label: "Aula",
         icon: GraduationCap,
         children: [
+          { label: "Chamada", href: "/chamada", icon: ClipboardCheck },
           { label: "Aulas", href: "/aulas", icon: CalendarDays },
           {
             label: "Planejamento de Aula",
@@ -166,6 +169,12 @@ export const navGroups: NavGroup[] = [
     titulo: "Configurações",
     nodes: [
       { label: "Usuários", href: "/usuarios", icon: UserCog, adminOnly: true },
+      {
+        label: "Padrão de Documentos",
+        href: "/padrao-documentos",
+        icon: Stamp,
+        adminOnly: true,
+      },
       {
         label: "Importação",
         href: "/importacao",
