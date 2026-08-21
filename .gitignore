@@ -25,3 +25,6 @@ dist-ssr
 
 # PWA (service worker gerado em dev)
 dev-dist
+
+# Configuracao local de ferramentas de desenvolvimento
+.claude/
