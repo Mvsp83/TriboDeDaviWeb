@@ -17,6 +17,7 @@ import {
   ChevronRight,
   AlertTriangle,
   MessageCircle,
+  ClipboardList,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -27,6 +28,7 @@ import { useAlunosEmRisco, REGRA_EVASAO } from "@/features/dashboard/evasaoApi";
 import { usePolos } from "@/features/polos/polosApi";
 import { useAlunos } from "@/features/alunos/alunosApi";
 import { linkWhatsApp, mensagemAusencias } from "@/lib/avisoResponsavel";
+import { useInscricoesPendentes } from "@/features/inscricoes/inscricoesApi";
 import { dataBR } from "@/lib/format";
 import type { Aniversariante } from "@/types";
 import { cn } from "@/lib/utils";
@@ -307,6 +309,41 @@ function EvasaoWidget() {
   );
 }
 
+// Inscrições esperando revisão — sem isso a ficha chega e ninguém percebe.
+function InscricoesWidget() {
+  const navigate = useNavigate();
+  const { data: pendentes, isLoading } = useInscricoesPendentes();
+
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-4 p-5">
+        <div
+          className="flex size-12 shrink-0 items-center justify-center rounded-xl"
+          style={{ backgroundColor: "#3b82f61f", color: "#3b82f6" }}
+        >
+          <ClipboardList className="size-6" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm text-muted-foreground">Inscrições</div>
+          <div className="font-semibold">
+            {isLoading
+              ? "Carregando…"
+              : !pendentes
+                ? "Nenhuma inscrição pendente"
+                : `${pendentes} ficha(s) aguardando revisão`}
+          </div>
+        </div>
+        {!!pendentes && (
+          <Button className="shrink-0" onClick={() => navigate("/inscricoes")}>
+            Revisar
+            <ChevronRight className="size-4" />
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 // Contexto passado a cada widget na hora de renderizar.
 interface WidgetCtx {
   data: DashboardData | undefined;
@@ -331,6 +368,12 @@ const CATALOGO: WidgetDef[] = [
     titulo: "Atalho: Fazer chamada",
     full: true,
     render: () => <ChamadaWidget />,
+  },
+  {
+    id: "inscricoes",
+    titulo: "Atalho: Inscrições pendentes",
+    full: true,
+    render: () => <InscricoesWidget />,
   },
   {
     id: "evasao",

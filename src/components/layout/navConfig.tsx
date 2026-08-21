@@ -72,6 +72,7 @@ export const navGroups: NavGroup[] = [
         icon: FolderPlus,
         children: [
           { label: "Alunos", href: "/alunos", icon: Users },
+          { label: "Inscrições", href: "/inscricoes", icon: ClipboardList },
           { label: "Polos", href: "/polos", icon: MapPin, adminOnly: true },
         ],
       },
