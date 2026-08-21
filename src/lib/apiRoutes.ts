@@ -101,6 +101,15 @@ export const ApiRotas = {
   graduacaoRegistrar: "/api/Graduacao/registrar",
   graduacaoExcluir: (id: number) => `/api/Graduacao/${id}`,
 
+  doadores: "/api/Doacao/doadores",
+  doadorSalvar: "/api/Doacao/doadores/salvar",
+  doadorExcluir: (id: number) => `/api/Doacao/doadores/${id}`,
+  doacoes: (ano: number) => `/api/Doacao?ano=${ano}`,
+  doacoesResumo: (ano: number) => `/api/Doacao/resumo/${ano}`,
+  doacaoSalvar: "/api/Doacao/salvar",
+  doacaoExcluir: (id: number) => `/api/Doacao/${id}`,
+  doacaoRecibo: (id: number) => `/api/Doacao/${id}/recibo`,
+
   calendarioPorAno: (ano: number) => `/api/EventoCalendario/ano/${ano}`,
   calendarioAnos: "/api/EventoCalendario/anos",
   calendarioCreate: "/api/EventoCalendario/create",

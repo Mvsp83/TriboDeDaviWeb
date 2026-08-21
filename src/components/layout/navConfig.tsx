@@ -28,6 +28,7 @@ import {
   Scale,
   Wallet,
   Receipt,
+  HeartHandshake,
   TrendingUp,
   FileSpreadsheet,
   type LucideIcon,
@@ -130,6 +131,12 @@ export const navGroups: NavGroup[] = [
         label: "Patrimônio",
         href: "/patrimonio",
         icon: Boxes,
+        adminOnly: true,
+      },
+      {
+        label: "Doações",
+        href: "/doacoes",
+        icon: HeartHandshake,
         adminOnly: true,
       },
       {
