@@ -96,6 +96,11 @@ export const ApiRotas = {
   inscricaoRecusar: (id: number) => `/api/Inscricao/${id}/recusar`,
   matriculasDoAno: (ano: number) => `/api/Inscricao/matriculas/${ano}`,
 
+  graduacoes: (ano: number) => `/api/Graduacao?ano=${ano}`,
+  graduacoesDoAluno: (alunoId: number) => `/api/Graduacao/aluno/${alunoId}`,
+  graduacaoRegistrar: "/api/Graduacao/registrar",
+  graduacaoExcluir: (id: number) => `/api/Graduacao/${id}`,
+
   calendarioPorAno: (ano: number) => `/api/EventoCalendario/ano/${ano}`,
   calendarioAnos: "/api/EventoCalendario/anos",
   calendarioCreate: "/api/EventoCalendario/create",
