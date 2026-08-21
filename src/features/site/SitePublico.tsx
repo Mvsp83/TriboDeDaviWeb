@@ -7,6 +7,7 @@ import {
   Mail,
   AtSign,
   MessageCircle,
+  ClipboardList,
   ArrowRight,
 } from "lucide-react";
 import { SITE, temContato } from "@/features/site/conteudoSite";
@@ -68,18 +69,12 @@ export function SitePublico() {
                 Fazer uma doação
               </Link>
             </Button>
-            {contato.whatsapp && (
-              <Button asChild variant="outline" size="lg">
-                <a
-                  href={`https://wa.me/55${contato.whatsapp}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MessageCircle className="size-5" />
-                  Quero matricular meu filho
-                </a>
-              </Button>
-            )}
+            <Button asChild variant="outline" size="lg">
+              <Link to="/matricula">
+                <ClipboardList className="size-5" />
+                Fazer inscrição
+              </Link>
+            </Button>
           </div>
 
           {/* Régua de faixas: a progressão do aluno, em uma linha. */}

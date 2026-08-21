@@ -5,6 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { DoacaoPage } from "@/features/doacao/DoacaoPage";
 import { SitePublico } from "@/features/site/SitePublico";
+import { MatriculaPage } from "@/features/matricula/MatriculaPage";
 import { useAuth } from "@/features/auth/AuthContext";
 
 // A raiz serve o site público para quem chega de fora e manda direto ao painel
@@ -143,6 +144,7 @@ export default function App() {
       <Route path="/" element={<Raiz />} />
       <Route path="/site" element={<SitePublico />} />
       <Route path="/doar" element={<DoacaoPage />} />
+      <Route path="/matricula" element={<MatriculaPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>

@@ -85,6 +85,17 @@ export const ApiRotas = {
   finTransferencia: "/api/Financeiro/transferencias",
   finImportar: "/api/Financeiro/importar",
 
+  // Inscrição: os dois primeiros são públicos (site, sem login).
+  inscricaoPolos: "/api/Inscricao/polos",
+  inscricaoEnviar: "/api/Inscricao/enviar",
+  inscricaoFila: (status: number | null, ano: number) =>
+    `/api/Inscricao/fila?ano=${ano}${status != null ? `&status=${status}` : ""}`,
+  inscricaoPendentes: "/api/Inscricao/pendentes/total",
+  inscricaoObter: (id: number) => `/api/Inscricao/${id}`,
+  inscricaoAprovar: (id: number) => `/api/Inscricao/${id}/aprovar`,
+  inscricaoRecusar: (id: number) => `/api/Inscricao/${id}/recusar`,
+  matriculasDoAno: (ano: number) => `/api/Inscricao/matriculas/${ano}`,
+
   calendarioPorAno: (ano: number) => `/api/EventoCalendario/ano/${ano}`,
   calendarioAnos: "/api/EventoCalendario/anos",
   calendarioCreate: "/api/EventoCalendario/create",
