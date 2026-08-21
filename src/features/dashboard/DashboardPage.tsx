@@ -16,6 +16,7 @@ import {
   ClipboardCheck,
   ChevronRight,
   AlertTriangle,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -24,6 +25,8 @@ import { useDashboardLayout } from "@/features/dashboard/dashboardConfigApi";
 import { useAulas } from "@/features/aulas/aulasApi";
 import { useAlunosEmRisco, REGRA_EVASAO } from "@/features/dashboard/evasaoApi";
 import { usePolos } from "@/features/polos/polosApi";
+import { useAlunos } from "@/features/alunos/alunosApi";
+import { linkWhatsApp, mensagemAusencias } from "@/lib/avisoResponsavel";
 import { dataBR } from "@/lib/format";
 import type { Aniversariante } from "@/types";
 import { cn } from "@/lib/utils";
@@ -185,9 +188,17 @@ function ChamadaWidget() {
 
 // Alunos que vêm faltando seguido — o professor age antes de perder a criança.
 function EvasaoWidget() {
+  const { sessao } = useAuth();
   const { data: risco, isLoading, isError } = useAlunosEmRisco();
   const { data: polos } = usePolos();
+  const { data: alunos } = useAlunos(sessao?.isAdministrador ?? false);
   const [verTodos, setVerTodos] = useState(false);
+
+  // Contato do responsável para o aviso por WhatsApp.
+  const contato = useMemo(() => {
+    const m = new Map((alunos ?? []).map((a) => [a.id, a]));
+    return (id: number) => m.get(id) ?? null;
+  }, [alunos]);
 
   const nomePolo = useMemo(() => {
     const m = new Map((polos ?? []).map((p) => [p.id, p.nome]));
@@ -250,9 +261,35 @@ function EvasaoWidget() {
                         : " · sem presença registrada"}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-md bg-warning/15 px-2 py-1 text-sm font-medium tabular-nums text-warning">
-                    {a.faltasSeguidas} faltas
-                  </span>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className="rounded-md bg-warning/15 px-2 py-1 text-sm font-medium tabular-nums text-warning">
+                      {a.faltasSeguidas} faltas
+                    </span>
+                    {(() => {
+                      const aluno = contato(a.alunoId);
+                      const link = linkWhatsApp(
+                        aluno?.celular,
+                        mensagemAusencias({
+                          nomeAluno: a.nome,
+                          nomeResponsavel: aluno?.responsavel,
+                          faltasSeguidas: a.faltasSeguidas,
+                        }),
+                      );
+                      if (!link) return null;
+                      return (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="size-8"
+                          title="Avisar responsável pelo WhatsApp"
+                          aria-label="Avisar responsável pelo WhatsApp"
+                          onClick={() => window.open(link, "_blank", "noopener,noreferrer")}
+                        >
+                          <MessageCircle className="size-4" />
+                        </Button>
+                      );
+                    })()}
+                  </div>
                 </li>
               ))}
             </ul>

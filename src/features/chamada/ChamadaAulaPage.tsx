@@ -25,12 +25,13 @@ import {
 import { faixaInfo } from "@/features/alunos/faixa";
 import { chamadaPendenteDaAula } from "@/lib/offlineQueue";
 import { dataBR, horaCurta } from "@/lib/format";
-import type { Aula, Presenca } from "@/types";
+import type { Aluno, Aula, Presenca } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { AvisarFaltasDialog } from "@/features/chamada/AvisarFaltasDialog";
 
 function mensagemErro(e: unknown, padrao: string): string {
   return e instanceof Error && e.message ? e.message : padrao;
@@ -152,6 +153,8 @@ function ChamadaPendente({
   const salvar = useSalvarChamada();
   const [marcadas, setMarcadas] = useState<Record<number, boolean>>({});
   const [confirmando, setConfirmando] = useState(false);
+  // Ausentes da chamada recém-salva, para oferecer o aviso aos responsáveis.
+  const [avisarAusentes, setAvisarAusentes] = useState<Aluno[] | null>(null);
 
   // Chamada já salva neste aparelho, aguardando internet (fila offline).
   const pendenteLocal = chamadaPendenteDaAula(aula.id);
@@ -186,7 +189,10 @@ function ChamadaPendente({
               ? "Chamada salva no aparelho. Será enviada quando houver internet."
               : "Chamada salva com sucesso.",
           );
-          navigate("/chamada");
+          // Com faltas, oferece avisar os responsáveis antes de sair da tela.
+          const ausentes = roster.filter((a) => !marcadas[a.id]);
+          if (ausentes.length > 0) setAvisarAusentes(ausentes);
+          else navigate("/chamada");
         },
         onError: (e) =>
           toast.error(mensagemErro(e, "Não foi possível salvar a chamada.")),
@@ -313,6 +319,22 @@ function ChamadaPendente({
         destrutivo={false}
         carregando={salvar.isPending}
         onConfirmar={confirmarSalvar}
+      />
+
+      <AvisarFaltasDialog
+        aberto={avisarAusentes !== null}
+        onOpenChange={(v) => {
+          if (!v) {
+            setAvisarAusentes(null);
+            navigate("/chamada");
+          }
+        }}
+        ausentes={avisarAusentes ?? []}
+        dataAula={aula.data}
+        onConcluir={() => {
+          setAvisarAusentes(null);
+          navigate("/chamada");
+        }}
       />
     </div>
   );
