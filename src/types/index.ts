@@ -211,6 +211,22 @@ export interface DocumentoOficial {
 export const TIPO_DOC_OFICIAL = { Oficio: 0, Recibo: 1 } as const;
 export const STATUS_DOC = { Rascunho: 0, Aprovado: 1 } as const;
 
+export interface Aviso {
+  id: number;
+  titulo?: string | null;
+  mensagem: string;
+  publicoAlvo: number; // 0=Todos, 1=Professores, 2=Supervisores
+  dataCriacao: string;
+  criadoPor?: string | null;
+  ativo: boolean;
+}
+
+export const PUBLICO_AVISO_LABEL: Record<number, string> = {
+  0: "Todos",
+  1: "Professores",
+  2: "Supervisores",
+};
+
 export interface BemPatrimonial {
   id: number;
   categoria: number;

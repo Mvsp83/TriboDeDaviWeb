@@ -14,6 +14,7 @@ import {
   FileText,
   FileSignature,
   Boxes,
+  Megaphone,
   UserCog,
   Upload,
   RefreshCw,
@@ -176,6 +177,7 @@ export const navGroups: NavGroup[] = [
   {
     titulo: "Configurações",
     nodes: [
+      { label: "Avisos", href: "/avisos", icon: Megaphone, adminOnly: true },
       { label: "Usuários", href: "/usuarios", icon: UserCog, adminOnly: true },
       {
         label: "Padrão de Documentos",

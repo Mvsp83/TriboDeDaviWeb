@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { navGroups, coletarFolhas } from "@/components/layout/navConfig";
 import { useDocumentoPadraoRemoto } from "@/features/configuracoes/configuracaoDocumentoApi";
+import { AvisosPendentes } from "@/features/avisos/AvisosPendentes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +63,8 @@ export function AppLayout() {
           </div>
         </main>
       </div>
+
+      <AvisosPendentes />
     </div>
   );
 }

@@ -28,6 +28,7 @@ const CORES_SECAO: Record<string, string> = {
   Aniversariantes: "#f472b6",
   Contabilidade: "#fb923c",
   Financeiro: "#a3e635",
+  Avisos: "#f59e0b",
   Usuários: "#fb7185",
   "Padrão de Documentos": "#fcd34d",
   Importação: "#60a5fa",

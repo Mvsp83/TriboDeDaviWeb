@@ -92,6 +92,12 @@ export const ApiRotas = {
   patrimonioUpdate: "/api/BemPatrimonial/update",
   patrimonioDelete: (id: number) => `/api/BemPatrimonial/delete/${id}`,
 
+  avisosPendentes: "/api/Aviso/pendentes",
+  avisoCiente: (id: number) => `/api/Aviso/ciente/${id}`,
+  avisosGetAll: "/api/Aviso/get-all",
+  avisoCreate: "/api/Aviso/create",
+  avisoDelete: (id: number) => `/api/Aviso/delete/${id}`,
+
   relatoriosMeus: "/api/RelatorioSalvo/get-meus",
   relatorioCreate: "/api/RelatorioSalvo/create",
   relatorioDelete: (id: number) => `/api/RelatorioSalvo/delete/${id}`,
