@@ -14,6 +14,7 @@ export const ApiRotas = {
 
   aulasGetAll: "/api/Aula/get-all",
   aulasPorPolo: `/api/Aula/get-por-polo?${TODAS_TURMAS}`,
+  aulaCreate: "/api/Aula/create",
 
   presencasGetAll: "/api/Presenca/get-all",
   presencaPorAula: (aulaId: number) => `/api/Presenca/aula/${aulaId}`,
