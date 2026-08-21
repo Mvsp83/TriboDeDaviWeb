@@ -12,7 +12,7 @@ export function ProtectedRoute({ adminOnly = false }: { adminOnly?: boolean }) {
   }
 
   if (adminOnly && !sessao?.isAdministrador) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/painel" replace />;
   }
 
   return <Outlet />;

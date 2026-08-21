@@ -62,7 +62,7 @@ export interface NavGroup {
 // Espelha o menu do portal, agora com submenus dentro de "Operacional".
 export const navGroups: NavGroup[] = [
   {
-    nodes: [{ label: "Dashboard", href: "/", icon: LayoutDashboard }],
+    nodes: [{ label: "Dashboard", href: "/painel", icon: LayoutDashboard }],
   },
   {
     titulo: "Operacional",

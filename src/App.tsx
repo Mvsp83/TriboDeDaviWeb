@@ -4,6 +4,16 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { DoacaoPage } from "@/features/doacao/DoacaoPage";
+import { SitePublico } from "@/features/site/SitePublico";
+import { useAuth } from "@/features/auth/AuthContext";
+
+// A raiz serve o site público para quem chega de fora e manda direto ao painel
+// quem já está logado — assim o endereço divulgado e o atalho da equipe são o
+// mesmo, e o app instalado (start_url "/") continua abrindo no painel.
+function Raiz() {
+  const { autenticado } = useAuth();
+  return autenticado ? <Navigate to="/painel" replace /> : <SitePublico />;
+}
 
 // Cada página vira um chunk próprio, carregado sob demanda (o AppLayout
 // mostra um skeleton via Suspense enquanto o chunk é buscado).
@@ -129,12 +139,14 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      {/* Pública: divulgada fora do sistema, não exige login. */}
+      {/* Públicas: divulgadas fora do sistema, não exigem login. */}
+      <Route path="/" element={<Raiz />} />
+      <Route path="/site" element={<SitePublico />} />
       <Route path="/doar" element={<DoacaoPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route index element={<DashboardPage />} />
+          <Route path="painel" element={<DashboardPage />} />
           <Route path="alunos" element={<AlunosPage />} />
           <Route path="aulas" element={<AulasPage />} />
           <Route path="chamada" element={<ChamadaPage />} />

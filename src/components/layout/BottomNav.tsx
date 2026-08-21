@@ -18,7 +18,7 @@ interface ItemNav {
 
 // Atalhos do dia a dia do professor. Chamada em destaque (botão elevado).
 const ITENS: ItemNav[] = [
-  { label: "Início", href: "/", icon: LayoutDashboard, exact: true },
+  { label: "Início", href: "/painel", icon: LayoutDashboard, exact: true },
   { label: "Aulas", href: "/aulas", icon: CalendarDays },
   { label: "Chamada", href: "/chamada", icon: ClipboardCheck, destaque: true },
   { label: "Alunos", href: "/alunos", icon: Users },
