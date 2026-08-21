@@ -211,6 +211,19 @@ export interface DocumentoOficial {
 export const TIPO_DOC_OFICIAL = { Oficio: 0, Recibo: 1 } as const;
 export const STATUS_DOC = { Rascunho: 0, Aprovado: 1 } as const;
 
+export interface BemPatrimonial {
+  id: number;
+  categoria: number;
+  descricao: string;
+  quantidade: number;
+  valorUnitario: number;
+  dataAquisicao?: string | null;
+  estado: number;
+  poloId?: number | null;
+  numeroPatrimonio?: string | null;
+  observacoes?: string | null;
+}
+
 export interface AuthData {
   token: string;
   tokenExpires: string;

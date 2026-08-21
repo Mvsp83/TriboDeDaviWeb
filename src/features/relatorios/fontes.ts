@@ -12,7 +12,12 @@ import {
   type PlanoDeAula,
   type Atividade,
   type Usuario,
+  type BemPatrimonial,
 } from "@/types";
+import {
+  CATEGORIA_BEM_LABEL,
+  ESTADO_BEM_LABEL,
+} from "@/features/patrimonio/tipos";
 
 export interface FiltroCtx {
   inicio: string | null; // yyyy-MM-dd
@@ -292,6 +297,46 @@ export function montarFontes(
         { id: "vezes", titulo: "Vezes aplicada", padrao: true, valor: (o) => String((o as AtividadeAplicadaLinha).vezes) },
         { id: "planos", titulo: "Planos", padrao: true, valor: (o) => String((o as AtividadeAplicadaLinha).planos) },
         { id: "ultima", titulo: "Última aplicação", padrao: true, valor: (o) => dataFmt((o as AtividadeAplicadaLinha).ultima) },
+      ],
+    },
+    {
+      id: "patrimonio",
+      nome: "Patrimônio",
+      somenteAdmin: true,
+      polo: (o) => (o as BemPatrimonial).poloId ?? null,
+      carregar: async () => {
+        const bens = await apiGet<BemPatrimonial[] | null>(
+          ApiRotas.patrimonioGetAll,
+        );
+        return bens ?? [];
+      },
+      colunas: [
+        { id: "categoria", titulo: "Categoria", padrao: true, valor: (o) => CATEGORIA_BEM_LABEL[(o as BemPatrimonial).categoria] ?? "" },
+        { id: "descricao", titulo: "Descrição", padrao: true, valor: (o) => (o as BemPatrimonial).descricao },
+        { id: "quantidade", titulo: "Qtd", padrao: true, valor: (o) => String((o as BemPatrimonial).quantidade) },
+        { id: "valorUnitario", titulo: "Valor unitário", padrao: true, valor: (o) => (o as BemPatrimonial).valorUnitario.toFixed(2) },
+        {
+          id: "valorTotal",
+          titulo: "Valor total",
+          padrao: true,
+          valor: (o) => {
+            const b = o as BemPatrimonial;
+            return (b.quantidade * b.valorUnitario).toFixed(2);
+          },
+        },
+        { id: "estado", titulo: "Estado", padrao: true, valor: (o) => ESTADO_BEM_LABEL[(o as BemPatrimonial).estado] ?? "" },
+        {
+          id: "polo",
+          titulo: "Polo",
+          padrao: true,
+          valor: (o) => {
+            const p = (o as BemPatrimonial).poloId;
+            return p == null ? "Geral" : nomePolo(p);
+          },
+        },
+        { id: "numero", titulo: "Nº patrimônio", valor: (o) => (o as BemPatrimonial).numeroPatrimonio ?? "" },
+        { id: "aquisicao", titulo: "Aquisição", valor: (o) => dataFmt((o as BemPatrimonial).dataAquisicao ?? "") },
+        { id: "obs", titulo: "Observações", valor: (o) => (o as BemPatrimonial).observacoes ?? "" },
       ],
     },
     {

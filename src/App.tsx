@@ -35,6 +35,9 @@ const ChamadaPage = lazy(() =>
 const CalendarioPage = lazy(() =>
   import("@/features/calendario/CalendarioPage").then((m) => ({ default: m.CalendarioPage })),
 );
+const PatrimonioPage = lazy(() =>
+  import("@/features/patrimonio/PatrimonioPage").then((m) => ({ default: m.PatrimonioPage })),
+);
 const DocumentosOficiaisPage = lazy(() =>
   import("@/features/documentosOficiais/DocumentosOficiaisPage").then((m) => ({
     default: m.DocumentosOficiaisPage,
@@ -154,6 +157,7 @@ export default function App() {
             <Route path="documentos" element={<DocumentosPage />} />
             <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
             <Route path="documentos-oficiais" element={<DocumentosOficiaisPage />} />
+            <Route path="patrimonio" element={<PatrimonioPage />} />
             <Route
               path="documentos-oficiais/novo/:tipo"
               element={<DocumentoOficialEditorPage />}

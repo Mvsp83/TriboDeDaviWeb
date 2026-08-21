@@ -86,6 +86,12 @@ export const ApiRotas = {
   docOficialDelete: (id: number) => `/api/DocumentoOficial/delete/${id}`,
   docOficialAprovar: (id: number) => `/api/DocumentoOficial/aprovar/${id}`,
 
+  patrimonioGetAll: "/api/BemPatrimonial/get-all",
+  patrimonioGet: (id: number) => `/api/BemPatrimonial/get/${id}`,
+  patrimonioCreate: "/api/BemPatrimonial/create",
+  patrimonioUpdate: "/api/BemPatrimonial/update",
+  patrimonioDelete: (id: number) => `/api/BemPatrimonial/delete/${id}`,
+
   relatoriosMeus: "/api/RelatorioSalvo/get-meus",
   relatorioCreate: "/api/RelatorioSalvo/create",
   relatorioDelete: (id: number) => `/api/RelatorioSalvo/delete/${id}`,
