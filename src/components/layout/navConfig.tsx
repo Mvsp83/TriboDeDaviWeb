@@ -105,6 +105,7 @@ export const navGroups: NavGroup[] = [
         ],
       },
       { label: "Relatórios", href: "/relatorios", icon: FileBarChart },
+      { label: "Relatório de Impacto", href: "/impacto", icon: TrendingUp },
     ],
   },
   {
