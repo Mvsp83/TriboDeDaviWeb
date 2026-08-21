@@ -9,6 +9,7 @@ import {
   Copy,
   Trash2,
   Loader2,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -181,6 +182,16 @@ export function PlanosDeAulaPage() {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-start gap-2 rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
+        <Info className="mt-0.5 size-4 shrink-0" />
+        <p>
+          <span className="font-medium text-foreground">Plano</span> é a aula
+          planejada para uma turma, polo e data, com as atividades de cada bloco.
+          Para reaproveitar uma estrutura pronta, use{" "}
+          <span className="font-medium text-foreground">“Novo a partir de modelo”</span>.
+        </p>
+      </div>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           {isLoading ? "Carregando..." : `${totalFiltrado} plano(s)`}
