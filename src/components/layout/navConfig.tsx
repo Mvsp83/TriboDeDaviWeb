@@ -13,6 +13,7 @@ import {
   Cake,
   FileText,
   FileSignature,
+  Boxes,
   UserCog,
   Upload,
   RefreshCw,
@@ -24,7 +25,6 @@ import {
   Calculator,
   Scale,
   Wallet,
-  Landmark,
   Receipt,
   TrendingUp,
   FileSpreadsheet,
@@ -61,22 +61,7 @@ export interface NavGroup {
 // Espelha o menu do portal, agora com submenus dentro de "Operacional".
 export const navGroups: NavGroup[] = [
   {
-    nodes: [
-      { label: "Dashboard", href: "/", icon: LayoutDashboard },
-      { label: "Calendário", href: "/calendario", icon: CalendarRange },
-      {
-        label: "Modelos de Documentos",
-        href: "/documentos",
-        icon: FileText,
-        adminOnly: true,
-      },
-      {
-        label: "Ofícios e Recibos",
-        href: "/documentos-oficiais",
-        icon: FileSignature,
-        adminOnly: true,
-      },
-    ],
+    nodes: [{ label: "Dashboard", href: "/", icon: LayoutDashboard }],
   },
   {
     titulo: "Operacional",
@@ -112,16 +97,36 @@ export const navGroups: NavGroup[] = [
               { label: "Atividades", href: "/atividades", icon: BookOpen },
             ],
           },
+          { label: "Presenças", href: "/presencas", icon: CheckCircle2 },
+          { label: "Frequência", href: "/frequencia", icon: BarChart3 },
+          { label: "Aniversariantes", href: "/aniversariantes", icon: Cake },
         ],
       },
-      { label: "Presenças", href: "/presencas", icon: CheckCircle2 },
-      { label: "Frequência", href: "/frequencia", icon: BarChart3 },
-      { label: "Aniversariantes", href: "/aniversariantes", icon: Cake },
+      { label: "Relatórios", href: "/relatorios", icon: FileBarChart },
     ],
   },
   {
     titulo: "Administrativo",
     nodes: [
+      { label: "Calendário", href: "/calendario", icon: CalendarRange },
+      {
+        label: "Modelos de Documentos",
+        href: "/documentos",
+        icon: FileText,
+        adminOnly: true,
+      },
+      {
+        label: "Ofícios e Recibos",
+        href: "/documentos-oficiais",
+        icon: FileSignature,
+        adminOnly: true,
+      },
+      {
+        label: "Patrimônio",
+        href: "/patrimonio",
+        icon: Boxes,
+        adminOnly: true,
+      },
       {
         label: "Contabilidade",
         icon: Calculator,
@@ -150,25 +155,19 @@ export const navGroups: NavGroup[] = [
         adminOnly: true,
         children: [
           {
-            label: "Contas",
-            icon: Landmark,
-            children: [
-              {
-                label: "Extratos",
-                href: "/administrativo/financeiro/contas/extratos",
-                icon: Receipt,
-              },
-              {
-                label: "Aplicações",
-                href: "/administrativo/financeiro/contas/aplicacoes",
-                icon: TrendingUp,
-              },
-              {
-                label: "Planilha Financeira",
-                href: "/administrativo/financeiro/contas/planilha",
-                icon: FileSpreadsheet,
-              },
-            ],
+            label: "Extratos",
+            href: "/administrativo/financeiro/contas/extratos",
+            icon: Receipt,
+          },
+          {
+            label: "Aplicações",
+            href: "/administrativo/financeiro/contas/aplicacoes",
+            icon: TrendingUp,
+          },
+          {
+            label: "Planilha Financeira",
+            href: "/administrativo/financeiro/contas/planilha",
+            icon: FileSpreadsheet,
           },
         ],
       },
@@ -197,9 +196,6 @@ export const navGroups: NavGroup[] = [
         adminOnly: true,
       },
     ],
-  },
-  {
-    nodes: [{ label: "Relatórios", href: "/relatorios", icon: FileBarChart }],
   },
 ];
 

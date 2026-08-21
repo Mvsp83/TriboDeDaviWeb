@@ -20,6 +20,7 @@ const CORES_SECAO: Record<string, string> = {
   Calendário: "#a78bfa",
   "Modelos de Documentos": "#fbbf24",
   "Ofícios e Recibos": "#2dd4bf",
+  "Patrimônio": "#e879f9",
   Cadastros: "#34d399",
   Aula: "#818cf8",
   Presenças: "#4ade80",
