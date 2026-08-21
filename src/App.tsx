@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { LoginPage } from "@/features/auth/LoginPage";
+import { DoacaoPage } from "@/features/doacao/DoacaoPage";
 
 // Cada página vira um chunk próprio, carregado sob demanda (o AppLayout
 // mostra um skeleton via Suspense enquanto o chunk é buscado).
@@ -128,6 +129,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      {/* Pública: divulgada fora do sistema, não exige login. */}
+      <Route path="/doar" element={<DoacaoPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
