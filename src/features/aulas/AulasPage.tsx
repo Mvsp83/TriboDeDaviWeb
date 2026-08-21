@@ -5,9 +5,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas, useCriarAula } from "@/features/aulas/aulasApi";
 import { usePolos } from "@/features/polos/polosApi";
-import { ApiError } from "@/lib/api";
 import { dataBR, horaCurta } from "@/lib/format";
-import type { Polo } from "@/types";
+import type { Aula, Polo } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +37,36 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+// Todas as datas do mês da data escolhida que caem no mesmo dia da semana
+// (ex.: escolhendo uma terça, devolve todas as terças daquele mês). Trabalha em
+// horário local para não escorregar de dia por fuso.
+function datasDoMesMesmoDiaSemana(dataIso: string): string[] {
+  const [y, m, d] = dataIso.split("-").map(Number);
+  if (!y || !m || !d) return [];
+  const alvo = new Date(y, m - 1, d).getDay();
+  const datas: string[] = [];
+  const dt = new Date(y, m - 1, 1);
+  while (dt.getMonth() === m - 1) {
+    if (dt.getDay() === alvo) {
+      const mm = String(dt.getMonth() + 1).padStart(2, "0");
+      const dd = String(dt.getDate()).padStart(2, "0");
+      datas.push(`${dt.getFullYear()}-${mm}-${dd}`);
+    }
+    dt.setDate(dt.getDate() + 1);
+  }
+  return datas;
+}
+
+function resumoMes(dataIso: string) {
+  const [y, m, d] = dataIso.split("-").map(Number);
+  const ref = new Date(y, m - 1, d);
+  return {
+    datas: datasDoMesMesmoDiaSemana(dataIso),
+    diaSemana: ref.toLocaleDateString("pt-BR", { weekday: "long" }),
+    mes: ref.toLocaleDateString("pt-BR", { month: "long" }),
+  };
+}
+
 function NovaAulaDialog({
   open,
   onOpenChange,
@@ -45,6 +74,7 @@ function NovaAulaDialog({
   poloIdProfessor,
   poloNomeProfessor,
   polos,
+  aulasExistentes,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -52,6 +82,7 @@ function NovaAulaDialog({
   poloIdProfessor: number | null;
   poloNomeProfessor: string;
   polos: Polo[];
+  aulasExistentes: Aula[];
 }) {
   const criar = useCriarAula();
   const [data, setData] = useState("");
@@ -59,6 +90,8 @@ function NovaAulaDialog({
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
   const [poloId, setPoloId] = useState<number | null>(admin ? null : poloIdProfessor);
+  const [mesInteiro, setMesInteiro] = useState(false);
+  const [salvando, setSalvando] = useState(false);
 
   // Limpa o formulário sempre que o diálogo abre.
   useEffect(() => {
@@ -68,8 +101,11 @@ function NovaAulaDialog({
       setInicio("");
       setFim("");
       setPoloId(admin ? null : poloIdProfessor);
+      setMesInteiro(false);
     }
   }, [open, admin, poloIdProfessor]);
+
+  const previa = mesInteiro && data ? resumoMes(data) : null;
 
   async function salvar() {
     if (poloId == null) return toast.warning("Selecione o polo.");
@@ -79,18 +115,50 @@ function NovaAulaDialog({
     // Comparação de "HH:mm" funciona lexicograficamente (24h com zero à esquerda).
     if (fim <= inicio) return toast.warning("A hora de fim deve ser maior que a de início.");
 
-    try {
-      await criar.mutateAsync({
-        poloId,
-        data,
-        turma: Number(turma),
-        horaInicio: inicio,
-        horaFim: fim,
-      });
-      toast.success("Aula criada!");
+    const datas = mesInteiro ? datasDoMesMesmoDiaSemana(data) : [data];
+
+    // Não recria aulas que já existem (mesmo polo/turma/data).
+    const jaTem = new Set(
+      aulasExistentes
+        .filter((a) => a.poloId === poloId && a.turma === Number(turma))
+        .map((a) => a.data.slice(0, 10)),
+    );
+    const aCriar = datas.filter((d) => !jaTem.has(d));
+    const jaExistiam = datas.length - aCriar.length;
+
+    if (aCriar.length === 0) {
+      toast.info("As aulas desse período já existem.");
+      return;
+    }
+
+    setSalvando(true);
+    let ok = 0;
+    const falhas: string[] = [];
+    // Sequencial: a API não tem endpoint de lote; contamos sucesso/falha.
+    for (const d of aCriar) {
+      try {
+        await criar.mutateAsync({
+          poloId,
+          data: d,
+          turma: Number(turma),
+          horaInicio: inicio,
+          horaFim: fim,
+        });
+        ok += 1;
+      } catch {
+        falhas.push(d);
+      }
+    }
+    setSalvando(false);
+
+    if (falhas.length === 0) {
+      const base = ok === 1 ? "Aula criada!" : `${ok} aulas criadas!`;
+      toast.success(jaExistiam ? `${base} (${jaExistiam} já existiam)` : base);
       onOpenChange(false);
-    } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Erro ao criar a aula.");
+    } else if (ok > 0) {
+      toast.warning(`${ok} aula(s) criada(s), ${falhas.length} falharam.`);
+    } else {
+      toast.error("Não foi possível criar as aulas.");
     }
   }
 
@@ -155,15 +223,31 @@ function NovaAulaDialog({
             <Label className="mb-1.5">Fim</Label>
             <Input type="time" value={fim} onChange={(e) => setFim(e.target.value)} />
           </div>
+
+          <label className="flex items-center gap-2 text-sm sm:col-span-2">
+            <input
+              type="checkbox"
+              className="size-4 accent-primary"
+              checked={mesInteiro}
+              onChange={(e) => setMesInteiro(e.target.checked)}
+            />
+            Criar todas as aulas do mês (mesmo dia da semana)
+          </label>
+          {previa && (
+            <p className="text-xs text-muted-foreground sm:col-span-2">
+              Serão criadas <span className="font-medium">{previa.datas.length}</span>{" "}
+              aula(s) de {previa.diaSemana} em {previa.mes} (as que já existem são ignoradas).
+            </p>
+          )}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={salvar} disabled={criar.isPending}>
-            {criar.isPending && <Loader2 className="size-4 animate-spin" />}
-            Criar aula
+          <Button onClick={salvar} disabled={salvando}>
+            {salvando && <Loader2 className="size-4 animate-spin" />}
+            {mesInteiro ? "Criar aulas" : "Criar aula"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -337,6 +421,7 @@ export function AulasPage() {
         poloIdProfessor={sessao?.poloId ?? null}
         poloNomeProfessor={sessao?.poloNome ?? ""}
         polos={polos ?? []}
+        aulasExistentes={aulas ?? []}
       />
     </div>
   );
