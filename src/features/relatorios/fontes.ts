@@ -76,7 +76,7 @@ function dentroPeriodo(dataIso: string, f: FiltroCtx): boolean {
   return true;
 }
 
-async function carregarPresencas(admin: boolean): Promise<Presenca[]> {
+export async function carregarPresencas(admin: boolean): Promise<Presenca[]> {
   // A API devolve Data: null quando não há presenças (get-all sem registros ou
   // aula do professor sem chamada). O apiGet resolve esse null sem lançar, então
   // normalizamos para [] — senão entram nulls na lista e quebram os relatórios

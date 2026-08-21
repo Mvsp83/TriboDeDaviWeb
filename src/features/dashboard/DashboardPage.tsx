@@ -15,12 +15,16 @@ import {
   RotateCcw,
   ClipboardCheck,
   ChevronRight,
+  AlertTriangle,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useDashboard, type DashboardData } from "@/features/dashboard/dashboardApi";
 import { useDashboardLayout } from "@/features/dashboard/dashboardConfigApi";
 import { useAulas } from "@/features/aulas/aulasApi";
+import { useAlunosEmRisco, REGRA_EVASAO } from "@/features/dashboard/evasaoApi";
+import { usePolos } from "@/features/polos/polosApi";
+import { dataBR } from "@/lib/format";
 import type { Aniversariante } from "@/types";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -179,6 +183,93 @@ function ChamadaWidget() {
   );
 }
 
+// Alunos que vêm faltando seguido — o professor age antes de perder a criança.
+function EvasaoWidget() {
+  const { data: risco, isLoading, isError } = useAlunosEmRisco();
+  const { data: polos } = usePolos();
+  const [verTodos, setVerTodos] = useState(false);
+
+  const nomePolo = useMemo(() => {
+    const m = new Map((polos ?? []).map((p) => [p.id, p.nome]));
+    return (id: number) => m.get(id) ?? "-";
+  }, [polos]);
+
+  const lista = risco ?? [];
+  const visiveis = verTodos ? lista : lista.slice(0, 5);
+
+  return (
+    <Card>
+      <CardContent className="p-0">
+        <div className="flex items-center gap-2 border-b border-border px-5 py-4">
+          <AlertTriangle className="size-5 text-warning" />
+          <h2 className="font-semibold">Alunos em risco de evasão</h2>
+          {lista.length > 0 && (
+            <span className="ml-auto rounded-full bg-warning/15 px-2 py-0.5 text-sm font-medium text-warning">
+              {lista.length}
+            </span>
+          )}
+        </div>
+
+        {isLoading && (
+          <div className="space-y-2 p-5">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+          </div>
+        )}
+
+        {!isLoading && isError && (
+          <p className="px-5 py-8 text-center text-sm text-destructive">
+            Não foi possível carregar a frequência.
+          </p>
+        )}
+
+        {!isLoading && !isError && lista.length === 0 && (
+          <p className="px-5 py-8 text-center text-sm text-muted-foreground">
+            Ninguém com {REGRA_EVASAO.FALTAS_SEGUIDAS_ALERTA} faltas seguidas. Frequência em dia!
+          </p>
+        )}
+
+        {!isLoading && !isError && lista.length > 0 && (
+          <>
+            <p className="px-5 pt-3 text-xs text-muted-foreground">
+              {REGRA_EVASAO.FALTAS_SEGUIDAS_ALERTA}+ faltas seguidas nas últimas{" "}
+              {REGRA_EVASAO.AULAS_ANALISADAS} aulas registradas.
+            </p>
+            <ul className="divide-y divide-border">
+              {visiveis.map((a) => (
+                <li
+                  key={a.alunoId}
+                  className="flex items-center justify-between gap-3 px-5 py-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{a.nome}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {nomePolo(a.poloId)}
+                      {a.ultimaPresenca
+                        ? ` · última presença em ${dataBR(a.ultimaPresenca)}`
+                        : " · sem presença registrada"}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-md bg-warning/15 px-2 py-1 text-sm font-medium tabular-nums text-warning">
+                    {a.faltasSeguidas} faltas
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {lista.length > 5 && (
+              <div className="border-t border-border px-5 py-2.5">
+                <Button variant="ghost" size="sm" onClick={() => setVerTodos((v) => !v)}>
+                  {verTodos ? "Ver menos" : `Ver todos (${lista.length})`}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 // Contexto passado a cada widget na hora de renderizar.
 interface WidgetCtx {
   data: DashboardData | undefined;
@@ -203,6 +294,12 @@ const CATALOGO: WidgetDef[] = [
     titulo: "Atalho: Fazer chamada",
     full: true,
     render: () => <ChamadaWidget />,
+  },
+  {
+    id: "evasao",
+    titulo: "Alunos em risco de evasão",
+    full: true,
+    render: () => <EvasaoWidget />,
   },
   {
     id: "card-alunos",
