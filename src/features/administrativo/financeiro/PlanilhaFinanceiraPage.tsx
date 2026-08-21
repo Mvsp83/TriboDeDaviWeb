@@ -40,8 +40,16 @@ export function PlanilhaFinanceiraPage() {
   const movimentacoes = movs ?? SEM_MOVS;
 
   const anos = useMemo(() => anosDisponiveis(movimentacoes), [movimentacoes]);
-  const [ano, setAno] = useState<number>(() => new Date().getFullYear());
-  const anoAtivo = anos.includes(ano) ? ano : anos[0];
+  // Ano mais recente que realmente tem lançamentos (anosDisponiveis sempre
+  // inclui o ano atual, mesmo vazio).
+  const anoMaisRecenteComDados = useMemo(() => {
+    const comDados = movimentacoes.map((m) => anoDe(m.data));
+    return comDados.length ? Math.max(...comDados) : null;
+  }, [movimentacoes]);
+  // Sem escolha manual (null), abre no ano mais recente com dados; se não há
+  // lançamentos, cai no ano atual.
+  const [ano, setAno] = useState<number | null>(null);
+  const anoAtivo = ano ?? anoMaisRecenteComDados ?? new Date().getFullYear();
 
   // Soma com sinal por categoria e por mês, no ano selecionado.
   const porCategoria = useMemo(() => {
