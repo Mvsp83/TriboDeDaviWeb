@@ -74,6 +74,17 @@ export const ApiRotas = {
   dashboardConfigObter: "/api/ConfiguracaoDashboard/obter",
   dashboardConfigSalvar: "/api/ConfiguracaoDashboard/salvar",
 
+  finContas: "/api/Financeiro/contas",
+  finContaSalvar: "/api/Financeiro/contas/salvar",
+  finContaExcluir: (id: number) => `/api/Financeiro/contas/${id}`,
+  finMovimentacoes: "/api/Financeiro/movimentacoes",
+  finMovSalvar: "/api/Financeiro/movimentacoes/salvar",
+  finMovExcluir: (id: number) => `/api/Financeiro/movimentacoes/${id}`,
+  finMovConciliacao: (id: number, conciliado: boolean) =>
+    `/api/Financeiro/movimentacoes/${id}/conciliacao?conciliado=${conciliado}`,
+  finTransferencia: "/api/Financeiro/transferencias",
+  finImportar: "/api/Financeiro/importar",
+
   calendarioPorAno: (ano: number) => `/api/EventoCalendario/ano/${ano}`,
   calendarioAnos: "/api/EventoCalendario/anos",
   calendarioCreate: "/api/EventoCalendario/create",

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useMovimentacoes } from "./movimentacoesApi";
 import { anosDisponiveis, anoDe, mesDe } from "./calculos";
 import { baixarCsv, imprimirDocumento } from "./exportar";
+import { AvisoMigracao } from "./AvisoMigracao";
 import { CATEGORIAS, valorComSinal, type MovimentacaoFinanceira } from "./tipos";
 import { moeda, MESES_CURTOS } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -154,6 +155,8 @@ export function PlanilhaFinanceiraPage() {
 
   return (
     <div className="space-y-4">
+      <AvisoMigracao />
+
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Planilha Financeira</h1>

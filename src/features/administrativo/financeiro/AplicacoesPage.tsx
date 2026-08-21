@@ -14,6 +14,7 @@ import { ContaFormDialog } from "./ContaFormDialog";
 import { MovimentacaoFormDialog } from "./MovimentacaoFormDialog";
 import { TransferenciaFormDialog } from "./TransferenciaFormDialog";
 import { saldoConta } from "./calculos";
+import { AvisoMigracao } from "./AvisoMigracao";
 import { baixarCsv } from "./exportar";
 import {
   CATEGORIAS_APLICACAO,
@@ -168,6 +169,8 @@ export function AplicacoesPage() {
 
   return (
     <div className="space-y-4">
+      <AvisoMigracao />
+
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Aplicações</h1>
