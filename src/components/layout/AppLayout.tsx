@@ -2,6 +2,7 @@ import { Suspense, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { navGroups, coletarFolhas } from "@/components/layout/navConfig";
 import { useDocumentoPadraoRemoto } from "@/features/configuracoes/configuracaoDocumentoApi";
 import { AvisosPendentes } from "@/features/avisos/AvisosPendentes";
@@ -21,6 +22,9 @@ export function AppLayout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const titulo = tituloDaRota(location.pathname);
+  // Na chamada em andamento (/chamada/:id) já há barra fixa de "Salvar", então
+  // escondemos a navegação inferior para não conflitar.
+  const mostrarBottomNav = !location.pathname.startsWith("/chamada/");
 
   // Prima o cache do padrão de documentos (compartilhado via API) para que a
   // exportação de PDF em qualquer tela use o valor mais recente.
@@ -55,7 +59,14 @@ export function AppLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar titulo={titulo} onMenu={() => setMobileOpen(true)} />
-        <main className="flex-1 p-4 md:p-6">
+        <main
+          className={cn(
+            "flex-1 px-4 pt-4 md:px-6 md:pt-6",
+            // Espaço extra embaixo no mobile para o conteúdo não ficar sob a
+            // barra de navegação inferior.
+            mostrarBottomNav ? "pb-24 md:pb-6" : "pb-4 md:pb-6",
+          )}
+        >
           <div className="mx-auto w-full max-w-7xl">
             <Suspense fallback={<Skeleton className="h-64 w-full" />}>
               <Outlet />
@@ -64,6 +75,7 @@ export function AppLayout() {
         </main>
       </div>
 
+      {mostrarBottomNav && <BottomNav />}
       <AvisosPendentes />
     </div>
   );
