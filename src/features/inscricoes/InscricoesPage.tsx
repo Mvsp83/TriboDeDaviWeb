@@ -8,6 +8,7 @@ import {
   Loader2,
   Pill,
   ChevronRight,
+  Printer,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePolos } from "@/features/polos/polosApi";
@@ -27,6 +28,7 @@ import {
   StatusInscricao,
   type Inscricao,
 } from "@/features/inscricoes/inscricoesApi";
+import { imprimirFicha } from "@/features/inscricoes/fichaPdf";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -154,6 +156,20 @@ function DetalheInscricao({
             Enviada em {dataBR(inscricao.dataEnvio)} · {STATUS_LABEL[inscricao.status]}
           </DialogDescription>
         </DialogHeader>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="self-start"
+          onClick={() => {
+            if (!imprimirFicha(inscricao)) {
+              toast.error("Permita pop-ups para gerar o PDF da ficha.");
+            }
+          }}
+        >
+          <Printer className="size-4" />
+          Imprimir ficha
+        </Button>
 
         {/* Alerta de saúde primeiro: é o que muda a conduta na aula. */}
         {(inscricao.temRestricaoMedica || inscricao.medicamentos) && (
