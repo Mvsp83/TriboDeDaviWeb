@@ -1,5 +1,16 @@
 import { useMemo, useState } from "react";
-import { FileBarChart, Download, FileDown, BookmarkPlus, Bookmark, X, Loader2 } from "lucide-react";
+import {
+  FileBarChart,
+  Download,
+  FileDown,
+  BookmarkPlus,
+  Bookmark,
+  X,
+  Loader2,
+  ArrowUp,
+  ArrowDown,
+  ChevronsUpDown,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePolos } from "@/features/polos/polosApi";
@@ -65,6 +76,32 @@ function Chip({
   );
 }
 
+const reDataBr = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
+// Deriva uma chave ordenável de um valor de célula (que é sempre string):
+// datas dd/MM/yyyy viram timestamp, números (inclusive "1.234,56") viram Number,
+// o resto permanece texto — para ordenar de forma natural cada tipo de coluna.
+function chaveOrdenacao(v: string): number | string {
+  const s = (v ?? "").trim();
+  if (!s) return "";
+  const m = reDataBr.exec(s);
+  if (m) return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1])).getTime();
+  const num = s.replace(/\./g, "").replace(",", ".");
+  if (/^-?\d+(\.\d+)?$/.test(num)) return Number(num);
+  return s.toLowerCase();
+}
+
+function compararValores(a: string, b: string): number {
+  const ka = chaveOrdenacao(a);
+  const kb = chaveOrdenacao(b);
+  if (ka === "" && kb !== "") return 1; // vazios sempre no fim
+  if (kb === "" && ka !== "") return -1;
+  if (typeof ka === "number" && typeof kb === "number") return ka - kb;
+  return String(ka).localeCompare(String(kb), "pt-BR", { numeric: true, sensitivity: "base" });
+}
+
+type Ordenacao = { colId: string; dir: "asc" | "desc" };
+
 export function RelatoriosPage() {
   const { sessao } = useAuth();
   const admin = sessao?.isAdministrador ?? false;
@@ -94,6 +131,7 @@ export function RelatoriosPage() {
   const [linhas, setLinhas] = useState<unknown[]>([]);
   const [gerado, setGerado] = useState(false);
   const [gerando, setGerando] = useState(false);
+  const [ordenacao, setOrdenacao] = useState<Ordenacao | null>(null);
 
   const [dialogSalvar, setDialogSalvar] = useState(false);
   const [nomeSalvo, setNomeSalvo] = useState("");
@@ -105,6 +143,22 @@ export function RelatoriosPage() {
   );
   const temResultado = gerado && linhas.length > 0 && colunasRelatorio.length > 0;
 
+  const linhasOrdenadas = useMemo(() => {
+    if (!ordenacao) return linhas;
+    const col = colunasRelatorio.find((c) => c.id === ordenacao.colId);
+    if (!col) return linhas;
+    const fator = ordenacao.dir === "asc" ? 1 : -1;
+    return [...linhas].sort((a, b) => fator * compararValores(col.valor(a), col.valor(b)));
+  }, [linhas, ordenacao, colunasRelatorio]);
+
+  function ordenarPor(colId: string) {
+    setOrdenacao((prev) =>
+      prev?.colId === colId
+        ? { colId, dir: prev.dir === "asc" ? "desc" : "asc" }
+        : { colId, dir: "asc" },
+    );
+  }
+
   const mostraPeriodo = !!fonte && (fonte.data != null || !!fonte.usaPeriodo);
   const mostraTurma = !!fonte && (fonte.turma != null || !!fonte.usaTurma);
   const mostraPolo = !!fonte && admin && (fonte.polo != null || !!fonte.usaPolo);
@@ -115,6 +169,7 @@ export function RelatoriosPage() {
     setColunasSel(new Set(f?.colunas.filter((c) => c.padrao).map((c) => c.id)));
     setLinhas([]);
     setGerado(false);
+    setOrdenacao(null);
     setInicio("");
     setFim("");
     setTurma("");
@@ -174,7 +229,7 @@ export function RelatoriosPage() {
     const campo = (v: string) => `"${(v ?? "").replace(/"/g, '""')}"`;
     const linhasCsv = [
       colunasRelatorio.map((c) => campo(c.titulo)).join(";"),
-      ...linhas.map((l) => colunasRelatorio.map((c) => campo(c.valor(l))).join(";")),
+      ...linhasOrdenadas.map((l) => colunasRelatorio.map((c) => campo(c.valor(l))).join(";")),
     ];
     const blob = new Blob(["﻿" + linhasCsv.join("\r\n")], {
       type: "text/csv;charset=utf-8;",
@@ -192,7 +247,7 @@ export function RelatoriosPage() {
   function exportarPdf() {
     if (!fonte || !temResultado) return;
     const th = colunasRelatorio.map((c) => `<th>${esc(c.titulo)}</th>`).join("");
-    const rows = linhas
+    const rows = linhasOrdenadas
       .map(
         (l) =>
           `<tr>${colunasRelatorio.map((c) => `<td>${esc(c.valor(l))}</td>`).join("")}</tr>`,
@@ -253,6 +308,7 @@ export function RelatoriosPage() {
     setFim("");
     setLinhas([]);
     setGerado(false);
+    setOrdenacao(null);
   }
 
   async function removerSalvo(s: RelatorioSalvo) {
@@ -428,9 +484,30 @@ export function RelatoriosPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      {colunasRelatorio.map((c) => (
-                        <TableHead key={c.id}>{c.titulo}</TableHead>
-                      ))}
+                      {colunasRelatorio.map((c) => {
+                        const ativo = ordenacao?.colId === c.id;
+                        return (
+                          <TableHead key={c.id}>
+                            <button
+                              type="button"
+                              onClick={() => ordenarPor(c.id)}
+                              className="inline-flex items-center gap-1 font-medium hover:text-foreground"
+                              title="Ordenar por esta coluna"
+                            >
+                              {c.titulo}
+                              {ativo ? (
+                                ordenacao!.dir === "asc" ? (
+                                  <ArrowUp className="size-3.5" />
+                                ) : (
+                                  <ArrowDown className="size-3.5" />
+                                )
+                              ) : (
+                                <ChevronsUpDown className="size-3.5 opacity-40" />
+                              )}
+                            </button>
+                          </TableHead>
+                        );
+                      })}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -441,7 +518,7 @@ export function RelatoriosPage() {
                         </TableCell>
                       </TableRow>
                     )}
-                    {linhas.map((l, i) => (
+                    {linhasOrdenadas.map((l, i) => (
                       <TableRow key={i}>
                         {colunasRelatorio.map((c) => (
                           <TableCell key={c.id}>{c.valor(l)}</TableCell>

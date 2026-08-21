@@ -81,18 +81,36 @@ async function carregarPresencas(admin: boolean): Promise<Presenca[]> {
   // aula do professor sem chamada). O apiGet resolve esse null sem lançar, então
   // normalizamos para [] — senão entram nulls na lista e quebram os relatórios
   // de Presenças/Frequência ao acessar p.data / p.nomeAluno.
+  let presencas: Presenca[];
   if (admin) {
-    return (await apiGet<Presenca[] | null>(ApiRotas.presencasGetAll)) ?? [];
+    presencas = (await apiGet<Presenca[] | null>(ApiRotas.presencasGetAll)) ?? [];
+  } else {
+    const aulas = (await apiGet<Aula[] | null>(ApiRotas.aulasPorPolo)) ?? [];
+    const listas = await Promise.all(
+      aulas.map((a) =>
+        apiGet<Presenca[] | null>(ApiRotas.presencaPorAula(a.id))
+          .then((r) => r ?? [])
+          .catch(() => []),
+      ),
+    );
+    presencas = listas.flat();
   }
-  const aulas = (await apiGet<Aula[] | null>(ApiRotas.aulasPorPolo)) ?? [];
-  const listas = await Promise.all(
-    aulas.map((a) =>
-      apiGet<Presenca[] | null>(ApiRotas.presencaPorAula(a.id))
-        .then((r) => r ?? [])
-        .catch(() => []),
-    ),
-  );
-  return listas.flat();
+
+  // O get-all (admin) não devolve nomeAluno preenchido — só o endpoint por-aula
+  // preenche. Quando faltar, resolvemos o nome pelo alunoId a partir da lista de
+  // alunos, senão as colunas "Aluno" de Presenças/Frequência saem em branco.
+  if (presencas.some((p) => !p.nomeAluno)) {
+    const alunos =
+      (await apiGet<Aluno[] | null>(
+        admin ? ApiRotas.alunosGetAll : ApiRotas.alunosPorPolo,
+      )) ?? [];
+    const nomePorId = new Map(alunos.map((a) => [a.id, a.nome]));
+    for (const p of presencas) {
+      if (!p.nomeAluno) p.nomeAluno = nomePorId.get(p.alunoId) ?? `Aluno #${p.alunoId}`;
+    }
+  }
+
+  return presencas;
 }
 
 // Monta as fontes de relatório. `nomePolo` resolve o nome do polo pelo id.
