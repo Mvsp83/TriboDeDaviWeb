@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import {
   Users,
   MapPin,
@@ -5,10 +6,20 @@ import {
   CalendarDays,
   CheckCircle2,
   XCircle,
+  SlidersHorizontal,
+  Eye,
+  EyeOff,
+  ArrowUp,
+  ArrowDown,
+  RotateCcw,
   type LucideIcon,
 } from "lucide-react";
-import { useDashboard } from "@/features/dashboard/dashboardApi";
+import { useDashboard, type DashboardData } from "@/features/dashboard/dashboardApi";
+import { useDashboardLayout } from "@/features/dashboard/dashboardConfigApi";
+import type { Aniversariante } from "@/types";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -18,6 +29,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const MESES = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
@@ -59,42 +78,168 @@ function StatCard({
   );
 }
 
+function AniversariantesTabela({
+  aniversariantes,
+  mesAtual,
+}: {
+  aniversariantes: Aniversariante[];
+  mesAtual: string;
+}) {
+  return (
+    <Card>
+      <CardContent className="p-0">
+        <div className="flex items-center gap-2 border-b border-border px-5 py-4">
+          <Cake className="size-5 text-primary" />
+          <h2 className="font-semibold capitalize">Aniversariantes de {mesAtual}</h2>
+        </div>
+        {aniversariantes.length === 0 ? (
+          <p className="px-5 py-8 text-center text-sm text-muted-foreground">
+            Nenhum aniversariante neste mês.
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Comemorado</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {aniversariantes.map((a, i) => (
+                <TableRow key={`${a.nome}-${i}`}>
+                  <TableCell className="font-medium">{a.nome}</TableCell>
+                  <TableCell className="tabular-nums text-muted-foreground">
+                    {new Date(a.dataNascimento).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    {a.jaComemorado ? (
+                      <span className="inline-flex items-center gap-1.5 text-success">
+                        <CheckCircle2 className="size-4" /> Sim
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-warning">
+                        <XCircle className="size-4" /> Não
+                      </span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Contexto passado a cada widget na hora de renderizar.
+interface WidgetCtx {
+  data: DashboardData | undefined;
+  isLoading: boolean;
+  mesAtual: string;
+}
+
+interface WidgetDef {
+  id: string;
+  // Nome exibido no personalizador.
+  titulo: string;
+  // Ocupa a linha inteira (tabelas), em vez de uma célula do grid.
+  full?: boolean;
+  render: (ctx: WidgetCtx) => React.ReactNode;
+}
+
+// Catálogo de widgets disponíveis. Para adicionar um novo, basta incluí-lo aqui
+// — a config de cada usuário se ajusta sozinha (ver dashboardLayout.normalizar).
+const CATALOGO: WidgetDef[] = [
+  {
+    id: "card-alunos",
+    titulo: "Card: Alunos",
+    render: (c) => (
+      <StatCard icon={Users} valor={c.data?.totalAlunos ?? 0} label="Alunos" cor="#f5c518" carregando={c.isLoading} />
+    ),
+  },
+  {
+    id: "card-polos",
+    titulo: "Card: Polos",
+    render: (c) => (
+      <StatCard icon={MapPin} valor={c.data?.totalPolos ?? 0} label="Polos" cor="#3b82f6" carregando={c.isLoading} />
+    ),
+  },
+  {
+    id: "card-aniversariantes",
+    titulo: "Card: Aniversariantes do mês",
+    render: (c) => (
+      <StatCard
+        icon={Cake}
+        valor={(c.data?.aniversariantes ?? []).length}
+        label="Aniversariantes do mês"
+        cor="#a855f7"
+        carregando={c.isLoading}
+      />
+    ),
+  },
+  {
+    id: "card-aulas",
+    titulo: "Card: Aulas cadastradas",
+    render: (c) => (
+      <StatCard icon={CalendarDays} valor={c.data?.totalAulas ?? 0} label="Aulas cadastradas" cor="#22c55e" carregando={c.isLoading} />
+    ),
+  },
+  {
+    id: "tabela-aniversariantes",
+    titulo: "Tabela: Aniversariantes do mês",
+    full: true,
+    render: (c) => (
+      <AniversariantesTabela aniversariantes={c.data?.aniversariantes ?? []} mesAtual={c.mesAtual} />
+    ),
+  },
+];
+
 export function DashboardPage() {
   const { data, isLoading, isError } = useDashboard();
   const mesAtual = MESES[new Date().getMonth()];
-  const aniversariantes = data?.aniversariantes ?? [];
+
+  const todosIds = useMemo(() => CATALOGO.map((w) => w.id), []);
+  const catalogoPorId = useMemo(() => new Map(CATALOGO.map((w) => [w.id, w])), []);
+
+  // Config sincronizada com a API (localStorage como cache/offline).
+  const { config, salvar: aplicar } = useDashboardLayout(todosIds);
+  const [personalizar, setPersonalizar] = useState(false);
+
+  function alternarVisivel(id: string) {
+    const ocultos = config.ocultos.includes(id)
+      ? config.ocultos.filter((x) => x !== id)
+      : [...config.ocultos, id];
+    aplicar({ ...config, ocultos });
+  }
+
+  function mover(id: string, dir: -1 | 1) {
+    const i = config.ordem.indexOf(id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= config.ordem.length) return;
+    const ordem = [...config.ordem];
+    [ordem[i], ordem[j]] = [ordem[j], ordem[i]];
+    aplicar({ ...config, ordem });
+  }
+
+  function restaurar() {
+    aplicar({ ordem: todosIds, ocultos: [] });
+  }
+
+  const ctx: WidgetCtx = { data, isLoading, mesAtual };
+  const visiveis = config.ordem.filter((id) => !config.ocultos.includes(id));
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon={Users}
-          valor={data?.totalAlunos ?? 0}
-          label="Alunos"
-          cor="#f5c518"
-          carregando={isLoading}
-        />
-        <StatCard
-          icon={MapPin}
-          valor={data?.totalPolos ?? 0}
-          label="Polos"
-          cor="#3b82f6"
-          carregando={isLoading}
-        />
-        <StatCard
-          icon={Cake}
-          valor={aniversariantes.length}
-          label="Aniversariantes do mês"
-          cor="#a855f7"
-          carregando={isLoading}
-        />
-        <StatCard
-          icon={CalendarDays}
-          valor={data?.totalAulas ?? 0}
-          label="Aulas cadastradas"
-          cor="#22c55e"
-          carregando={isLoading}
-        />
+      <div className="flex items-center justify-end">
+        <Button variant="outline" size="sm" onClick={() => setPersonalizar(true)}>
+          <SlidersHorizontal className="size-4" />
+          Personalizar
+        </Button>
       </div>
 
       {isError && (
@@ -106,51 +251,92 @@ export function DashboardPage() {
         </Card>
       )}
 
-      {aniversariantes.length > 0 && (
+      {visiveis.length === 0 ? (
         <Card>
-          <CardContent className="p-0">
-            <div className="flex items-center gap-2 border-b border-border px-5 py-4">
-              <Cake className="size-5 text-primary" />
-              <h2 className="font-semibold capitalize">
-                Aniversariantes de {mesAtual}
-              </h2>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Comemorado</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {aniversariantes.map((a, i) => (
-                  <TableRow key={`${a.nome}-${i}`}>
-                    <TableCell className="font-medium">{a.nome}</TableCell>
-                    <TableCell className="tabular-nums text-muted-foreground">
-                      {new Date(a.dataNascimento).toLocaleDateString("pt-BR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      {a.jaComemorado ? (
-                        <span className="inline-flex items-center gap-1.5 text-success">
-                          <CheckCircle2 className="size-4" /> Sim
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 text-warning">
-                          <XCircle className="size-4" /> Não
-                        </span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <CardContent className="p-8 text-center text-sm text-muted-foreground">
+            Nenhum widget visível. Clique em <span className="font-medium">Personalizar</span> para escolher o que exibir.
           </CardContent>
         </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {visiveis.map((id) => {
+            const w = catalogoPorId.get(id);
+            if (!w) return null;
+            return (
+              <div key={id} className={w.full ? "sm:col-span-2 lg:col-span-4" : undefined}>
+                {w.render(ctx)}
+              </div>
+            );
+          })}
+        </div>
       )}
+
+      <Dialog open={personalizar} onOpenChange={setPersonalizar}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Personalizar painel</DialogTitle>
+            <DialogDescription>
+              Mostre ou oculte cada bloco e ajuste a ordem. As preferências ficam salvas neste navegador.
+            </DialogDescription>
+          </DialogHeader>
+
+          <ul className="space-y-1">
+            {config.ordem.map((id, indice) => {
+              const w = catalogoPorId.get(id);
+              if (!w) return null;
+              const oculto = config.ocultos.includes(id);
+              return (
+                <li
+                  key={id}
+                  className="flex items-center gap-2 rounded-md border border-border px-2.5 py-2"
+                >
+                  <span className={cn("flex-1 text-sm", oculto && "text-muted-foreground line-through")}>
+                    {w.titulo}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    onClick={() => mover(id, -1)}
+                    disabled={indice === 0}
+                    aria-label="Mover para cima"
+                  >
+                    <ArrowUp className="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    onClick={() => mover(id, 1)}
+                    disabled={indice === config.ordem.length - 1}
+                    aria-label="Mover para baixo"
+                  >
+                    <ArrowDown className="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    onClick={() => alternarVisivel(id)}
+                    aria-label={oculto ? "Mostrar" : "Ocultar"}
+                    title={oculto ? "Mostrar" : "Ocultar"}
+                  >
+                    {oculto ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <DialogFooter className="sm:justify-between">
+            <Button variant="ghost" size="sm" onClick={restaurar}>
+              <RotateCcw className="size-4" />
+              Restaurar padrão
+            </Button>
+            <Button onClick={() => setPersonalizar(false)}>Concluído</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

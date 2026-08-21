@@ -70,6 +70,9 @@ export const ApiRotas = {
   configDocumentoObter: "/api/ConfiguracaoDocumento/obter",
   configDocumentoSalvar: "/api/ConfiguracaoDocumento/salvar",
 
+  dashboardConfigObter: "/api/ConfiguracaoDashboard/obter",
+  dashboardConfigSalvar: "/api/ConfiguracaoDashboard/salvar",
+
   calendarioPorAno: (ano: number) => `/api/EventoCalendario/ano/${ano}`,
   calendarioAnos: "/api/EventoCalendario/anos",
   calendarioCreate: "/api/EventoCalendario/create",
