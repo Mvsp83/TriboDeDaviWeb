@@ -7,16 +7,23 @@ export interface Aluno {
   cpf?: string | null;
   dataNascimento: string; // ISO
   peso?: number | null;
+  altura?: number | null;
   faixa: number;
+  // `endereco` é a rua; número e complemento são campos próprios desde a ficha
+  // de inscrição online. Cadastros antigos podem ter tudo junto em `endereco`.
   endereco?: string | null;
+  numero?: string | null;
+  complemento?: string | null;
   bairro?: string | null;
   cidade?: string | null;
   celular?: string | null;
+  telefone2?: string | null;
   responsavel?: string | null;
   parentesco?: number | null;
   rgResponsavel?: string | null;
   cpfResponsavel?: string | null;
   escola?: string | null;
+  serie?: string | null;
   periodo?: string | null;
   poloId: number;
   turma: number;

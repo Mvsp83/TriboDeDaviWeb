@@ -33,10 +33,15 @@ const schema = z.object({
   rg: z.string(),
   dataNascimento: z.string(),
   celular: z.string(),
+  telefone2: z.string(),
   peso: z.string(),
+  altura: z.string(),
   escola: z.string(),
+  serie: z.string(),
   periodo: z.string(),
   endereco: z.string(),
+  numero: z.string(),
+  complemento: z.string(),
   bairro: z.string(),
   cidade: z.string(),
   responsavel: z.string(),
@@ -106,10 +111,15 @@ export function AlunoFormDialog({
           ? isoParaInput(aluno.dataNascimento)
           : "",
         celular: aluno.celular ?? "",
+        telefone2: aluno.telefone2 ?? "",
         peso: aluno.peso != null ? String(aluno.peso) : "",
+        altura: aluno.altura != null ? String(aluno.altura) : "",
         escola: aluno.escola ?? "",
+        serie: aluno.serie ?? "",
         periodo: aluno.periodo ?? "",
         endereco: aluno.endereco ?? "",
+        numero: aluno.numero ?? "",
+        complemento: aluno.complemento ?? "",
         bairro: aluno.bairro ?? "",
         cidade: aluno.cidade ?? "",
         responsavel: aluno.responsavel ?? "",
@@ -129,6 +139,7 @@ export function AlunoFormDialog({
     const faixa =
       values.faixaBase === 40 ? 40 : values.faixaBase + values.faixaGrau;
     const pesoNum = parseFloat(values.peso.replace(",", "."));
+    const alturaNum = parseFloat(values.altura.replace(",", "."));
 
     const payload: Partial<Aluno> = {
       id: aluno?.id,
@@ -137,10 +148,15 @@ export function AlunoFormDialog({
       rg: values.rg,
       dataNascimento: values.dataNascimento || "2000-01-01",
       celular: values.celular,
+      telefone2: values.telefone2,
       peso: Number.isNaN(pesoNum) ? 0 : pesoNum,
+      altura: Number.isNaN(alturaNum) ? null : alturaNum,
       escola: values.escola,
+      serie: values.serie,
       periodo: values.periodo,
       endereco: values.endereco,
+      numero: values.numero,
+      complemento: values.complemento,
       bairro: values.bairro,
       cidade: values.cidade,
       responsavel: values.responsavel,
@@ -189,11 +205,20 @@ export function AlunoFormDialog({
             <Campo label="Celular">
               <Input {...register("celular")} />
             </Campo>
+            <Campo label="Telefone 2">
+              <Input {...register("telefone2")} />
+            </Campo>
             <Campo label="Peso (kg)">
               <Input inputMode="decimal" placeholder="ex: 42.5" {...register("peso")} />
             </Campo>
+            <Campo label="Altura (m)">
+              <Input inputMode="decimal" placeholder="ex: 1.42" {...register("altura")} />
+            </Campo>
             <Campo label="Escola">
               <Input {...register("escola")} />
+            </Campo>
+            <Campo label="Série">
+              <Input {...register("serie")} />
             </Campo>
             <Campo label="Período">
               <Input {...register("periodo")} />
@@ -201,8 +226,14 @@ export function AlunoFormDialog({
           </Secao>
 
           <Secao titulo="Endereço">
-            <Campo className="sm:col-span-2" label="Endereço">
+            <Campo className="sm:col-span-2" label="Rua">
               <Input {...register("endereco")} />
+            </Campo>
+            <Campo label="Número">
+              <Input {...register("numero")} />
+            </Campo>
+            <Campo label="Complemento">
+              <Input {...register("complemento")} />
             </Campo>
             <Campo label="Bairro">
               <Input {...register("bairro")} />
@@ -348,10 +379,15 @@ function vazio(poloPadrao?: number | null): FormValues {
     rg: "",
     dataNascimento: "",
     celular: "",
+    telefone2: "",
     peso: "",
+    altura: "",
     escola: "",
+    serie: "",
     periodo: "",
     endereco: "",
+    numero: "",
+    complemento: "",
     bairro: "",
     cidade: "",
     responsavel: "",

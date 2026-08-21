@@ -141,12 +141,24 @@ export function montarFontes(
         { id: "responsavel", titulo: "Responsável", valor: (o) => (o as Aluno).responsavel ?? "" },
         { id: "rg", titulo: "RG", valor: (o) => (o as Aluno).rg ?? "" },
         { id: "cpf", titulo: "CPF", valor: (o) => (o as Aluno).cpf ?? "" },
-        { id: "endereco", titulo: "Endereço", valor: (o) => (o as Aluno).endereco ?? "" },
+        {
+          id: "endereco",
+          titulo: "Endereço",
+          // Junta rua, número e complemento — que passaram a ser campos
+          // separados — para o relatório mostrar o endereço completo.
+          valor: (o) => {
+            const a = o as Aluno;
+            return [a.endereco, a.numero, a.complemento].filter(Boolean).join(", ");
+          },
+        },
         { id: "bairro", titulo: "Bairro", valor: (o) => (o as Aluno).bairro ?? "" },
         { id: "cidade", titulo: "Cidade", valor: (o) => (o as Aluno).cidade ?? "" },
         { id: "escola", titulo: "Escola", valor: (o) => (o as Aluno).escola ?? "" },
+        { id: "serie", titulo: "Série", valor: (o) => (o as Aluno).serie ?? "" },
         { id: "periodo", titulo: "Período escolar", valor: (o) => (o as Aluno).periodo ?? "" },
         { id: "peso", titulo: "Peso (kg)", valor: (o) => (o as Aluno).peso?.toString() ?? "" },
+        { id: "altura", titulo: "Altura (m)", valor: (o) => (o as Aluno).altura?.toString() ?? "" },
+        { id: "telefone2", titulo: "Telefone 2", valor: (o) => (o as Aluno).telefone2 ?? "" },
       ],
     },
     {
