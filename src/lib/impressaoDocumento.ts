@@ -34,11 +34,14 @@ export function montarDocumentoHtml(
   cfg: DocumentoPadrao = carregarDocumentoPadrao(),
   imprimirAoCarregar = false,
 ): string {
-  const logo = `${window.location.origin}/logo.png`;
+  // Usa o símbolo (só a estrela) — o logo é branco, feito para a barra lateral
+  // escura, e sumiria no fundo branco do documento. Por isso ele vai dentro de
+  // um selo escuro, onde a marca branca fica visível no papel timbrado.
+  const logo = `${window.location.origin}/simbolo.png`;
   const geradoEm = new Date().toLocaleString("pt-BR");
 
   const logoHtml = cfg.mostrarLogo
-    ? `<img src="${logo}" alt="" onerror="this.style.display='none'" />`
+    ? `<span class="marca"><img src="${logo}" alt="" onerror="this.parentNode.style.display='none'" /></span>`
     : "";
   const instHtml = cfg.tituloCabecalho
     ? `<div class="inst">${esc(cfg.tituloCabecalho)}</div>`
@@ -49,8 +52,21 @@ export function montarDocumentoHtml(
   const dataHtml = cfg.mostrarDataGeracao
     ? `<span>Gerado em ${esc(geradoEm)}</span>`
     : "<span></span>";
+  // Espera as imagens (logo) terminarem de carregar antes de imprimir — senão
+  // o PDF sai sem o logo, pois a janela nova ainda estava baixando a imagem.
   const scriptImprimir = imprimirAoCarregar
-    ? `<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},250);});</script>`
+    ? `<script>
+window.addEventListener("load",function(){
+  var jaImprimiu=false;
+  function imprimir(){if(jaImprimiu)return;jaImprimiu=true;setTimeout(function(){window.print();},100);}
+  var pendentes=Array.prototype.slice.call(document.images).filter(function(i){return !i.complete;});
+  if(pendentes.length===0){imprimir();return;}
+  var restam=pendentes.length;
+  function fim(){if(--restam<=0)imprimir();}
+  pendentes.forEach(function(i){i.addEventListener("load",fim);i.addEventListener("error",fim);});
+  setTimeout(imprimir,3000); // trava de segurança se alguma imagem travar
+});
+</script>`
     : "";
 
   return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8" />
@@ -68,7 +84,11 @@ export function montarDocumentoHtml(
     display: flex; align-items: center; gap: 12px;
     border-bottom: 2px solid #111; padding-bottom: 10px; margin-bottom: 18px;
   }
-  .cabecalho img { height: 40px; width: auto; }
+  .cabecalho .marca {
+    background: #111; border-radius: 10px; padding: 7px 9px;
+    display: inline-flex; align-items: center;
+  }
+  .cabecalho .marca img { height: 44px; width: auto; display: block; }
   .cabecalho .inst { font-size: 12px; color: #555; font-weight: 600; letter-spacing: .3px; }
   .cabecalho .extra { font-size: 11px; color: #777; margin-top: 1px; }
   h1 { font-size: 20px; margin: 2px 0 0 0; }
