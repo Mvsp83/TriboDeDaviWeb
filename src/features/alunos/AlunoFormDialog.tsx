@@ -52,6 +52,7 @@ const schema = z.object({
   turma: z.number().min(1).max(3),
   faixaBase: z.number(),
   faixaGrau: z.number(),
+  autorizaImagem: z.enum(["sim", "nao", "indef"]),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -130,6 +131,12 @@ export function AlunoFormDialog({
         turma: aluno.turma || 1,
         faixaBase: base,
         faixaGrau: grau,
+        autorizaImagem:
+          aluno.autorizaImagem === true
+            ? "sim"
+            : aluno.autorizaImagem === false
+              ? "nao"
+              : "indef",
       });
     } else {
       reset(vazio(poloPadrao));
@@ -166,6 +173,12 @@ export function AlunoFormDialog({
       poloId: values.poloId,
       turma: values.turma,
       faixa,
+      autorizaImagem:
+        values.autorizaImagem === "sim"
+          ? true
+          : values.autorizaImagem === "nao"
+            ? false
+            : null,
     };
 
     try {
@@ -275,6 +288,24 @@ export function AlunoFormDialog({
             </Campo>
             <Campo label="RG do responsável">
               <Input {...register("rgResponsavel")} />
+            </Campo>
+            <Campo label="Autoriza uso de imagem/voz">
+              <Controller
+                control={control}
+                name="autorizaImagem"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sim">Sim, autoriza</SelectItem>
+                      <SelectItem value="nao">Não autoriza</SelectItem>
+                      <SelectItem value="indef">Não informado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </Campo>
           </Secao>
 
@@ -420,6 +451,7 @@ function vazio(poloPadrao?: number | null): FormValues {
     turma: 1,
     faixaBase: 0,
     faixaGrau: 0,
+    autorizaImagem: "indef",
   };
 }
 

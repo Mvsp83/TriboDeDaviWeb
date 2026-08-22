@@ -256,7 +256,6 @@ export function MatriculaPage() {
     if (etapa === 4) {
       if (!aceitouTermo) return "É preciso aceitar o termo de participação.";
       if (!aceitouComodato) return "É preciso aceitar o termo de comodato.";
-      if (!aceitouImagem) return "É preciso autorizar o uso de imagem e voz.";
       if (!aceitouLgpd) return "É preciso autorizar o tratamento dos dados.";
       if (!assinatura.trim()) return "Escreva o nome completo do responsável.";
     }
@@ -264,7 +263,7 @@ export function MatriculaPage() {
   }, [
     etapa, poloId, jaEraAluno, nome, dataNascimento, escola, serie, periodo,
     parentesco, nomeResponsavel, whatsApp, rua, numero, bairro, saude,
-    precisaTermoResponsabilidade, aceitouTermo, aceitouComodato, aceitouImagem, aceitouLgpd, assinatura,
+    precisaTermoResponsabilidade, aceitouTermo, aceitouComodato, aceitouLgpd, assinatura,
   ]);
 
   function avancar() {
@@ -853,7 +852,7 @@ export function MatriculaPage() {
                 onToggle={() => setAceitouImagem(!aceitouImagem)}
               >
                 Autorizo o uso de imagem e voz.{" "}
-                <span className="text-destructive">*</span>
+                <span className="text-muted-foreground">(opcional)</span>
               </Marcavel>
 
               <BlocoTermo titulo="Tratamento de dados (LGPD)" texto={TERMO_LGPD} />

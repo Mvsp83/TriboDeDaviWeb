@@ -27,6 +27,9 @@ export interface Aluno {
   periodo?: string | null;
   poloId: number;
   turma: number;
+  // Autorização de uso de imagem/voz (LGPD): true = autoriza, false = não,
+  // null/undefined = não informado.
+  autorizaImagem?: boolean | null;
 }
 
 export interface Polo {

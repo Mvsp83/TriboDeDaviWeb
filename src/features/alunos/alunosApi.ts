@@ -39,6 +39,7 @@ function montarBody(aluno: Partial<Aluno>, id: number) {
     periodo: aluno.periodo ?? "",
     poloId: aluno.poloId ?? 0,
     turma: aluno.turma ?? 1,
+    autorizaImagem: aluno.autorizaImagem ?? null,
   };
 }
 

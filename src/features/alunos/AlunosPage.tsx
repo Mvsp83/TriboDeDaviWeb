@@ -10,6 +10,7 @@ import {
   ShieldX,
   KeyRound,
   Printer,
+  CameraOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -24,6 +25,7 @@ import {
 import { AlunoFormDialog } from "@/features/alunos/AlunoFormDialog";
 import { CodigoResponsavelDialog } from "@/features/responsavel/CodigoResponsavelDialog";
 import { imprimirCodigos } from "@/features/responsavel/imprimirCodigos";
+import { imprimirSemImagem } from "@/features/alunos/imprimirSemImagem";
 import { faixaInfo } from "@/features/alunos/faixa";
 import { imprimirCarteirinhas } from "@/features/carteirinha/carteirinhaPdf";
 import { ApiError } from "@/lib/api";
@@ -81,6 +83,7 @@ export function AlunosPage() {
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroPolo, setFiltroPolo] = useState("");
   const [filtroTurma, setFiltroTurma] = useState("");
+  const [filtroSemImagem, setFiltroSemImagem] = useState(false);
 
   const [dialogAberto, setDialogAberto] = useState(false);
   const [alunoEdicao, setAlunoEdicao] = useState<Aluno | null>(null);
@@ -104,9 +107,11 @@ export function AlunosPage() {
       )
         return false;
       if (filtroTurma && String(a.turma) !== filtroTurma) return false;
+      // "Sem autorização de imagem" = tudo que não for explicitamente Sim.
+      if (filtroSemImagem && a.autorizaImagem === true) return false;
       return true;
     });
-  }, [alunos, filtroNome, filtroPolo, filtroTurma, nomePorPolo]);
+  }, [alunos, filtroNome, filtroPolo, filtroTurma, filtroSemImagem, nomePorPolo]);
 
   const acessar = useCallback(
     (a: Aluno, key: string): SortValue => {
@@ -224,6 +229,18 @@ export function AlunosPage() {
     }
   }
 
+  // Relatório dos alunos que NÃO têm autorização de imagem (para as redes).
+  function imprimirListaSemImagem() {
+    const semAut = (alunos ?? []).filter((a) => a.autorizaImagem !== true);
+    if (semAut.length === 0) {
+      toast.info("Todos os alunos têm autorização de imagem registrada.");
+      return;
+    }
+    if (!imprimirSemImagem(semAut, nomePorPolo)) {
+      toast.error("Permita pop-ups para imprimir a lista.");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
@@ -277,6 +294,20 @@ export function AlunosPage() {
             onChange={(e) => setFiltroTurma(e.target.value)}
           />
         </CardContent>
+        <div className="flex flex-wrap items-center gap-2 border-t border-border p-4">
+          <Button
+            variant={filtroSemImagem ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFiltroSemImagem((v) => !v)}
+          >
+            <CameraOff className="size-4" />
+            Sem autorização de imagem
+          </Button>
+          <Button variant="ghost" size="sm" onClick={imprimirListaSemImagem}>
+            <Printer className="size-4" />
+            Imprimir lista
+          </Button>
+        </div>
       </Card>
 
       <Card>
@@ -335,7 +366,17 @@ export function AlunosPage() {
               {!isLoading &&
                 sorted.map((a) => (
                   <TableRow key={a.id}>
-                    <TableCell className="font-medium">{a.nome}</TableCell>
+                    <TableCell className="font-medium">
+                      {a.nome}
+                      {a.autorizaImagem !== true && (
+                        <span title="Sem autorização de uso de imagem">
+                          <CameraOff
+                            className="ml-1.5 inline size-4 align-text-bottom text-destructive"
+                            aria-label="Sem autorização de imagem"
+                          />
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <FaixaBadge faixa={a.faixa} />
                     </TableCell>
