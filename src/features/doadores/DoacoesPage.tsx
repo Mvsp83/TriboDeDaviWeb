@@ -12,7 +12,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
-import { dataBR } from "@/lib/format";
+import { dataBR, formatarTelefone } from "@/lib/format";
 import {
   useDoadores,
   useDoacoes,
@@ -196,7 +196,12 @@ function DoadorDialog({
           </div>
           <div>
             <Label className="mb-1.5">Telefone</Label>
-            <Input value={form.telefone} onChange={(e) => set("telefone", e.target.value)} />
+            <Input
+              inputMode="tel"
+              placeholder="(47) 99999-9999"
+              value={form.telefone}
+              onChange={(e) => set("telefone", formatarTelefone(e.target.value))}
+            />
           </div>
           <div>
             <Label className="mb-1.5">Endereço</Label>

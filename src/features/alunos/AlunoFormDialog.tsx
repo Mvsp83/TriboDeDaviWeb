@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useSalvarAluno } from "@/features/alunos/alunosApi";
 import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
 import { ApiError } from "@/lib/api";
+import { formatarTelefone } from "@/lib/format";
 import type { Aluno, Polo } from "@/types";
 import {
   Dialog,
@@ -203,10 +204,32 @@ export function AlunoFormDialog({
               <Input type="date" {...register("dataNascimento")} />
             </Campo>
             <Campo label="Celular">
-              <Input {...register("celular")} />
+              <Controller
+                control={control}
+                name="celular"
+                render={({ field }) => (
+                  <Input
+                    inputMode="tel"
+                    placeholder="(47) 99999-9999"
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(formatarTelefone(e.target.value))}
+                  />
+                )}
+              />
             </Campo>
             <Campo label="Telefone 2">
-              <Input {...register("telefone2")} />
+              <Controller
+                control={control}
+                name="telefone2"
+                render={({ field }) => (
+                  <Input
+                    inputMode="tel"
+                    placeholder="(47) 3333-3333"
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(formatarTelefone(e.target.value))}
+                  />
+                )}
+              />
             </Campo>
             <Campo label="Peso (kg)">
               <Input inputMode="decimal" placeholder="ex: 42.5" {...register("peso")} />
