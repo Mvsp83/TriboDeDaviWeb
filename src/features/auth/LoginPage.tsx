@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate, useLocation, Navigate } from "react-router-dom";
-import { Eye, EyeOff, Loader2, LogIn, User, Lock, ShieldCheck } from "lucide-react";
+import { useNavigate, useLocation, Navigate, Link } from "react-router-dom";
+import { Eye, EyeOff, Loader2, LogIn, User, Lock, ShieldCheck, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { ApiError } from "@/lib/api";
 import { LogoLockup } from "@/components/Logo";
@@ -91,6 +91,15 @@ export function LoginPage() {
 
   return (
     <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background p-4">
+      {/* Voltar para a página inicial */}
+      <Link
+        to="/"
+        className="absolute left-4 top-4 z-20 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" />
+        Voltar ao início
+      </Link>
+
       {/* Brilho dourado de fundo */}
       <div
         className="pointer-events-none absolute -top-40 left-1/2 size-[38rem] -translate-x-1/2 rounded-full opacity-25 blur-[120px]"

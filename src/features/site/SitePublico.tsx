@@ -10,6 +10,12 @@ import {
   ClipboardList,
   ArrowRight,
   Users,
+  BookOpen,
+  Camera,
+  Receipt,
+  Info,
+  FileText,
+  UserRound,
 } from "lucide-react";
 import { SITE, temContato } from "@/features/site/conteudoSite";
 import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
@@ -38,15 +44,36 @@ function Numero({ valor, rotulo }: { valor: number; rotulo: string }) {
 // Site público do instituto: apresenta o projeto, recebe doações e dá acesso
 // ao portal. É a página que qualquer pessoa vê ao abrir o endereço.
 export function SitePublico() {
-  const { contato, numeros, polos } = SITE;
+  const { contato, numeros, polos, historia, fotos, prestacaoContas, informacoes } = SITE;
   const anoAtual = new Date().getFullYear();
+
+  const temPrestacao =
+    Boolean(prestacaoContas.texto) || prestacaoContas.documentos.length > 0;
+  const temInformacoes = informacoes.regras.length > 0 || polos.length > 0;
+
+  // Links de navegação — só aparecem para seções que têm conteúdo.
+  const secoes = [
+    { id: "historia", label: "História", on: historia.length > 0 },
+    { id: "fotos", label: "Fotos", on: true },
+    { id: "prestacao", label: "Prestação de contas", on: temPrestacao },
+    { id: "informacoes", label: "Informações", on: temInformacoes },
+  ].filter((s) => s.on);
 
   return (
     <div className="min-h-svh bg-background text-foreground">
       {/* Topo */}
       <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
         <img src="/logo.png" alt={SITE.nome} className="h-10 w-auto md:h-12" />
-        <div className="flex items-center gap-2">
+
+        <nav className="order-3 flex w-full flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground md:order-2 md:w-auto">
+          {secoes.map((s) => (
+            <a key={s.id} href={`#${s.id}`} className="transition-colors hover:text-foreground">
+              {s.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="order-2 flex items-center gap-2 md:order-3">
           {/* Famílias: acompanham o aluno com código + nascimento. */}
           <Button asChild size="sm">
             <Link to="/responsavel">
@@ -137,35 +164,149 @@ export function SitePublico() {
         </div>
       </section>
 
-      {/* Polos (só aparece quando cadastrados em conteudoSite.ts) */}
-      {polos.length > 0 && (
-        <section className="border-t border-border bg-secondary/20">
-          <div className="mx-auto max-w-5xl px-4 py-14 md:py-20">
-            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              Onde treinamos
+      {/* História */}
+      {historia.length > 0 && (
+        <section id="historia" className="scroll-mt-6 border-t border-border">
+          <div className="mx-auto max-w-3xl px-4 py-14 md:py-20">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
+              <BookOpen className="size-6 text-primary" />
+              Nossa história
             </h2>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              {polos.map((polo) => (
-                <div
-                  key={polo.nome}
-                  className="rounded-xl border border-border bg-card p-5"
-                >
-                  <h3 className="flex items-center gap-2 font-semibold">
-                    <MapPin className="size-4 text-primary" />
-                    {polo.nome}
-                  </h3>
-                  {polo.endereco && (
-                    <p className="mt-1.5 text-sm text-muted-foreground">{polo.endereco}</p>
-                  )}
-                  {polo.horarios && (
-                    <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Clock className="size-3.5" />
-                      {polo.horarios}
-                    </p>
-                  )}
-                </div>
+            <div className="mt-6 space-y-4">
+              {historia.map((par, i) => (
+                <p key={i} className="text-pretty leading-relaxed text-muted-foreground">
+                  {par}
+                </p>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Fotos */}
+      <section id="fotos" className="scroll-mt-6 border-t border-border bg-secondary/20">
+        <div className="mx-auto max-w-5xl px-4 py-14 md:py-20">
+          <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
+            <Camera className="size-6 text-primary" />
+            Momentos no tatame
+          </h2>
+          {fotos.length > 0 ? (
+            <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3">
+              {fotos.map((f, i) => (
+                <figure key={i} className="overflow-hidden rounded-xl border border-border bg-card">
+                  <img
+                    src={f.url}
+                    alt={f.legenda ?? "Foto do Instituto Tribo de Davi"}
+                    loading="lazy"
+                    className="aspect-square w-full object-cover"
+                  />
+                  {f.legenda && (
+                    <figcaption className="p-2 text-xs text-muted-foreground">
+                      {f.legenda}
+                    </figcaption>
+                  )}
+                </figure>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-6 text-muted-foreground">
+              Em breve — fotos das aulas, eventos e graduações do projeto.
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* Prestação de contas */}
+      {temPrestacao && (
+        <section id="prestacao" className="scroll-mt-6 border-t border-border">
+          <div className="mx-auto max-w-3xl px-4 py-14 md:py-20">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
+              <Receipt className="size-6 text-primary" />
+              Prestação de contas
+            </h2>
+            {prestacaoContas.texto && (
+              <p className="mt-4 text-pretty leading-relaxed text-muted-foreground">
+                {prestacaoContas.texto}
+              </p>
+            )}
+            {prestacaoContas.documentos.length > 0 ? (
+              <ul className="mt-6 flex flex-col gap-2">
+                {prestacaoContas.documentos.map((d, i) => (
+                  <li key={i}>
+                    <a
+                      href={d.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
+                    >
+                      <FileText className="size-4 text-primary" />
+                      {d.nome}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">
+                Os relatórios serão publicados aqui em breve.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Informações: regras gerais + polos/endereços/responsáveis */}
+      {temInformacoes && (
+        <section id="informacoes" className="scroll-mt-6 border-t border-border bg-secondary/20">
+          <div className="mx-auto max-w-5xl px-4 py-14 md:py-20">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
+              <Info className="size-6 text-primary" />
+              Informações
+            </h2>
+
+            {informacoes.regras.length > 0 && (
+              <div className="mt-8">
+                <h3 className="font-semibold">Regras gerais</h3>
+                <ul className="mt-3 flex flex-col gap-2">
+                  {informacoes.regras.map((r, i) => (
+                    <li key={i} className="flex gap-2 text-muted-foreground">
+                      <span className="mt-0.5 text-primary">•</span>
+                      <span>{r}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {polos.length > 0 && (
+              <div className="mt-10">
+                <h3 className="font-semibold">Polos e endereços</h3>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {polos.map((polo) => (
+                    <div key={polo.nome} className="rounded-xl border border-border bg-card p-5">
+                      <h4 className="flex items-center gap-2 font-semibold">
+                        <MapPin className="size-4 text-primary" />
+                        {polo.nome}
+                      </h4>
+                      {polo.endereco && (
+                        <p className="mt-1.5 text-sm text-muted-foreground">{polo.endereco}</p>
+                      )}
+                      {polo.horarios && (
+                        <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <Clock className="size-3.5" />
+                          {polo.horarios}
+                        </p>
+                      )}
+                      {polo.responsavel && (
+                        <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <UserRound className="size-3.5" />
+                          {polo.responsavel}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </section>
       )}

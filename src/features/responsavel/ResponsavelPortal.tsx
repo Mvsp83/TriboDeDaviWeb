@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Loader2,
   LogIn,
@@ -8,6 +9,7 @@ import {
   Megaphone,
   CheckCircle2,
   XCircle,
+  ArrowLeft,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import {
@@ -78,7 +80,15 @@ export function ResponsavelPortal() {
 
   if (!painel) {
     return (
-      <div className="flex min-h-svh items-center justify-center bg-background p-4">
+      <div className="relative flex min-h-svh items-center justify-center bg-background p-4">
+        <Link
+          to="/"
+          className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Voltar ao início
+        </Link>
+
         <div className="w-full max-w-sm">
           <div className="mb-8 flex flex-col items-center gap-3 text-center">
             <LogoLockup className="h-20" />

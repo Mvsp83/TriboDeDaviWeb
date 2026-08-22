@@ -1,15 +1,26 @@
 // Conteúdo do site público. Tudo o que muda com o tempo (contatos, polos,
-// horários, números) fica aqui, num lugar só, para não precisar caçar texto
-// dentro do componente.
+// horários, textos, fotos) fica aqui, num lugar só, para não precisar caçar
+// texto dentro do componente.
 //
-// >>> OS CAMPOS MARCADOS COM "PREENCHER" ESTÃO VAZIOS DE PROPÓSITO. <<<
-// Onde não sabemos a informação real, o site simplesmente não mostra a seção,
+// >>> OS CAMPOS MARCADOS COM "PREENCHER"/"AJUSTE" SÃO EDITÁVEIS. <<<
+// Onde a informação fica vazia, o site simplesmente não mostra aquele item,
 // em vez de exibir um dado inventado.
 
 export interface Polo {
   nome: string;
   endereco?: string;
   horarios?: string;
+  responsavel?: string;
+}
+
+export interface Foto {
+  url: string; // caminho da imagem (em /public) ou URL completa
+  legenda?: string;
+}
+
+export interface Documento {
+  nome: string;
+  url: string; // link do documento (PDF, Drive, etc.)
 }
 
 export const SITE = {
@@ -46,8 +57,37 @@ export const SITE = {
     },
   ],
 
-  // PREENCHER: polos com endereço e horários reais.
-  // Enquanto a lista estiver vazia, a seção não aparece no site.
+  // AJUSTE com a história real do instituto. Cada item é um parágrafo.
+  // Lista vazia esconde a seção "Nossa história".
+  historia: [
+    "O Instituto Tribo de Davi usa o jiu-jitsu como ferramenta de transformação social, oferecendo aulas gratuitas a crianças e adolescentes. Mais do que ensinar uma arte marcial, o projeto forma caráter — disciplina, respeito e fé caminham junto com a técnica no tatame.",
+    "Cada faixa conquistada é também uma conquista pessoal: autoconfiança, rotina e pertencimento. É assim que formamos campeões dentro e fora do tatame.",
+  ] as string[],
+
+  // PREENCHER: fotos das aulas, eventos e graduações.
+  // Enquanto a lista estiver vazia, a galeria mostra "em breve".
+  fotos: [] as Foto[],
+
+  // Prestação de contas. O texto pode ser ajustado; os documentos aparecem
+  // como links para download (relatórios, balancetes, etc.).
+  prestacaoContas: {
+    texto:
+      "A transparência é um compromisso do Instituto. Publicamos aqui os relatórios e documentos da nossa prestação de contas — de onde vêm e para onde vão os recursos que mantêm o projeto.",
+    documentos: [] as Documento[],
+  },
+
+  // Informações gerais do projeto. As regras aparecem em lista.
+  informacoes: {
+    regras: [
+      "Uniforme (quimono) e faixa são emprestados pelo instituto a quem precisa.",
+      "A presença é registrada em toda aula — pontualidade e frequência importam.",
+      "Respeito ao professor, aos colegas e ao espaço de treino.",
+      "A família é comunicada quando o aluno começa a faltar.",
+    ] as string[],
+  },
+
+  // PREENCHER: polos com endereço, horários e responsável.
+  // Enquanto a lista estiver vazia, a parte de polos não aparece.
   polos: [] as Polo[],
 
   contato: {
