@@ -9,6 +9,7 @@ import {
   MessageCircle,
   ClipboardList,
   ArrowRight,
+  Users,
 } from "lucide-react";
 import { SITE, temContato } from "@/features/site/conteudoSite";
 import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
@@ -43,14 +44,24 @@ export function SitePublico() {
   return (
     <div className="min-h-svh bg-background text-foreground">
       {/* Topo */}
-      <header className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-5">
+      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
         <img src="/logo.png" alt={SITE.nome} className="h-10 w-auto md:h-12" />
-        <Button asChild variant="ghost" size="sm">
-          <Link to="/login">
-            <LogIn className="size-4" />
-            Entrar
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Famílias: acompanham o aluno com código + nascimento. */}
+          <Button asChild size="sm">
+            <Link to="/responsavel">
+              <Users className="size-4" />
+              Área do Responsável
+            </Link>
+          </Button>
+          {/* Equipe: login com senha (admin/professor/supervisor). */}
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/login">
+              <LogIn className="size-4" />
+              Acesso da equipe
+            </Link>
+          </Button>
+        </div>
       </header>
 
       {/* Herói */}
@@ -225,13 +236,27 @@ export function SitePublico() {
             )}
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground">
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border pt-6 text-xs text-muted-foreground">
             <span>
               © {anoAtual} {SITE.nome}
             </span>
-            <Link to="/login" className="hover:text-foreground">
-              Acesso da equipe
-            </Link>
+            <span>
+              Desenvolvido por{" "}
+              <a
+                href="mailto:marcusviniciussp.dev@gmail.com"
+                className="font-medium hover:text-foreground"
+              >
+                eMeVe ©
+              </a>
+            </span>
+            <div className="flex items-center gap-x-6">
+              <Link to="/responsavel" className="hover:text-foreground">
+                Área do Responsável
+              </Link>
+              <Link to="/login" className="hover:text-foreground">
+                Acesso da equipe
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
