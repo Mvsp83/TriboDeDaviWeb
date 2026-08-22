@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -160,6 +160,7 @@ function BlocoTermo({ titulo, texto }: { titulo: string; texto: string }) {
 // ── Página ────────────────────────────────────────────────────────────────
 export function MatriculaPage() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const { data: polos } = usePolosPublicos();
   const enviar = useEnviarInscricao();
   const ano = new Date().getFullYear();
@@ -921,11 +922,13 @@ export function MatriculaPage() {
       <div className="mt-4 flex items-center justify-between gap-3">
         <Button
           variant="outline"
-          onClick={() => setEtapa((e) => Math.max(e - 1, 0))}
-          disabled={etapa === 0 || enviar.isPending}
+          onClick={() =>
+            etapa === 0 ? navigate("/") : setEtapa((e) => Math.max(e - 1, 0))
+          }
+          disabled={enviar.isPending}
         >
           <ArrowLeft className="size-4" />
-          Voltar
+          {etapa === 0 ? "Voltar ao início" : "Voltar"}
         </Button>
 
         {etapa < ETAPAS.length - 1 ? (
