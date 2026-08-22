@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import {
   Users,
   MapPin,
@@ -461,6 +462,8 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <VersiculoDoDia />
+
       <div className="flex items-center justify-end">
         <Button variant="outline" size="sm" onClick={() => setPersonalizar(true)}>
           <SlidersHorizontal className="size-4" />

@@ -17,6 +17,7 @@ import {
   type PainelResponsavel,
 } from "@/features/responsavel/responsavelApi";
 import { faixaInfo } from "@/features/alunos/faixa";
+import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { LogoLockup } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -158,6 +159,8 @@ export function ResponsavelPortal() {
       </header>
 
       <main className="mx-auto flex max-w-2xl flex-col gap-4 p-4">
+        <VersiculoDoDia />
+
         {/* Aluno */}
         <Card>
           <CardContent className="flex flex-wrap items-center gap-3 p-5">

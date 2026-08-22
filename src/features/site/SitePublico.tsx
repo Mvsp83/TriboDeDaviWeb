@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { SITE, temContato } from "@/features/site/conteudoSite";
 import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
+import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { Button } from "@/components/ui/button";
 
 // Cores das faixas para a régua de progressão do herói. Espelha o sistema de
@@ -104,6 +105,11 @@ export function SitePublico() {
           </div>
         </section>
       )}
+
+      {/* Versículo do dia */}
+      <section className="mx-auto max-w-3xl px-4 pt-12 md:pt-16">
+        <VersiculoDoDia />
+      </section>
 
       {/* Pilares */}
       <section className="mx-auto max-w-5xl px-4 py-14 md:py-20">
