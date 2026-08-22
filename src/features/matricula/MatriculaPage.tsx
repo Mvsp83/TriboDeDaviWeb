@@ -8,6 +8,9 @@ import {
   CircleAlert,
   Loader2,
   PartyPopper,
+  KeyRound,
+  MessageCircle,
+  Copy,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
@@ -163,6 +166,7 @@ export function MatriculaPage() {
 
   const [etapa, setEtapa] = useState(0);
   const [enviada, setEnviada] = useState(false);
+  const [codigoGerado, setCodigoGerado] = useState<string | null>(null);
 
   // Polo pode vir pré-selecionado pelo link (/matricula?polo=3), mas continua
   // editável — se a família errar, a equipe também corrige na revisão.
@@ -275,7 +279,7 @@ export function MatriculaPage() {
       return;
     }
     try {
-      await enviar.mutateAsync({
+      const res = await enviar.mutateAsync({
         poloId: poloId!,
         turma: null, // definida pela equipe na revisão
         jaEraAluno: !!jaEraAluno,
@@ -314,6 +318,7 @@ export function MatriculaPage() {
         nomeAssinatura: assinatura.trim(),
         versaoTermos: VERSAO_TERMOS,
       });
+      setCodigoGerado(res.codigoResponsavel);
       setEnviada(true);
     } catch (err) {
       toast.error(
@@ -325,6 +330,19 @@ export function MatriculaPage() {
   }
 
   if (enviada) {
+    const linkPortal = `${window.location.origin}/responsavel`;
+    const msgWhats =
+      `Guarde este código de acesso ao portal do Instituto Tribo de Davi para acompanhar ${nome}: ` +
+      `*${codigoGerado}*\n\nPortal: ${linkPortal}\n(entre com o código + a data de nascimento do aluno)`;
+
+    function copiarCodigo() {
+      if (!codigoGerado) return;
+      navigator.clipboard
+        .writeText(codigoGerado)
+        .then(() => toast.success("Código copiado."))
+        .catch(() => toast.error("Não foi possível copiar."));
+    }
+
     return (
       <div className="mx-auto flex min-h-svh max-w-lg flex-col items-center justify-center gap-4 p-6 text-center">
         <div className="flex size-16 items-center justify-center rounded-2xl bg-success/15 text-success">
@@ -335,6 +353,39 @@ export function MatriculaPage() {
           Recebemos a ficha de <strong>{nome}</strong>. A equipe do polo vai
           conferir os dados e entrar em contato pelo WhatsApp informado.
         </p>
+
+        {codigoGerado && (
+          <div className="w-full rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
+            <div className="flex items-center justify-center gap-2 text-sm font-semibold uppercase tracking-wide text-primary">
+              <KeyRound className="size-4" />
+              Seu código de acesso ao portal
+            </div>
+            <div className="my-3 select-all font-mono text-4xl font-extrabold tracking-[0.25em] sm:text-5xl">
+              {codigoGerado}
+            </div>
+            <p className="text-sm font-medium text-destructive">
+              ⚠️ ANOTE ESTE CÓDIGO. É com ele (mais a data de nascimento do
+              aluno) que você vai acompanhar seu filho no portal.
+            </p>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <Button asChild className="flex-1">
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(msgWhats)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="size-4" />
+                  Enviar pelo WhatsApp
+                </a>
+              </Button>
+              <Button variant="outline" onClick={copiarCodigo}>
+                <Copy className="size-4" />
+                Copiar
+              </Button>
+            </div>
+          </div>
+        )}
+
         <Button asChild variant="outline">
           <Link to="/">Voltar ao início</Link>
         </Button>
@@ -353,6 +404,17 @@ export function MatriculaPage() {
           Projeto Jiu-Jitsu · preenchida pelo responsável
         </p>
       </header>
+
+      {/* Aviso: ao concluir, a família recebe o código de acesso ao portal. */}
+      <div className="mb-5 flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+        <KeyRound className="mt-0.5 size-4 shrink-0 text-primary" />
+        <p>
+          <strong>Importante:</strong> ao final você receberá um{" "}
+          <strong>código de acesso</strong> para acompanhar seu filho no portal
+          (frequência, graduação e avisos). <strong>Guarde-o bem</strong> — ele
+          aparece uma vez, na tela de conclusão.
+        </p>
+      </div>
 
       {/* Progresso */}
       <div className="mb-5">

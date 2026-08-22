@@ -112,3 +112,19 @@ export function useGerarCodigoResponsavel() {
       qc.invalidateQueries({ queryKey: ["codigo-responsavel", id] }),
   });
 }
+
+export interface CodigoResponsavelItem {
+  id: number;
+  nome: string;
+  responsavel: string;
+  poloId: number;
+  codigo: string;
+}
+
+// Impressão em lote: gera os códigos faltantes e devolve a lista completa.
+export function usePrepararCodigosResponsavel() {
+  return useMutation({
+    mutationFn: () =>
+      apiPost<CodigoResponsavelItem[]>(ApiRotas.alunosCodigosPreparar),
+  });
+}

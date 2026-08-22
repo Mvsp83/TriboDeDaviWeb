@@ -9,6 +9,7 @@ import {
   Download,
   ShieldX,
   KeyRound,
+  Printer,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -18,9 +19,11 @@ import {
   useExcluirAluno,
   useExportarDadosAluno,
   useAnonimizarAluno,
+  usePrepararCodigosResponsavel,
 } from "@/features/alunos/alunosApi";
 import { AlunoFormDialog } from "@/features/alunos/AlunoFormDialog";
 import { CodigoResponsavelDialog } from "@/features/responsavel/CodigoResponsavelDialog";
+import { imprimirCodigos } from "@/features/responsavel/imprimirCodigos";
 import { faixaInfo } from "@/features/alunos/faixa";
 import { imprimirCarteirinhas } from "@/features/carteirinha/carteirinhaPdf";
 import { ApiError } from "@/lib/api";
@@ -73,6 +76,7 @@ export function AlunosPage() {
   const excluir = useExcluirAluno();
   const exportar = useExportarDadosAluno();
   const anonimizar = useAnonimizarAluno();
+  const prepararCodigos = usePrepararCodigosResponsavel();
 
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroPolo, setFiltroPolo] = useState("");
@@ -202,18 +206,51 @@ export function AlunosPage() {
     }
   }
 
+  // Gera os códigos faltantes e abre a folha de impressão (entrega física).
+  async function imprimirTodosCodigos() {
+    try {
+      const itens = await prepararCodigos.mutateAsync();
+      if (!itens || itens.length === 0) {
+        toast.info("Nenhum aluno para gerar código.");
+        return;
+      }
+      if (!imprimirCodigos(itens, nomePorPolo)) {
+        toast.error("Permita pop-ups para imprimir os códigos.");
+      }
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError ? err.message : "Erro ao preparar os códigos.",
+      );
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
           {isLoading ? "Carregando..." : `${filtrados.length} aluno(s)`}
         </p>
-        {admin && (
-          <Button onClick={abrirNovo}>
-            <Plus className="size-4" />
-            Novo aluno
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={imprimirTodosCodigos}
+            disabled={prepararCodigos.isPending}
+            title="Gera os códigos faltantes e abre a folha para imprimir"
+          >
+            {prepararCodigos.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Printer className="size-4" />
+            )}
+            Imprimir códigos
           </Button>
-        )}
+          {admin && (
+            <Button onClick={abrirNovo}>
+              <Plus className="size-4" />
+              Novo aluno
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card>
@@ -335,17 +372,17 @@ export function AlunosPage() {
                         >
                           <Pencil className="size-4" />
                         </Button>
-                        {admin && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setAlunoCodigo(a)}
-                            aria-label="Acesso do responsável"
-                            title="Código de acesso do responsável"
-                          >
-                            <KeyRound className="size-4" />
-                          </Button>
-                        )}
+                        {/* Código do responsável: professor+ (a família pode
+                            ter perdido) — não é exclusivo de admin. */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setAlunoCodigo(a)}
+                          aria-label="Acesso do responsável"
+                          title="Código de acesso do responsável"
+                        >
+                          <KeyRound className="size-4" />
+                        </Button>
                         {admin && (
                           <Button
                             variant="ghost"

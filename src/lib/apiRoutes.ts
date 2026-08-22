@@ -28,6 +28,8 @@ export const ApiRotas = {
 
   // Código de acesso do responsável (admin gera/consulta).
   alunoCodigoResponsavel: (id: number) => `/api/Aluno/${id}/codigo-responsavel`,
+  // Impressão em lote dos códigos (gera os faltantes e devolve a lista).
+  alunosCodigosPreparar: "/api/Aluno/codigos-responsavel/preparar",
 
   // Portal do responsável (público).
   responsavelAcesso: "/api/Responsavel/acesso",

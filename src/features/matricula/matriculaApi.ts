@@ -64,10 +64,15 @@ export interface EnvioInscricao {
 export function useEnviarInscricao() {
   return useMutation({
     mutationFn: (dados: EnvioInscricao) =>
-      apiPost<{ id: number }>(ApiRotas.inscricaoEnviar, {
-        ...dados,
-        // A data vai como ISO completo para o DateTime da API.
-        dataNascimento: `${dados.dataNascimento}T00:00:00`,
-      }),
+      // A API devolve o código de acesso do responsável, entregue à família
+      // no fim do formulário.
+      apiPost<{ id: number; codigoResponsavel: string }>(
+        ApiRotas.inscricaoEnviar,
+        {
+          ...dados,
+          // A data vai como ISO completo para o DateTime da API.
+          dataNascimento: `${dados.dataNascimento}T00:00:00`,
+        },
+      ),
   });
 }

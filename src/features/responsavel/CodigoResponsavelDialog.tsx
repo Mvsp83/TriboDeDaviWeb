@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { Loader2, Copy, RefreshCw, KeyRound } from "lucide-react";
+import { Loader2, Copy, RefreshCw, KeyRound, MessageCircle } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import {
   useCodigoResponsavel,
@@ -80,6 +80,22 @@ export function CodigoResponsavelDialog({
             <p className="text-sm text-muted-foreground">
               Nenhum código gerado ainda.
             </p>
+          )}
+
+          {codigo && aluno?.celular && (
+            <Button asChild variant="outline">
+              <a
+                href={`https://wa.me/55${aluno.celular.replace(/\D/g, "")}?text=${encodeURIComponent(
+                  `Código de acesso ao portal do Instituto Tribo de Davi para acompanhar ${aluno.nome}: *${codigo}*\n\n` +
+                    `Portal: ${window.location.origin}/responsavel\n(entre com o código + a data de nascimento do aluno)`,
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="size-4" />
+                Enviar pelo WhatsApp
+              </a>
+            </Button>
           )}
 
           <Button onClick={gerarCodigo} disabled={gerar.isPending}>
