@@ -150,7 +150,7 @@ function BlocoTermo({ titulo, texto }: { titulo: string; texto: string }) {
   return (
     <div>
       <p className="mb-1.5 text-sm font-semibold">{titulo}</p>
-      <div className="max-h-44 overflow-y-auto whitespace-pre-line rounded-md border border-border bg-secondary/30 p-3 text-xs leading-relaxed text-muted-foreground">
+      <div className="whitespace-pre-line rounded-md border border-border bg-secondary/30 p-4 text-sm leading-relaxed text-foreground/85">
         {texto}
       </div>
     </div>
@@ -256,6 +256,7 @@ export function MatriculaPage() {
     if (etapa === 4) {
       if (!aceitouTermo) return "É preciso aceitar o termo de participação.";
       if (!aceitouComodato) return "É preciso aceitar o termo de comodato.";
+      if (!aceitouImagem) return "É preciso autorizar o uso de imagem e voz.";
       if (!aceitouLgpd) return "É preciso autorizar o tratamento dos dados.";
       if (!assinatura.trim()) return "Escreva o nome completo do responsável.";
     }
@@ -263,7 +264,7 @@ export function MatriculaPage() {
   }, [
     etapa, poloId, jaEraAluno, nome, dataNascimento, escola, serie, periodo,
     parentesco, nomeResponsavel, whatsApp, rua, numero, bairro, saude,
-    precisaTermoResponsabilidade, aceitouTermo, aceitouComodato, aceitouLgpd, assinatura,
+    precisaTermoResponsabilidade, aceitouTermo, aceitouComodato, aceitouImagem, aceitouLgpd, assinatura,
   ]);
 
   function avancar() {
@@ -699,7 +700,7 @@ export function MatriculaPage() {
                     <CircleAlert className="size-4" />
                     Termo de Responsabilidade
                   </p>
-                  <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">
+                  <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-foreground/85">
                     {TERMO_RESPONSABILIDADE}
                   </p>
                   <div className="mt-3">
@@ -852,7 +853,7 @@ export function MatriculaPage() {
                 onToggle={() => setAceitouImagem(!aceitouImagem)}
               >
                 Autorizo o uso de imagem e voz.{" "}
-                <span className="text-muted-foreground">(opcional)</span>
+                <span className="text-destructive">*</span>
               </Marcavel>
 
               <BlocoTermo titulo="Tratamento de dados (LGPD)" texto={TERMO_LGPD} />
