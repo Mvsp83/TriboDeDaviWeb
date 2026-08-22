@@ -34,3 +34,16 @@ export const OPCOES_FAIXA_BASE = CORES.map((c) => ({
   valor: c.base,
   nome: c.nome,
 }));
+
+// Base da cor a que a faixa pertence (0=Branca, 5=Cinza, ...). Faixas de mesma
+// cor compartilham a base; só muda quando troca a cor.
+export function baseDaCor(faixa: number): number {
+  const grupo = [...CORES].reverse().find((c) => faixa >= c.base) ?? CORES[0];
+  return grupo.base;
+}
+
+// Houve troca de COR (não apenas de grau) entre duas faixas. É o critério para
+// emitir certificado: grau novo dentro da mesma cor não gera certificado.
+export function mudouDeCor(faixaAnterior: number, faixaNova: number): boolean {
+  return baseDaCor(faixaAnterior) !== baseDaCor(faixaNova);
+}

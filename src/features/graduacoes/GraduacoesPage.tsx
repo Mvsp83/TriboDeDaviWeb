@@ -4,7 +4,7 @@ import { Award, GraduationCap, Loader2, Printer, Trash2 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAlunos } from "@/features/alunos/alunosApi";
 import { usePolos } from "@/features/polos/polosApi";
-import { faixaInfo, OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
+import { faixaInfo, OPCOES_FAIXA_BASE, mudouDeCor } from "@/features/alunos/faixa";
 import { ApiError } from "@/lib/api";
 import { dataBR } from "@/lib/format";
 import {
@@ -318,8 +318,10 @@ export function GraduacoesPage() {
         <GraduationCap className="mt-0.5 size-4 shrink-0" />
         <p>
           Histórico de graduações do projeto. Registrar atualiza a faixa do aluno
-          e guarda a trajetória — e cada graduação rende um{" "}
-          <span className="font-medium text-foreground">certificado para imprimir</span>.
+          e guarda a trajetória. O{" "}
+          <span className="font-medium text-foreground">certificado para imprimir</span>{" "}
+          sai apenas na <span className="font-medium text-foreground">troca de faixa (cor)</span> —
+          um grau novo dentro da mesma cor não gera certificado.
         </p>
       </div>
 
@@ -397,19 +399,23 @@ export function GraduacoesPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          title="Imprimir certificado"
-                          onClick={() => {
-                            if (!imprimirCertificado(g)) {
-                              toast.error("Permita pop-ups para gerar o certificado.");
-                            }
-                          }}
-                        >
-                          <Printer className="size-4" />
-                        </Button>
+                        {/* Certificado só na troca de cor — grau novo dentro da
+                            mesma cor não gera certificado. */}
+                        {mudouDeCor(g.faixaAnterior, g.faixaNova) && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                            title="Imprimir certificado"
+                            onClick={() => {
+                              if (!imprimirCertificado(g)) {
+                                toast.error("Permita pop-ups para gerar o certificado.");
+                              }
+                            }}
+                          >
+                            <Printer className="size-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"

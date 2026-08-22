@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { faixaInfo } from "@/features/alunos/faixa";
+import { faixaInfo, mudouDeCor } from "@/features/alunos/faixa";
 
 // A API manda a faixa como número 0..40 (9 cores × 4 graus). O faixaInfo
 // resolve a cor do intervalo e o grau dentro dela.
@@ -23,5 +23,19 @@ describe("faixaInfo", () => {
     const info = faixaInfo(10);
     expect(info.cor).toMatch(/^#/);
     expect(info.texto).toMatch(/^#/);
+  });
+});
+
+// Certificado só na troca de cor.
+describe("mudouDeCor", () => {
+  it("é verdadeiro quando troca a cor", () => {
+    expect(mudouDeCor(4, 5)).toBe(true); // Branca 4g → Cinza
+    expect(mudouDeCor(9, 10)).toBe(true); // Cinza 4g → Amarela
+    expect(mudouDeCor(35, 40)).toBe(true); // Marrom → Preta
+  });
+
+  it("é falso quando avança só de grau (mesma cor)", () => {
+    expect(mudouDeCor(0, 1)).toBe(false); // Branca → Branca 1g
+    expect(mudouDeCor(20, 23)).toBe(false); // Verde → Verde 3g
   });
 });
