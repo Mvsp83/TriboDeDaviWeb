@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Menu, LogOut, ImageIcon } from "lucide-react";
+import { Menu, LogOut, ImageIcon, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useMeuAvatar } from "@/features/perfil/perfilApi";
 import { AvatarView } from "@/features/perfil/presets";
 import { AvatarDialog } from "@/features/perfil/AvatarDialog";
+import { Seguranca2FADialog } from "@/features/seguranca/Seguranca2FADialog";
 import { Badge } from "@/components/ui/badge";
 import { SyncIndicator } from "@/components/layout/SyncIndicator";
 import {
@@ -25,6 +26,7 @@ export function Topbar({
   const { sessao, sair } = useAuth();
   const { data: avatar } = useMeuAvatar();
   const [dialogAvatar, setDialogAvatar] = useState(false);
+  const [dialog2fa, setDialog2fa] = useState(false);
 
   const nome = sessao?.login ?? "?";
 
@@ -64,6 +66,10 @@ export function Topbar({
             <ImageIcon className="size-4" />
             Alterar avatar
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDialog2fa(true)}>
+            <ShieldCheck className="size-4" />
+            Verificação em 2 etapas
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={sair}
             className="text-destructive focus:text-destructive"
@@ -80,6 +86,8 @@ export function Topbar({
         nome={nome}
         avatarAtual={avatar ?? null}
       />
+
+      <Seguranca2FADialog aberto={dialog2fa} onOpenChange={setDialog2fa} />
     </header>
   );
 }

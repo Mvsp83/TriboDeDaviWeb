@@ -250,7 +250,13 @@ export interface BemPatrimonial {
 export interface AuthData {
   token: string;
   tokenExpires: string;
+  // Presente no login/refresh; o cliente guarda para renovar a sessão.
+  refreshToken?: string;
 }
+
+// Resposta do login: ou os tokens, ou o pedido do segundo fator (2FA ativo e
+// código ainda não informado).
+export type LoginResposta = AuthData | { requer2fa: true };
 
 export interface SincronizacaoHistorico {
   id: number;

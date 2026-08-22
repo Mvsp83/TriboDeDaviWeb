@@ -5,12 +5,33 @@ const TODAS_TURMAS = "turmas=1&turmas=2&turmas=3";
 
 export const ApiRotas = {
   login: "/api/v1/auth/login",
+  refresh: "/api/v1/auth/refresh",
+  logout: "/api/v1/auth/logout",
+
+  // 2FA (TOTP) do próprio usuário autenticado.
+  doisFatoresStatus: "/api/Usuario/2fa/status",
+  doisFatoresIniciar: "/api/Usuario/2fa/iniciar",
+  doisFatoresConfirmar: "/api/Usuario/2fa/confirmar",
+  doisFatoresDesativar: "/api/Usuario/2fa/desativar",
+  usuarioRevogarSessoes: (id: number) => `/api/Usuario/${id}/revogar-sessoes`,
 
   alunosGetAll: "/api/Aluno/get-all",
   alunosPorPolo: `/api/Aluno/get-por-polo?${TODAS_TURMAS}`,
   alunoCreate: "/api/Aluno/create",
   alunoUpdate: "/api/Aluno/update",
   alunoDelete: (id: number) => `/api/Aluno/delete/${id}`,
+  // LGPD (art. 18) — só Administrador.
+  alunoExportarDados: (id: number) => `/api/Aluno/${id}/exportar-dados`,
+  alunoAnonimizar: (id: number) => `/api/Aluno/${id}/anonimizar`,
+  alunosCandidatosRetencao: (mesesInativo: number) =>
+    `/api/Aluno/candidatos-retencao?mesesInativo=${mesesInativo}`,
+
+  // Código de acesso do responsável (admin gera/consulta).
+  alunoCodigoResponsavel: (id: number) => `/api/Aluno/${id}/codigo-responsavel`,
+
+  // Portal do responsável (público).
+  responsavelAcesso: "/api/Responsavel/acesso",
+  responsavelPainel: "/api/Responsavel/painel",
 
   aulasGetAll: "/api/Aula/get-all",
   aulasPorPolo: `/api/Aula/get-por-polo?${TODAS_TURMAS}`,

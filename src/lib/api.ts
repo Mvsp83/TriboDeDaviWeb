@@ -1,5 +1,16 @@
-import axios, { AxiosError } from "axios";
-import { clearToken, getToken } from "@/lib/token";
+import axios, {
+  AxiosError,
+  type InternalAxiosRequestConfig,
+} from "axios";
+import {
+  clearToken,
+  getRefreshToken,
+  getToken,
+  setRefreshToken,
+  setToken,
+} from "@/lib/token";
+import { ApiRotas } from "@/lib/apiRoutes";
+import type { AuthData } from "@/types";
 
 // Envelope padrão da API (ResultViewModel<T>)
 export interface ResultViewModel<T> {
@@ -32,16 +43,68 @@ http.interceptors.request.use((config) => {
   return config;
 });
 
+// Renovação single-flight: várias requisições que tomam 401 ao mesmo tempo
+// compartilham um único /refresh. Devolve o novo access token, ou null se não
+// deu (sem refresh token, ou o refresh também falhou).
+let renovacaoEmAndamento: Promise<string | null> | null = null;
+
+async function renovarSessao(): Promise<string | null> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return null;
+
+  if (!renovacaoEmAndamento) {
+    renovacaoEmAndamento = (async () => {
+      try {
+        const { data } = await http.post<ResultViewModel<AuthData>>(
+          ApiRotas.refresh,
+          { refreshToken },
+        );
+        if (!data?.success || !data.data) return null;
+        setToken(data.data.token);
+        if (data.data.refreshToken) setRefreshToken(data.data.refreshToken);
+        return data.data.token;
+      } catch {
+        return null;
+      } finally {
+        renovacaoEmAndamento = null;
+      }
+    })();
+  }
+  return renovacaoEmAndamento;
+}
+
+type ConfigComRetry = InternalAxiosRequestConfig & { _retry?: boolean };
+
 http.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Sessão expirada/invalida: limpa o token e volta ao login
+  async (error: AxiosError) => {
+    const original = error.config as ConfigComRetry | undefined;
+    const url = original?.url ?? "";
+    const ehAuth = url.includes("/auth/refresh") || url.includes("/auth/login");
+
+    // 401 numa chamada normal: tenta renovar a sessão uma vez e repetir. Só
+    // funciona online (o /refresh precisa de rede); offline, o erro segue e o
+    // app continua com o que tem em cache.
+    if (
+      error.response?.status === 401 &&
+      original &&
+      !original._retry &&
+      !ehAuth
+    ) {
+      original._retry = true;
+      const novoToken = await renovarSessao();
+      if (novoToken) {
+        original.headers.Authorization = `Bearer ${novoToken}`;
+        return http(original);
+      }
+
+      // Refresh indisponível/negado: encerra a sessão e volta ao login.
       clearToken();
       if (!window.location.pathname.startsWith("/login")) {
         window.location.assign("/login");
       }
     }
+
     return Promise.reject(error);
   },
 );

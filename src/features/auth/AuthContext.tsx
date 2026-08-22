@@ -6,15 +6,30 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { clearToken, getToken, setToken } from "@/lib/token";
-import { login as loginRequest } from "@/features/auth/authApi";
+import {
+  clearToken,
+  getRefreshToken,
+  getToken,
+  setRefreshToken,
+  setToken,
+} from "@/lib/token";
+import {
+  login as loginRequest,
+  logout as logoutRequest,
+} from "@/features/auth/authApi";
 import { sessaoDoToken } from "@/features/auth/session";
 import type { Sessao } from "@/types";
 
 interface AuthContextValue {
   sessao: Sessao | null;
   autenticado: boolean;
-  entrar: (login: string, senha: string) => Promise<void>;
+  // Retorna { requer2fa: true } quando falta o segundo fator — a tela de login
+  // então pede o código e chama entrar de novo com codigo2fa.
+  entrar: (
+    login: string,
+    senha: string,
+    codigo2fa?: string,
+  ) => Promise<{ requer2fa: boolean }>;
   sair: () => void;
 }
 
@@ -25,14 +40,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessaoDoToken(getToken()),
   );
 
-  const entrar = useCallback(async (login: string, senha: string) => {
-    const auth = await loginRequest({ login, password: senha });
-    setToken(auth.token);
-    const nova = sessaoDoToken(auth.token);
-    setSessao(nova);
-  }, []);
+  const entrar = useCallback(
+    async (login: string, senha: string, codigo2fa?: string) => {
+      const resposta = await loginRequest({ login, password: senha, codigo2fa });
+
+      // 2FA ativo e código ainda não informado: sinaliza para a tela pedir.
+      if ("requer2fa" in resposta) {
+        return { requer2fa: true };
+      }
+
+      setToken(resposta.token);
+      if (resposta.refreshToken) setRefreshToken(resposta.refreshToken);
+      setSessao(sessaoDoToken(resposta.token));
+      return { requer2fa: false };
+    },
+    [],
+  );
 
   const sair = useCallback(() => {
+    // Revoga a sessão no servidor (best-effort); a limpeza local não espera.
+    const refresh = getRefreshToken();
+    if (refresh) void logoutRequest(refresh).catch(() => {});
     clearToken();
     setSessao(null);
   }, []);

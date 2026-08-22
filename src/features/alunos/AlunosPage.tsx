@@ -1,10 +1,26 @@
 import { useCallback, useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2, Loader2, QrCode } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  Loader2,
+  QrCode,
+  Download,
+  ShieldX,
+  KeyRound,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePolos } from "@/features/polos/polosApi";
-import { useAlunos, useExcluirAluno } from "@/features/alunos/alunosApi";
+import {
+  useAlunos,
+  useExcluirAluno,
+  useExportarDadosAluno,
+  useAnonimizarAluno,
+} from "@/features/alunos/alunosApi";
 import { AlunoFormDialog } from "@/features/alunos/AlunoFormDialog";
+import { CodigoResponsavelDialog } from "@/features/responsavel/CodigoResponsavelDialog";
 import { faixaInfo } from "@/features/alunos/faixa";
 import { imprimirCarteirinhas } from "@/features/carteirinha/carteirinhaPdf";
 import { ApiError } from "@/lib/api";
@@ -55,6 +71,8 @@ export function AlunosPage() {
   const { data: alunos, isLoading, isError } = useAlunos(admin);
   const { data: polos } = usePolos();
   const excluir = useExcluirAluno();
+  const exportar = useExportarDadosAluno();
+  const anonimizar = useAnonimizarAluno();
 
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroPolo, setFiltroPolo] = useState("");
@@ -63,6 +81,8 @@ export function AlunosPage() {
   const [dialogAberto, setDialogAberto] = useState(false);
   const [alunoEdicao, setAlunoEdicao] = useState<Aluno | null>(null);
   const [alunoExcluir, setAlunoExcluir] = useState<Aluno | null>(null);
+  const [alunoAnonimizar, setAlunoAnonimizar] = useState<Aluno | null>(null);
+  const [alunoCodigo, setAlunoCodigo] = useState<Aluno | null>(null);
 
   const nomePorPolo = useMemo(() => {
     const map = new Map<number, string>();
@@ -140,6 +160,45 @@ export function AlunosPage() {
       );
     } finally {
       setAlunoExcluir(null);
+    }
+  }
+
+  // LGPD — acesso/portabilidade: baixa os dados do aluno como JSON.
+  async function exportarDados(aluno: Aluno) {
+    try {
+      const dados = await exportar.mutateAsync(aluno.id);
+      const nomeArquivo = `aluno-${aluno.id}-dados-lgpd.json`;
+      const blob = new Blob([JSON.stringify(dados, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = nomeArquivo;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Dados exportados.");
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError ? err.message : "Erro ao exportar os dados.",
+      );
+    }
+  }
+
+  // LGPD — eliminação: apaga os dados pessoais mantendo o histórico anonimizado.
+  async function confirmarAnonimizacao() {
+    if (!alunoAnonimizar) return;
+    try {
+      await anonimizar.mutateAsync(alunoAnonimizar.id);
+      toast.success("Dados pessoais anonimizados.");
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError ? err.message : "Erro ao anonimizar o aluno.",
+      );
+    } finally {
+      setAlunoAnonimizar(null);
     }
   }
 
@@ -280,6 +339,48 @@ export function AlunosPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => setAlunoCodigo(a)}
+                            aria-label="Acesso do responsável"
+                            title="Código de acesso do responsável"
+                          >
+                            <KeyRound className="size-4" />
+                          </Button>
+                        )}
+                        {admin && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => exportarDados(a)}
+                            disabled={
+                              exportar.isPending &&
+                              exportar.variables === a.id
+                            }
+                            aria-label="Exportar dados (LGPD)"
+                            title="Exportar dados do aluno (LGPD)"
+                          >
+                            {exportar.isPending && exportar.variables === a.id ? (
+                              <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                              <Download className="size-4" />
+                            )}
+                          </Button>
+                        )}
+                        {admin && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setAlunoAnonimizar(a)}
+                            aria-label="Anonimizar (LGPD)"
+                            title="Anonimizar dados pessoais (LGPD)"
+                            className="text-amber-600 hover:text-amber-600"
+                          >
+                            <ShieldX className="size-4" />
+                          </Button>
+                        )}
+                        {admin && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setAlunoExcluir(a)}
                             aria-label="Excluir"
                             className="text-destructive hover:text-destructive"
@@ -331,6 +432,56 @@ export function AlunosPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={alunoAnonimizar !== null}
+        onOpenChange={(o) => !o && setAlunoAnonimizar(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Anonimizar dados pessoais (LGPD)</DialogTitle>
+            <DialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Isto apaga os <strong>dados pessoais</strong> de{" "}
+                  <strong>{alunoAnonimizar?.nome}</strong> — nome, RG, CPF,
+                  endereço, contatos e responsável — e da ficha de inscrição.
+                </p>
+                <p>
+                  O histórico de presença, matrícula e graduação{" "}
+                  <strong>é preservado de forma anonimizada</strong> para a
+                  prestação de contas. A ação não pode ser desfeita. Para exportar
+                  os dados antes, use o botão de download.
+                </p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setAlunoAnonimizar(null)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmarAnonimizacao}
+              disabled={anonimizar.isPending}
+            >
+              {anonimizar.isPending && (
+                <Loader2 className="size-4 animate-spin" />
+              )}
+              Anonimizar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <CodigoResponsavelDialog
+        aluno={alunoCodigo}
+        aberto={alunoCodigo !== null}
+        onOpenChange={(o) => !o && setAlunoCodigo(null)}
+      />
     </div>
   );
 }

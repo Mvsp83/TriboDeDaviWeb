@@ -60,3 +60,55 @@ export function useExcluirAluno() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alunos"] }),
   });
 }
+
+// ── LGPD ────────────────────────────────────────────────────────────────
+
+// Pacote de dados devolvido pela exportação. Mantido genérico de propósito: é
+// baixado como JSON para o responsável, não renderizado campo a campo.
+export interface DadosPessoaisAluno {
+  geradoEm: string;
+  geradoPor: string;
+  cadastro: Record<string, unknown>;
+  matriculas: unknown[];
+  graduacoes: unknown[];
+  presencas: unknown[];
+  inscricoes: unknown[];
+}
+
+// Acesso/portabilidade: baixa tudo que o sistema guarda sobre o aluno.
+export function useExportarDadosAluno() {
+  return useMutation({
+    mutationFn: (id: number) =>
+      apiGet<DadosPessoaisAluno>(ApiRotas.alunoExportarDados(id)),
+  });
+}
+
+// Eliminação: apaga os dados pessoais mantendo o histórico anonimizado.
+export function useAnonimizarAluno() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => apiPost(ApiRotas.alunoAnonimizar(id)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["alunos"] }),
+  });
+}
+
+// ── Código de acesso do responsável ───────────────────────────────────────
+
+export function useCodigoResponsavel(id: number | null) {
+  return useQuery({
+    queryKey: ["codigo-responsavel", id],
+    queryFn: () =>
+      apiGet<{ codigo: string | null }>(ApiRotas.alunoCodigoResponsavel(id!)),
+    enabled: id !== null,
+  });
+}
+
+export function useGerarCodigoResponsavel() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) =>
+      apiPost<{ codigo: string }>(ApiRotas.alunoCodigoResponsavel(id)),
+    onSuccess: (_data, id) =>
+      qc.invalidateQueries({ queryKey: ["codigo-responsavel", id] }),
+  });
+}
