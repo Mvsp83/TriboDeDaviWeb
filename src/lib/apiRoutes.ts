@@ -110,6 +110,9 @@ export const ApiRotas = {
   doacaoExcluir: (id: number) => `/api/Doacao/${id}`,
   doacaoRecibo: (id: number) => `/api/Doacao/${id}/recibo`,
 
+  auditoria: (entidade: string, usuario: string, limite: number) =>
+    `/api/LogAuditoria?entidade=${encodeURIComponent(entidade)}&usuario=${encodeURIComponent(usuario)}&limite=${limite}`,
+
   calendarioPorAno: (ano: number) => `/api/EventoCalendario/ano/${ano}`,
   calendarioAnos: "/api/EventoCalendario/anos",
   calendarioCreate: "/api/EventoCalendario/create",

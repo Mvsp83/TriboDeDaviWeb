@@ -16,6 +16,7 @@ import {
   Boxes,
   Megaphone,
   UserCog,
+  ShieldCheck,
   Upload,
   RefreshCw,
   Stamp,
@@ -190,6 +191,7 @@ export const navGroups: NavGroup[] = [
     nodes: [
       { label: "Avisos", href: "/avisos", icon: Megaphone, adminOnly: true },
       { label: "Usuários", href: "/usuarios", icon: UserCog, adminOnly: true },
+      { label: "Auditoria", href: "/auditoria", icon: ShieldCheck, adminOnly: true },
       {
         label: "Padrão de Documentos",
         href: "/padrao-documentos",

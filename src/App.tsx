@@ -24,6 +24,9 @@ const DashboardPage = lazy(() =>
 const AlunosPage = lazy(() =>
   import("@/features/alunos/AlunosPage").then((m) => ({ default: m.AlunosPage })),
 );
+const AuditoriaPage = lazy(() =>
+  import("@/features/auditoria/AuditoriaPage").then((m) => ({ default: m.AuditoriaPage })),
+);
 const DoacoesPage = lazy(() =>
   import("@/features/doadores/DoacoesPage").then((m) => ({ default: m.DoacoesPage })),
 );
@@ -168,6 +171,7 @@ export default function App() {
           <Route path="impacto" element={<ImpactoPage />} />
           <Route path="graduacoes" element={<GraduacoesPage />} />
           <Route path="doacoes" element={<DoacoesPage />} />
+          <Route path="auditoria" element={<AuditoriaPage />} />
           <Route path="aulas" element={<AulasPage />} />
           <Route path="chamada" element={<ChamadaPage />} />
           <Route path="chamada/:aulaId" element={<ChamadaAulaPage />} />

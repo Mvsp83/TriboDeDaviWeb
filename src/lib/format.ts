@@ -12,6 +12,21 @@ export function dataBR(iso: string | null | undefined): string {
   return Number.isNaN(d.getTime()) ? "-" : d.toLocaleDateString("pt-BR");
 }
 
+// Data e hora (dd/MM/aaaa HH:mm) — usada no log de auditoria. A API grava em
+// UTC; o toLocale converte para o fuso de quem lê.
+export function dataHora(iso: string | null | undefined): string {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 // Data ISO para yyyy-MM-dd (valor de <input type="date">).
 export function paraInputDate(iso: string | null | undefined): string {
   if (!iso) return "";
