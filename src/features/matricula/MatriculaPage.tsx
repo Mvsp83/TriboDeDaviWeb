@@ -23,7 +23,6 @@ import {
   CONDICOES,
   SINTOMAS,
   ACOMPANHAMENTOS,
-  SITUACOES_CONJUGAIS,
   MOTIVOS_MATRICULA,
   OBJETIVOS,
   VERSAO_TERMOS,
@@ -67,7 +66,6 @@ const ETAPAS = [
   "Aluno",
   "Responsável",
   "Saúde",
-  "Família",
   "Termos",
 ];
 
@@ -255,7 +253,7 @@ export function MatriculaPage() {
       if (precisaTermoResponsabilidade && !saude.aceitouTermoResponsabilidade)
         return "Como houve resposta “sim”, é preciso aceitar o Termo de Responsabilidade.";
     }
-    if (etapa === 5) {
+    if (etapa === 4) {
       if (!aceitouTermo) return "É preciso aceitar o termo de participação.";
       if (!aceitouComodato) return "É preciso aceitar o termo de comodato.";
       if (!aceitouLgpd) return "É preciso autorizar o tratamento dos dados.";
@@ -811,56 +809,6 @@ export function MatriculaPage() {
                   ))}
                 </div>
               </Campo>
-            </>
-          )}
-
-          {/* 5. Pesquisa familiar */}
-          {etapa === 4 && (
-            <>
-              <p className="text-sm text-muted-foreground">
-                Estas informações ajudam o instituto a conhecer melhor a família e
-                a buscar apoio para o projeto. Nenhuma resposta é obrigatória.
-              </p>
-
-              <Campo label="Situação conjugal dos pais">
-                <Select
-                  value={familiar.situacaoConjugal}
-                  onValueChange={(v) =>
-                    setFamiliar((f) => ({ ...f, situacaoConjugal: v }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SITUACOES_CONJUGAIS.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Campo>
-              {familiar.situacaoConjugal === "Outro" && (
-                <Campo label="Qual?">
-                  <Input
-                    value={familiar.situacaoConjugalOutro}
-                    onChange={(e) =>
-                      setFamiliar((f) => ({ ...f, situacaoConjugalOutro: e.target.value }))
-                    }
-                  />
-                </Campo>
-              )}
-
-              <Campo label="Quantas pessoas moram na mesma casa que o aluno?">
-                <Input
-                  inputMode="numeric"
-                  value={familiar.pessoasNaCasa}
-                  onChange={(e) =>
-                    setFamiliar((f) => ({ ...f, pessoasNaCasa: e.target.value }))
-                  }
-                />
-              </Campo>
 
               <Campo label="Motivos para matricular no instituto">
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -880,8 +828,8 @@ export function MatriculaPage() {
             </>
           )}
 
-          {/* 6. Termos */}
-          {etapa === 5 && (
+          {/* 5. Termos */}
+          {etapa === 4 && (
             <>
               <BlocoTermo titulo="Termo de participação" texto={TERMO_PARTICIPACAO} />
               <Marcavel marcado={aceitouTermo} onToggle={() => setAceitouTermo(!aceitouTermo)}>
