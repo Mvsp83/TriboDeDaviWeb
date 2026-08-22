@@ -34,6 +34,7 @@ export const ApiRotas = {
   // Portal do responsável (público).
   responsavelAcesso: "/api/Responsavel/acesso",
   responsavelPainel: "/api/Responsavel/painel",
+  responsavelAutorizarImagem: "/api/Responsavel/autorizar-imagem",
 
   aulasGetAll: "/api/Aula/get-all",
   aulasPorPolo: `/api/Aula/get-por-polo?${TODAS_TURMAS}`,

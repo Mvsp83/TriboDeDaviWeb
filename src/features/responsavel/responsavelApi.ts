@@ -62,7 +62,14 @@ export interface AcessoResposta {
 }
 
 export interface PainelResponsavel {
-  aluno: { nome: string; faixa: number; polo: string; turma: number };
+  aluno: {
+    nome: string;
+    faixa: number;
+    polo: string;
+    turma: number;
+    autorizaImagem: boolean | null;
+    autorizaImagemEm: string | null;
+  };
   frequencia: {
     totalAulas: number;
     presencas: number;
@@ -106,6 +113,20 @@ export async function obterPainel(): Promise<PainelResponsavel> {
     const { data } = await httpResp.get<ResultViewModel<PainelResponsavel>>(
       ApiRotas.responsavelPainel,
     );
+    return unwrap(data);
+  } catch (error) {
+    throw toApiError(error);
+  }
+}
+
+// O responsável autoriza (true) ou revoga (false) o uso de imagem do filho.
+export async function autorizarImagem(
+  autoriza: boolean,
+): Promise<{ autorizaImagem: boolean }> {
+  try {
+    const { data } = await httpResp.post<
+      ResultViewModel<{ autorizaImagem: boolean }>
+    >(ApiRotas.responsavelAutorizarImagem, { autoriza });
     return unwrap(data);
   } catch (error) {
     throw toApiError(error);

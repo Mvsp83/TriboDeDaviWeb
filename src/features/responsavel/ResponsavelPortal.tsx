@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import {
   Loader2,
   LogIn,
@@ -10,10 +11,12 @@ import {
   CheckCircle2,
   XCircle,
   ArrowLeft,
+  Camera,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import {
   acessar,
+  autorizarImagem,
   clearRespToken,
   obterPainel,
   type PainelResponsavel,
@@ -76,6 +79,24 @@ export function ResponsavelPortal() {
     setPainel(null);
     setCodigo("");
     setNascimento("");
+  }
+
+  const [salvandoImagem, setSalvandoImagem] = useState(false);
+  async function alternarImagem(autoriza: boolean) {
+    setSalvandoImagem(true);
+    try {
+      await autorizarImagem(autoriza);
+      setPainel(await obterPainel());
+      toast.success(
+        autoriza ? "Uso de imagem autorizado." : "Autorização de imagem revogada.",
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError ? err.message : "Não foi possível salvar.",
+      );
+    } finally {
+      setSalvandoImagem(false);
+    }
   }
 
   if (!painel) {
@@ -308,6 +329,54 @@ export function ResponsavelPortal() {
                 ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Uso de imagem — consentimento self-service */}
+        <Card>
+          <CardContent className="p-5">
+            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+              <Camera className="size-4" /> Uso de imagem e voz
+            </h2>
+            <p className="text-sm">
+              {aluno.autorizaImagem === true
+                ? `Você autorizou o uso da imagem e voz de ${aluno.nome} nos canais do instituto.`
+                : aluno.autorizaImagem === false
+                  ? "Você não autorizou o uso da imagem e voz."
+                  : "Você ainda não definiu a autorização de uso de imagem."}
+            </p>
+            {aluno.autorizaImagemEm && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Atualizado em {dataBR(aluno.autorizaImagemEm)}.
+              </p>
+            )}
+            <div className="mt-3 flex gap-2">
+              {aluno.autorizaImagem !== true && (
+                <Button
+                  size="sm"
+                  onClick={() => alternarImagem(true)}
+                  disabled={salvandoImagem}
+                >
+                  {salvandoImagem && <Loader2 className="size-4 animate-spin" />}
+                  Autorizar
+                </Button>
+              )}
+              {aluno.autorizaImagem !== false && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alternarImagem(false)}
+                  disabled={salvandoImagem}
+                >
+                  {salvandoImagem && <Loader2 className="size-4 animate-spin" />}
+                  Não autorizar
+                </Button>
+              )}
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Sem sua autorização, o instituto não publica a imagem do seu filho
+              nos canais oficiais. Você pode mudar essa escolha quando quiser.
+            </p>
           </CardContent>
         </Card>
       </main>
