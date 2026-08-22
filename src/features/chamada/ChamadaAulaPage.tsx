@@ -11,6 +11,7 @@ import {
   MapPin,
   Users,
   X,
+  QrCode,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas } from "@/features/aulas/aulasApi";
@@ -32,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AvisarFaltasDialog } from "@/features/chamada/AvisarFaltasDialog";
+import { LeitorQrDialog } from "@/features/chamada/LeitorQrDialog";
 
 function mensagemErro(e: unknown, padrao: string): string {
   return e instanceof Error && e.message ? e.message : padrao;
@@ -155,6 +157,7 @@ function ChamadaPendente({
   const [confirmando, setConfirmando] = useState(false);
   // Ausentes da chamada recém-salva, para oferecer o aviso aos responsáveis.
   const [avisarAusentes, setAvisarAusentes] = useState<Aluno[] | null>(null);
+  const [lendoQr, setLendoQr] = useState(false);
 
   // Chamada já salva neste aparelho, aguardando internet (fila offline).
   const pendenteLocal = chamadaPendenteDaAula(aula.id);
@@ -268,6 +271,10 @@ function ChamadaPendente({
           {presentes} de {roster.length} presentes
         </p>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setLendoQr(true)}>
+            <QrCode className="size-4" />
+            Ler QR
+          </Button>
           <Button variant="outline" size="sm" onClick={() => marcarTodos(true)}>
             Marcar todos
           </Button>
@@ -319,6 +326,14 @@ function ChamadaPendente({
         destrutivo={false}
         carregando={salvar.isPending}
         onConfirmar={confirmarSalvar}
+      />
+
+      <LeitorQrDialog
+        aberto={lendoQr}
+        onOpenChange={setLendoQr}
+        roster={roster.map((a) => ({ id: a.id, nome: a.nome }))}
+        jaPresente={(id) => !!marcadas[id]}
+        onPresente={(id) => setMarcadas((m) => ({ ...m, [id]: true }))}
       />
 
       <AvisarFaltasDialog

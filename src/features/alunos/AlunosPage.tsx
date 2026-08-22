@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Loader2, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePolos } from "@/features/polos/polosApi";
 import { useAlunos, useExcluirAluno } from "@/features/alunos/alunosApi";
 import { AlunoFormDialog } from "@/features/alunos/AlunoFormDialog";
 import { faixaInfo } from "@/features/alunos/faixa";
+import { imprimirCarteirinhas } from "@/features/carteirinha/carteirinhaPdf";
 import { ApiError } from "@/lib/api";
 import { useTableSort, type SortValue } from "@/lib/useTableSort";
 import { SortableHead } from "@/components/SortableHead";
@@ -119,6 +120,13 @@ export function AlunosPage() {
   function abrirEdicao(aluno: Aluno) {
     setAlunoEdicao(aluno);
     setDialogAberto(true);
+  }
+
+  async function gerarCarteirinha(aluno: Aluno) {
+    const ok = await imprimirCarteirinhas([
+      { aluno, nomePolo: nomePorPolo.get(aluno.poloId) ?? "-" },
+    ]);
+    if (!ok) toast.error("Permita pop-ups para gerar a carteirinha.");
   }
 
   async function confirmarExclusao() {
@@ -251,6 +259,15 @@ export function AlunosPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => gerarCarteirinha(a)}
+                          aria-label="Carteirinha"
+                          title="Carteirinha com QR"
+                        >
+                          <QrCode className="size-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
