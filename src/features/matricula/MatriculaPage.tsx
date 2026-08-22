@@ -15,6 +15,8 @@ import {
 import { ApiError } from "@/lib/api";
 import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
 import { usePolosPublicos, useEnviarInscricao } from "@/features/matricula/matriculaApi";
+import { BAIRROS } from "@/features/matricula/bairros";
+import { formatarTelefone } from "@/lib/format";
 import {
   PARQ,
   TERMO_RESPONSABILIDADE,
@@ -618,14 +620,15 @@ export function MatriculaPage() {
                     inputMode="tel"
                     placeholder="(47) 99999-9999"
                     value={whatsApp}
-                    onChange={(e) => setWhatsApp(e.target.value)}
+                    onChange={(e) => setWhatsApp(formatarTelefone(e.target.value))}
                   />
                 </Campo>
                 <Campo label="Telefone 2">
                   <Input
                     inputMode="tel"
+                    placeholder="(47) 3333-3333"
                     value={telefone2}
-                    onChange={(e) => setTelefone2(e.target.value)}
+                    onChange={(e) => setTelefone2(formatarTelefone(e.target.value))}
                   />
                 </Campo>
               </div>
@@ -645,7 +648,17 @@ export function MatriculaPage() {
                   />
                 </Campo>
                 <Campo label="Bairro" obrigatorio>
-                  <Input value={bairro} onChange={(e) => setBairro(e.target.value)} />
+                  <Input
+                    list="lista-bairros"
+                    value={bairro}
+                    onChange={(e) => setBairro(e.target.value)}
+                    placeholder="Comece a digitar…"
+                  />
+                  <datalist id="lista-bairros">
+                    {BAIRROS.map((b) => (
+                      <option key={b} value={b} />
+                    ))}
+                  </datalist>
                 </Campo>
                 <Campo label="Cidade" obrigatorio>
                   <Input value={cidade} onChange={(e) => setCidade(e.target.value)} />

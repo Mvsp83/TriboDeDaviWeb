@@ -1,3 +1,13 @@
+// Aplica a máscara de telefone brasileiro conforme o usuário digita: aceita
+// só dígitos e formata como (XX) XXXXX-XXXX (celular) ou (XX) XXXX-XXXX (fixo).
+export function formatarTelefone(valor: string): string {
+  const d = valor.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 2) return d;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
 // Formata TimeSpan serializado ("HH:mm:ss" ou "d.HH:mm:ss") para "HH:mm".
 export function horaCurta(hora: string | null | undefined): string {
   if (!hora) return "-";
