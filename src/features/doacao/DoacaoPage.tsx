@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Copy, Check, HeartHandshake, QrCode } from "lucide-react";
 import { gerarPixBrCode } from "@/lib/pixBrCode";
 import { DOACAO, doacaoConfigurada } from "@/features/doacao/configDoacao";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ const brl = (v: number) =>
 // Página pública de doação: mostra o QR Code e o "copia e cola" do Pix.
 // Não depende de login nem da API — funciona mesmo com o backend fora do ar.
 export function DoacaoPage() {
+  useDocumentTitle("Doar por Pix — Instituto Tribo de Davi");
   const [valor, setValor] = useState<number | null>(null);
   const [outro, setOutro] = useState("");
   const [copiado, setCopiado] = useState(false);

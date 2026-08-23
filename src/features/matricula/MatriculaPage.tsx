@@ -17,6 +17,7 @@ import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
 import { usePolosPublicos, useEnviarInscricao } from "@/features/matricula/matriculaApi";
 import { BAIRROS } from "@/features/matricula/bairros";
 import { formatarTelefone } from "@/lib/format";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import {
   PARQ,
   TERMO_RESPONSABILIDADE,
@@ -164,6 +165,7 @@ export function MatriculaPage() {
   const { data: polos } = usePolosPublicos();
   const enviar = useEnviarInscricao();
   const ano = new Date().getFullYear();
+  useDocumentTitle(`Inscrição ${ano} — Instituto Tribo de Davi`);
 
   const [etapa, setEtapa] = useState(0);
   const [enviada, setEnviada] = useState(false);

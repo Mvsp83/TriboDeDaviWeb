@@ -20,6 +20,7 @@ import {
 import { SITE, temContato } from "@/features/site/conteudoSite";
 import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 
 // Cores das faixas para a régua de progressão do herói. Espelha o sistema de
@@ -46,6 +47,7 @@ function Numero({ valor, rotulo }: { valor: number; rotulo: string }) {
 export function SitePublico() {
   const { contato, numeros, polos, historia, fotos, prestacaoContas, informacoes } = SITE;
   const anoAtual = new Date().getFullYear();
+  useDocumentTitle(`${SITE.nome} — Jiu-jitsu gratuito para crianças`);
 
   const temPrestacao =
     Boolean(prestacaoContas.texto) || prestacaoContas.documentos.length > 0;
@@ -61,6 +63,14 @@ export function SitePublico() {
 
   return (
     <div className="min-h-svh bg-background text-foreground">
+      {/* Pular para o conteúdo — visível só ao navegar por teclado. */}
+      <a
+        href="#conteudo"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+      >
+        Pular para o conteúdo
+      </a>
+
       {/* Topo */}
       <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
         <img src="/logo.png" alt={SITE.nome} className="h-10 w-auto md:h-12" />
@@ -95,7 +105,7 @@ export function SitePublico() {
       </header>
 
       {/* Herói */}
-      <section className="mx-auto max-w-5xl px-4 pb-14 pt-6 md:pb-20 md:pt-10">
+      <section id="conteudo" tabIndex={-1} className="mx-auto max-w-5xl px-4 pb-14 pt-6 outline-none md:pb-20 md:pt-10">
         <div className="max-w-2xl">
           <h1 className="text-balance text-3xl font-bold leading-tight tracking-tight md:text-5xl">
             {SITE.chamada}

@@ -42,6 +42,7 @@ import {
   type Selo,
 } from "@/features/responsavel/conquistas";
 import { faixaInfo } from "@/features/alunos/faixa";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { LogoLockup } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -152,6 +153,7 @@ function ConquistasCard({ painel }: { painel: PainelResponsavel }) {
 }
 
 export function ResponsavelPortal() {
+  useDocumentTitle("Portal do Responsável — Instituto Tribo de Davi");
   const [codigo, setCodigo] = useState("");
   const [nascimento, setNascimento] = useState("");
   const [erro, setErro] = useState("");

@@ -20,6 +20,7 @@ import {
 } from "@/features/transparencia/conteudoTransparencia";
 import { SITE } from "@/features/site/conteudoSite";
 import { moeda } from "@/lib/format";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 
 function Numero({ valor, rotulo }: { valor: string; rotulo: string }) {
@@ -75,6 +76,7 @@ function Distribuicao({
 export function TransparenciaPage() {
   const { intro, identificacao, impacto, financeiro, documentos } = TRANSPARENCIA;
   const anoAtual = new Date().getFullYear();
+  useDocumentTitle(`Transparência e impacto — ${SITE.nome}`);
 
   const totalReceitas = financeiro.receitas.reduce((s, r) => s + r.valor, 0);
   const totalDespesas = financeiro.despesas.reduce((s, d) => s + d.valor, 0);

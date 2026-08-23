@@ -1,14 +1,36 @@
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { LoginPage } from "@/features/auth/LoginPage";
-import { DoacaoPage } from "@/features/doacao/DoacaoPage";
 import { SitePublico } from "@/features/site/SitePublico";
-import { TransparenciaPage } from "@/features/transparencia/TransparenciaPage";
-import { MatriculaPage } from "@/features/matricula/MatriculaPage";
-import { ResponsavelPortal } from "@/features/responsavel/ResponsavelPortal";
 import { useAuth } from "@/features/auth/AuthContext";
+
+// A landing (SitePublico) é carregada de imediato — é a primeira tela do
+// visitante. As demais telas públicas são carregadas sob demanda para não
+// baixar tudo de uma vez num celular simples (a comum é abrir só o site).
+const DoacaoPage = lazy(() =>
+  import("@/features/doacao/DoacaoPage").then((m) => ({ default: m.DoacaoPage })),
+);
+const TransparenciaPage = lazy(() =>
+  import("@/features/transparencia/TransparenciaPage").then((m) => ({ default: m.TransparenciaPage })),
+);
+const MatriculaPage = lazy(() =>
+  import("@/features/matricula/MatriculaPage").then((m) => ({ default: m.MatriculaPage })),
+);
+const ResponsavelPortal = lazy(() =>
+  import("@/features/responsavel/ResponsavelPortal").then((m) => ({ default: m.ResponsavelPortal })),
+);
+
+// Fallback enquanto um chunk carrega (público, fora do AppLayout).
+function CarregandoTela() {
+  return (
+    <div className="flex min-h-svh items-center justify-center bg-background">
+      <Loader2 className="size-6 animate-spin text-muted-foreground" />
+    </div>
+  );
+}
 
 // A raiz serve o site público para quem chega de fora e manda direto ao painel
 // quem já está logado — assim o endereço divulgado e o atalho da equipe são o
@@ -157,6 +179,7 @@ const PlanilhaFinanceiraPage = lazy(() =>
 
 export default function App() {
   return (
+    <Suspense fallback={<CarregandoTela />}>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       {/* Públicas: divulgadas fora do sistema, não exigem login. */}
@@ -247,5 +270,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 }
