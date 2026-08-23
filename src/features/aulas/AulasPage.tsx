@@ -8,7 +8,6 @@ import { usePolos } from "@/features/polos/polosApi";
 import { dataBR, horaCurta } from "@/lib/format";
 import type { Aula, Polo } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { IdRef } from "@/components/IdRef";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -380,7 +379,6 @@ export function AulasPage() {
                     className="cursor-pointer transition-colors hover:bg-secondary/40"
                   >
                     <TableCell className="font-medium tabular-nums">
-                      <IdRef id={a.id} />
                       {dataBR(a.data)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
