@@ -16,6 +16,7 @@ import {
 import { imprimirCertificado } from "@/features/graduacoes/certificadoPdf";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { IdRef } from "@/components/IdRef";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -387,11 +388,7 @@ export function GraduacoesPage() {
                 lista.map((g) => (
                   <TableRow key={g.id}>
                     <TableCell className="font-medium">
-                      {/* #id: mesmo número que a Auditoria mostra ("Graduação #N"),
-                          para cruzar as duas telas. */}
-                      <span className="mr-2 text-xs font-normal tabular-nums text-muted-foreground">
-                        #{g.id}
-                      </span>
+                      <IdRef id={g.id} />
                       {g.nomeAluno}
                     </TableCell>
                     <TableCell className="text-muted-foreground">{g.poloNome}</TableCell>

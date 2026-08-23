@@ -12,6 +12,7 @@ import { ROLE_LABEL, type Usuario } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { IdRef } from "@/components/IdRef";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -127,7 +128,10 @@ export function UsuariosPage() {
               {!isLoading &&
                 filtrados.map((u) => (
                   <TableRow key={u.id}>
-                    <TableCell className="font-medium">{u.login}</TableCell>
+                    <TableCell className="font-medium">
+                      <IdRef id={u.id} />
+                      {u.login}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {u.email}
                     </TableCell>

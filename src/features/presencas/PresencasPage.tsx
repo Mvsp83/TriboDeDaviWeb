@@ -15,6 +15,7 @@ import { dataBR, horaCurta } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Presenca } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
+import { IdRef } from "@/components/IdRef";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -187,6 +188,7 @@ export function PresencasPage() {
                       {lista.map((p) => (
                         <TableRow key={p.id}>
                           <TableCell className="font-medium">
+                            <IdRef id={p.id} />
                             {p.nomeAluno || nomePorAluno.get(p.alunoId) || "-"}
                           </TableCell>
                           <TableCell>

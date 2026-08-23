@@ -43,6 +43,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { IdRef } from "@/components/IdRef";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import {
@@ -306,7 +307,10 @@ export function ExtratosPage() {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{c.nome}</p>
+                    <p className="truncate font-medium">
+                      <IdRef id={c.id} />
+                      {c.nome}
+                    </p>
                     <div className="mt-1 flex items-center gap-1.5">
                       <Badge variant="outline">{TIPO_CONTA_LABEL[c.tipo]}</Badge>
                       {!c.ativa && <Badge variant="warning">Inativa</Badge>}
@@ -472,6 +476,7 @@ export function ExtratosPage() {
                             )}
                             <div className="min-w-0">
                               <p className="flex items-center gap-1.5 truncate font-medium">
+                                <IdRef id={mov.id} />
                                 {mov.descricao}
                                 {mov.transferenciaId && (
                                   <ArrowLeftRight

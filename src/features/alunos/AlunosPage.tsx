@@ -35,6 +35,7 @@ import type { Aluno } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { IdRef } from "@/components/IdRef";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -367,6 +368,7 @@ export function AlunosPage() {
                 sorted.map((a) => (
                   <TableRow key={a.id}>
                     <TableCell className="font-medium">
+                      <IdRef id={a.id} />
                       {a.nome}
                       {a.autorizaImagem !== true && (
                         <span title="Sem autorização de uso de imagem">

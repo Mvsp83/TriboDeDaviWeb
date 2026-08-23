@@ -29,6 +29,7 @@ import {
 } from "@/features/doadores/doacoesApi";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { IdRef } from "@/components/IdRef";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -514,7 +515,10 @@ export function DoacoesPage() {
                 {(doacoes ?? []).map((d) => (
                   <TableRow key={d.id}>
                     <TableCell className="tabular-nums">{dataBR(d.data)}</TableCell>
-                    <TableCell className="font-medium">{d.nomeDoador}</TableCell>
+                    <TableCell className="font-medium">
+                      <IdRef id={d.id} />
+                      {d.nomeDoador}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {FORMA_LABEL[d.forma] ?? d.forma}
                     </TableCell>
@@ -603,6 +607,7 @@ export function DoacoesPage() {
                     }}
                   >
                     <TableCell className="font-medium">
+                      <IdRef id={d.id} />
                       {d.nome}
                       {d.tipoPessoa === 1 && (
                         <Badge variant="outline" className="ml-2">
