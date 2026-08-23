@@ -2,8 +2,6 @@ import { Link } from "react-router-dom";
 import {
   HeartHandshake,
   LogIn,
-  MapPin,
-  Clock,
   Mail,
   AtSign,
   MessageCircle,
@@ -13,11 +11,9 @@ import {
   BookOpen,
   Camera,
   Receipt,
-  Info,
   FileText,
-  UserRound,
 } from "lucide-react";
-import { SITE, temContato } from "@/features/site/conteudoSite";
+import { SITE, temContato, temInformacoes } from "@/features/site/conteudoSite";
 import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -45,20 +41,18 @@ function Numero({ valor, rotulo }: { valor: number; rotulo: string }) {
 // Site público do instituto: apresenta o projeto, recebe doações e dá acesso
 // ao portal. É a página que qualquer pessoa vê ao abrir o endereço.
 export function SitePublico() {
-  const { contato, numeros, polos, historia, fotos, prestacaoContas, informacoes } = SITE;
+  const { contato, numeros, historia, fotos, prestacaoContas } = SITE;
   const anoAtual = new Date().getFullYear();
   useDocumentTitle(`${SITE.nome} — Jiu-jitsu gratuito para crianças`);
 
   const temPrestacao =
     Boolean(prestacaoContas.texto) || prestacaoContas.documentos.length > 0;
-  const temInformacoes = informacoes.regras.length > 0 || polos.length > 0;
 
   // Links de navegação — só aparecem para seções que têm conteúdo.
   const secoes = [
     { id: "historia", label: "História", on: historia.length > 0 },
     { id: "fotos", label: "Fotos", on: true },
     { id: "prestacao", label: "Prestação de contas", on: temPrestacao },
-    { id: "informacoes", label: "Informações", on: temInformacoes },
   ].filter((s) => s.on);
 
   return (
@@ -84,6 +78,11 @@ export function SitePublico() {
           <Link to="/galeria" className="transition-colors hover:text-foreground">
             Galeria
           </Link>
+          {temInformacoes() && (
+            <Link to="/informacoes" className="transition-colors hover:text-foreground">
+              Informações
+            </Link>
+          )}
           <Link to="/transparencia" className="transition-colors hover:text-foreground">
             Transparência
           </Link>
@@ -280,63 +279,6 @@ export function SitePublico() {
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
-          </div>
-        </section>
-      )}
-
-      {/* Informações: regras gerais + polos/endereços/responsáveis */}
-      {temInformacoes && (
-        <section id="informacoes" className="scroll-mt-6 border-t border-border bg-secondary/20">
-          <div className="mx-auto max-w-5xl px-4 py-14 md:py-20">
-            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
-              <Info className="size-6 text-primary" />
-              Informações
-            </h2>
-
-            {informacoes.regras.length > 0 && (
-              <div className="mt-8">
-                <h3 className="font-semibold">Regras gerais</h3>
-                <ul className="mt-3 flex flex-col gap-2">
-                  {informacoes.regras.map((r, i) => (
-                    <li key={i} className="flex gap-2 text-muted-foreground">
-                      <span className="mt-0.5 text-primary">•</span>
-                      <span>{r}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {polos.length > 0 && (
-              <div className="mt-10">
-                <h3 className="font-semibold">Polos e endereços</h3>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  {polos.map((polo) => (
-                    <div key={polo.nome} className="rounded-xl border border-border bg-card p-5">
-                      <h4 className="flex items-center gap-2 font-semibold">
-                        <MapPin className="size-4 text-primary" />
-                        {polo.nome}
-                      </h4>
-                      {polo.endereco && (
-                        <p className="mt-1.5 text-sm text-muted-foreground">{polo.endereco}</p>
-                      )}
-                      {polo.horarios && (
-                        <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <Clock className="size-3.5" />
-                          {polo.horarios}
-                        </p>
-                      )}
-                      {polo.responsavel && (
-                        <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <UserRound className="size-3.5" />
-                          {polo.responsavel}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </section>
       )}

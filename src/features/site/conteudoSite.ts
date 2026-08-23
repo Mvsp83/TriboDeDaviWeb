@@ -23,6 +23,12 @@ export interface Documento {
   url: string; // link do documento (PDF, Drive, etc.)
 }
 
+// Um assunto da página de Informações: um título e uma lista de itens.
+export interface TopicoInfo {
+  titulo: string;
+  itens: string[];
+}
+
 export const SITE = {
   nome: "Instituto Tribo de Davi",
   // Frase de efeito do topo.
@@ -76,14 +82,24 @@ export const SITE = {
     documentos: [] as Documento[],
   },
 
-  // Informações gerais do projeto. As regras aparecem em lista.
+  // Informações gerais do projeto — exibidas na página própria "/informacoes",
+  // organizadas por assunto. Adicione quantos tópicos quiser (uniforme,
+  // frequência, matrícula, competições, etc.); cada um vira uma seção.
   informacoes: {
-    regras: [
-      "Uniforme (quimono) e faixa são emprestados pelo instituto a quem precisa.",
-      "A presença é registrada em toda aula — pontualidade e frequência importam.",
-      "Respeito ao professor, aos colegas e ao espaço de treino.",
-      "A família é comunicada quando o aluno começa a faltar.",
-    ] as string[],
+    // Texto de abertura da página (opcional; vazio esconde).
+    intro:
+      "Tudo o que a família precisa saber sobre o funcionamento do projeto.",
+    topicos: [
+      {
+        titulo: "Regras gerais",
+        itens: [
+          "Uniforme (quimono) e faixa são emprestados pelo instituto a quem precisa.",
+          "A presença é registrada em toda aula — pontualidade e frequência importam.",
+          "Respeito ao professor, aos colegas e ao espaço de treino.",
+          "A família é comunicada quando o aluno começa a faltar.",
+        ],
+      },
+    ] as TopicoInfo[],
   },
 
   // PREENCHER: polos com endereço, horários e responsável.
@@ -104,3 +120,7 @@ export const SITE = {
 
 export const temContato = () =>
   Boolean(SITE.contato.whatsapp || SITE.contato.email || SITE.contato.instagram);
+
+// A página de Informações só aparece se houver algum tópico com itens ou polos.
+export const temInformacoes = () =>
+  SITE.informacoes.topicos.some((t) => t.itens.length > 0) || SITE.polos.length > 0;

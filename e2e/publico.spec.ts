@@ -67,6 +67,26 @@ test.describe("Galeria", () => {
   });
 });
 
+test.describe("Informações", () => {
+  test("é uma página própria com divisões por assunto", async ({ page }) => {
+    await page.goto("/informacoes");
+    await expect(page).toHaveTitle(/Informações/);
+    await expect(
+      page.getByRole("heading", { name: "Informações", level: 1 }),
+    ).toBeVisible();
+    // A divisão padrão "Regras gerais" vem do conteúdo curado.
+    await expect(
+      page.getByRole("heading", { name: /Regras gerais/i }),
+    ).toBeVisible();
+  });
+
+  test("é acessível pelo menu do site", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("link", { name: "Informações" }).first().click();
+    await expect(page).toHaveURL(/\/informacoes$/);
+  });
+});
+
 test.describe("Títulos por rota", () => {
   test("cada tela pública tem seu próprio título", async ({ page }) => {
     await page.goto("/matricula");
