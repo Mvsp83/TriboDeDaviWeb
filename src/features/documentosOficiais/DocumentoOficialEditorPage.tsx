@@ -12,12 +12,14 @@ import {
   RECIBO_DEFAULT,
   TIPO_DOC_LABEL,
   ehRecibo,
+  TIPO_RECIBO_DOACAO,
   type OficioConteudo,
   type ReciboConteudo,
+  type ReciboDoacaoConteudo,
 } from "@/features/documentosOficiais/tipos";
 import { exportarDocumentoOficialPdf } from "@/features/documentosOficiais/documentosOficiaisPdf";
 import { valorPorExtenso } from "@/features/documentosOficiais/valorExtenso";
-import { paraInputDate } from "@/lib/format";
+import { paraInputDate, moeda, dataCurtaBR } from "@/lib/format";
 import { ApiError } from "@/lib/api";
 import { STATUS_DOC, type DocumentoOficial } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,8 +42,18 @@ export function DocumentoOficialEditorPage() {
   const aprovar = useAprovarDocumentoOficial();
 
   const tipo = doc ? doc.tipo : tipoParam === "recibo" ? 1 : 0;
-  // Recibo comum (1) e recibo de doação (2) usam o mesmo formulário/layout.
   const isRecibo = ehRecibo(tipo);
+  // Recibo de doação (tipo 2): gerado na tela de Doações, imutável e com
+  // conteúdo próprio — aqui é só leitura + exportar PDF, sem o formulário.
+  const isReciboDoacao = doc?.tipo === TIPO_RECIBO_DOACAO;
+  const dadosDoacao = useMemo<ReciboDoacaoConteudo | null>(() => {
+    if (!isReciboDoacao || !doc) return null;
+    try {
+      return JSON.parse(doc.conteudo || "{}") as ReciboDoacaoConteudo;
+    } catch {
+      return null;
+    }
+  }, [isReciboDoacao, doc]);
   const travado = doc?.status === STATUS_DOC.Aprovado;
 
   const [dataDocumento, setDataDocumento] = useState(
@@ -106,6 +118,16 @@ export function DocumentoOficialEditorPage() {
   }
 
   function onExportar() {
+    // Recibo de doação tem conteúdo próprio (dados do doador) e é imutável:
+    // exporta o documento SALVO, não o estado do formulário (que é de
+    // ofício/recibo comum e não representa esse tipo).
+    if (doc && doc.tipo === TIPO_RECIBO_DOACAO) {
+      if (!exportarDocumentoOficialPdf(doc)) {
+        toast.error("Permita pop-ups para exportar o PDF.");
+      }
+      return;
+    }
+
     const preview: DocumentoOficial = {
       id: existenteId ?? 0,
       tipo,
@@ -195,39 +217,60 @@ export function DocumentoOficialEditorPage() {
         </div>
       )}
 
-      <Card>
-        <CardContent className="space-y-4 p-5">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div>
-              <Label className="mb-1.5">Data do documento</Label>
-              <Input
-                type="date"
-                value={dataDocumento}
-                disabled={travado}
-                onChange={(e) => setDataDocumento(e.target.value)}
-              />
+      {isReciboDoacao ? (
+        <Card>
+          <CardContent className="space-y-2 p-5 text-sm">
+            <p className="text-muted-foreground">
+              Recibo gerado a partir de uma doação. Não é editável aqui — use{" "}
+              <span className="font-medium text-foreground">Exportar PDF</span> para gerar o arquivo.
+            </p>
+            {dadosDoacao && (
+              <dl className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+                <Info rotulo="Doador" valor={dadosDoacao.doadorNome} />
+                <Info rotulo="Documento" valor={dadosDoacao.doadorDocumento} />
+                <Info rotulo="Valor" valor={moeda(dadosDoacao.valor)} />
+                <Info rotulo="Forma" valor={dadosDoacao.forma} />
+                <Info rotulo="Data" valor={dataCurtaBR(dadosDoacao.data?.slice(0, 10))} />
+                <Info rotulo="Finalidade" valor={dadosDoacao.finalidade} />
+              </dl>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="space-y-4 p-5">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div>
+                <Label className="mb-1.5">Data do documento</Label>
+                <Input
+                  type="date"
+                  value={dataDocumento}
+                  disabled={travado}
+                  onChange={(e) => setDataDocumento(e.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <Label className="mb-1.5">Local</Label>
+                <Input
+                  value={isRecibo ? recibo.local : oficio.local}
+                  disabled={travado}
+                  onChange={(e) =>
+                    isRecibo
+                      ? setRecibo({ ...recibo, local: e.target.value })
+                      : setOficio({ ...oficio, local: e.target.value })
+                  }
+                />
+              </div>
             </div>
-            <div className="sm:col-span-2">
-              <Label className="mb-1.5">Local</Label>
-              <Input
-                value={isRecibo ? recibo.local : oficio.local}
-                disabled={travado}
-                onChange={(e) =>
-                  isRecibo
-                    ? setRecibo({ ...recibo, local: e.target.value })
-                    : setOficio({ ...oficio, local: e.target.value })
-                }
-              />
-            </div>
-          </div>
 
-          {isRecibo ? (
-            <ReciboCampos recibo={recibo} setRecibo={setRecibo} travado={travado} />
-          ) : (
-            <OficioCampos oficio={oficio} setOficio={setOficio} travado={travado} />
-          )}
-        </CardContent>
-      </Card>
+            {isRecibo ? (
+              <ReciboCampos recibo={recibo} setRecibo={setRecibo} travado={travado} />
+            ) : (
+              <OficioCampos oficio={oficio} setOficio={setOficio} travado={travado} />
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <ConfirmDialog
         aberto={confirmarAprovar}
@@ -411,6 +454,17 @@ function ReciboCampos({
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+// Par rótulo/valor da visão só-leitura do recibo de doação. Some quando vazio.
+function Info({ rotulo, valor }: { rotulo: string; valor?: string }) {
+  if (!valor) return null;
+  return (
+    <div>
+      <dt className="text-muted-foreground">{rotulo}</dt>
+      <dd className="font-medium">{valor}</dd>
     </div>
   );
 }
