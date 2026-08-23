@@ -386,7 +386,14 @@ export function GraduacoesPage() {
               {!isLoading &&
                 lista.map((g) => (
                   <TableRow key={g.id}>
-                    <TableCell className="font-medium">{g.nomeAluno}</TableCell>
+                    <TableCell className="font-medium">
+                      {/* #id: mesmo número que a Auditoria mostra ("Graduação #N"),
+                          para cruzar as duas telas. */}
+                      <span className="mr-2 text-xs font-normal tabular-nums text-muted-foreground">
+                        #{g.id}
+                      </span>
+                      {g.nomeAluno}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{g.poloNome}</TableCell>
                     <TableCell>
                       <ChipFaixa faixa={g.faixaAnterior} />
