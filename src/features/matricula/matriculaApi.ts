@@ -61,6 +61,46 @@ export interface EnvioInscricao {
   versaoTermos: string;
 }
 
+// Dados de um aluno já cadastrado, para pré-preencher a rematrícula.
+export interface DadosPreMatricula {
+  alunoId: number;
+  nome: string;
+  dataNascimento: string; // yyyy-MM-dd
+  rg: string;
+  cpf: string;
+  peso: number | null;
+  altura: number | null;
+  faixa: number;
+  escola: string;
+  serie: string;
+  periodo: string;
+  parentesco: number;
+  nomeResponsavel: string;
+  rgResponsavel: string;
+  cpfResponsavel: string;
+  rua: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  whatsApp: string;
+  telefone2: string;
+  poloId: number;
+  turmaAnterior: number;
+}
+
+// Rematrícula: busca o aluno por CPF do responsável + data de nascimento.
+// Retorna null quando não encontra (a API responde Success=true, Data=null).
+export function useBuscarRematricula() {
+  return useMutation({
+    mutationFn: ({ cpfResponsavel, dataNascimento }: { cpfResponsavel: string; dataNascimento: string }) =>
+      apiPost<DadosPreMatricula | null>(ApiRotas.inscricaoBuscarAluno, {
+        cpfResponsavel,
+        dataNascimento: `${dataNascimento}T00:00:00`,
+      }),
+  });
+}
+
 export function useEnviarInscricao() {
   return useMutation({
     mutationFn: (dados: EnvioInscricao) =>

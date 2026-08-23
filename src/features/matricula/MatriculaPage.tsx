@@ -11,10 +11,16 @@ import {
   KeyRound,
   MessageCircle,
   Copy,
+  UserSearch,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
-import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
-import { usePolosPublicos, useEnviarInscricao } from "@/features/matricula/matriculaApi";
+import { OPCOES_FAIXA_BASE, baseDaCor } from "@/features/alunos/faixa";
+import {
+  usePolosPublicos,
+  useEnviarInscricao,
+  useBuscarRematricula,
+  type DadosPreMatricula,
+} from "@/features/matricula/matriculaApi";
 import { BAIRROS } from "@/features/matricula/bairros";
 import { formatarTelefone } from "@/lib/format";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -212,6 +218,63 @@ export function MatriculaPage() {
   const [aceitouComodato, setAceitouComodato] = useState(false);
   const [aceitouLgpd, setAceitouLgpd] = useState(false);
   const [assinatura, setAssinatura] = useState("");
+
+  // Rematrícula: busca por CPF do responsável + nascimento para trazer os dados.
+  const [cpfBusca, setCpfBusca] = useState("");
+  const [nascBusca, setNascBusca] = useState("");
+  const buscarRematricula = useBuscarRematricula();
+
+  // Carrega os dados encontrados nos campos do formulário. Saúde, pesquisa
+  // familiar e termos ficam em branco de propósito: são re-respondidos a cada ano.
+  function preencherComDados(d: DadosPreMatricula) {
+    setJaEraAluno(true);
+    if (d.poloId) setPoloId(d.poloId);
+    if (d.turmaAnterior) setTurmaAnterior(String(d.turmaAnterior));
+    setNome(d.nome);
+    setDataNascimento(d.dataNascimento);
+    setRg(d.rg);
+    setCpf(d.cpf);
+    setPeso(d.peso != null ? String(d.peso) : "");
+    setAltura(d.altura != null ? String(d.altura) : "");
+    setFaixaBase(String(baseDaCor(d.faixa)));
+    setGrau(String(d.faixa - baseDaCor(d.faixa)));
+    setEscola(d.escola);
+    setSerie(d.serie);
+    setPeriodo(d.periodo);
+    setParentesco(d.parentesco ? String(d.parentesco) : "");
+    setNomeResponsavel(d.nomeResponsavel);
+    setRgResponsavel(d.rgResponsavel);
+    setCpfResponsavel(d.cpfResponsavel);
+    setRua(d.rua);
+    setNumero(d.numero);
+    setComplemento(d.complemento);
+    setBairro(d.bairro);
+    if (d.cidade) setCidade(d.cidade);
+    setWhatsApp(d.whatsApp);
+    setTelefone2(d.telefone2);
+  }
+
+  async function buscarMeusDados() {
+    if (cpfBusca.trim().length < 11 || !nascBusca) {
+      toast.warning("Informe o CPF do responsável e a data de nascimento do aluno.");
+      return;
+    }
+    try {
+      const dados = await buscarRematricula.mutateAsync({
+        cpfResponsavel: cpfBusca,
+        dataNascimento: nascBusca,
+      });
+      if (!dados) {
+        toast.error("Não encontramos um aluno com esse CPF e data de nascimento. Confira os dados ou preencha a ficha normalmente.");
+        return;
+      }
+      preencherComDados(dados);
+      toast.success(`Dados de ${dados.nome} carregados. Confira e ajuste o que mudou.`);
+      setEtapa(1);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Não foi possível buscar agora.");
+    }
+  }
 
   useEffect(() => {
     if (poloDoLink) setPoloId(poloDoLink);
@@ -442,6 +505,45 @@ export function MatriculaPage() {
           {/* 1. Polo */}
           {etapa === 0 && (
             <>
+              {/* Rematrícula: quem já é aluno traz os dados por CPF do
+                  responsável + nascimento e só edita o que mudou. */}
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+                <p className="flex items-center gap-2 text-sm font-semibold">
+                  <UserSearch className="size-4 text-primary" />
+                  Já é aluno do projeto?
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Traga seus dados do ano passado e ajuste só o que mudou.
+                </p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <Input
+                    placeholder="CPF do responsável"
+                    inputMode="numeric"
+                    value={cpfBusca}
+                    onChange={(e) => setCpfBusca(e.target.value)}
+                  />
+                  <Input
+                    type="date"
+                    aria-label="Data de nascimento do aluno"
+                    value={nascBusca}
+                    onChange={(e) => setNascBusca(e.target.value)}
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  className="mt-3"
+                  onClick={buscarMeusDados}
+                  disabled={buscarRematricula.isPending}
+                >
+                  {buscarRematricula.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <UserSearch className="size-4" />
+                  )}
+                  Buscar meus dados
+                </Button>
+              </div>
+
               <Campo label="Polo onde o aluno vai treinar" obrigatorio>
                 <Select
                   value={poloId != null ? String(poloId) : ""}
