@@ -189,15 +189,27 @@ export function ResponsavelPortal() {
       return;
     }
     setCarregando(true);
+
+    // 1) Valida as credenciais. Só um erro AQUI significa código/data errados.
     try {
       await acessar(codigo.trim().toUpperCase(), nascimento);
-      await recarregar();
     } catch (err) {
       setErro(
         err instanceof ApiError && err.status
           ? "Código ou data de nascimento incorretos."
           : "Erro ao conectar. Tente novamente em instantes.",
       );
+      setCarregando(false);
+      return;
+    }
+
+    // 2) Credenciais OK: carrega o painel. Uma falha aqui NÃO é culpa do código —
+    // não pode aparecer como "credenciais incorretas".
+    try {
+      await recarregar();
+    } catch {
+      clearRespToken();
+      setErro("Entrada confirmada, mas houve um erro ao carregar seus dados. Tente novamente em instantes.");
     } finally {
       setCarregando(false);
     }
