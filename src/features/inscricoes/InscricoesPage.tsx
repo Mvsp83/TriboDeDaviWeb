@@ -9,6 +9,7 @@ import {
   Pill,
   ChevronRight,
   Printer,
+  UserPlus,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePolos } from "@/features/polos/polosApi";
@@ -24,6 +25,7 @@ import {
   useFilaInscricoes,
   useAprovarInscricao,
   useRecusarInscricao,
+  useMatricularAno,
   STATUS_LABEL,
   StatusInscricao,
   type Inscricao,
@@ -413,9 +415,25 @@ export function InscricoesPage() {
   const [status, setStatus] = useState<string>("0");
   const [ano, setAno] = useState(String(anoAtual));
   const [aberta, setAberta] = useState<Inscricao | null>(null);
+  const [confirmarMatricula, setConfirmarMatricula] = useState(false);
 
   const statusNum = status === "todas" ? null : Number(status);
   const { data: inscricoes, isLoading, isError } = useFilaInscricoes(statusNum, Number(ano));
+  const matricularAno = useMatricularAno();
+
+  async function executarMatriculaAno() {
+    try {
+      const r = await matricularAno.mutateAsync(Number(ano));
+      toast.success(
+        r.criadas > 0
+          ? `${r.criadas} aluno(s) matriculado(s) em ${ano}. ${r.jaMatriculados} já estavam.`
+          : `Todos os ${r.totalAlunos} alunos já estavam matriculados em ${ano}.`,
+      );
+      setConfirmarMatricula(false);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Não foi possível matricular.");
+    }
+  }
 
   const anos = useMemo(
     () => [anoAtual, anoAtual - 1, anoAtual - 2].map(String),
@@ -469,8 +487,47 @@ export function InscricoesPage() {
           <p className="ml-auto text-sm text-muted-foreground">
             {isLoading ? "Carregando..." : `${lista.length} inscrição(ões)`}
           </p>
+          {/* Virada de ano: matricula em lote quem já é aluno mas ainda não tem
+              matrícula no ano selecionado. */}
+          <Button
+            variant="outline"
+            onClick={() => setConfirmarMatricula(true)}
+            disabled={matricularAno.isPending}
+          >
+            {matricularAno.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <UserPlus className="size-4" />
+            )}
+            Matricular alunos de {ano}
+          </Button>
         </CardContent>
       </Card>
+
+      <Dialog open={confirmarMatricula} onOpenChange={setConfirmarMatricula}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Matricular alunos de {ano}?</DialogTitle>
+            <DialogDescription>
+              Cria a matrícula de {ano} para{" "}
+              {sessao?.isAdministrador ? "todos os alunos ativos" : "os alunos do seu polo"}{" "}
+              que ainda não têm matrícula neste ano, usando o polo e a turma do
+              cadastro atual. Quem já está matriculado não é afetado. Use isto na
+              virada de ano para marcar quem segue no projeto.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmarMatricula(false)} disabled={matricularAno.isPending}>
+              Cancelar
+            </Button>
+            <Button onClick={executarMatriculaAno} disabled={matricularAno.isPending}>
+              {matricularAno.isPending && <Loader2 className="size-4 animate-spin" />}
+              <UserPlus className="size-4" />
+              Matricular
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {isLoading && (
         <div className="space-y-2">

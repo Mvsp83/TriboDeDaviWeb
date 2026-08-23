@@ -126,6 +126,7 @@ export const ApiRotas = {
   inscricaoAprovar: (id: number) => `/api/Inscricao/${id}/aprovar`,
   inscricaoRecusar: (id: number) => `/api/Inscricao/${id}/recusar`,
   matriculasDoAno: (ano: number) => `/api/Inscricao/matriculas/${ano}`,
+  matricularAno: (ano: number) => `/api/Inscricao/matricular-ano/${ano}`,
 
   graduacoes: (ano: number) => `/api/Graduacao?ano=${ano}`,
   graduacoesDoAluno: (alunoId: number) => `/api/Graduacao/aluno/${alunoId}`,

@@ -108,6 +108,24 @@ export function useAprovarInscricao() {
   });
 }
 
+export interface MatriculaLoteResultado {
+  criadas: number;
+  jaMatriculados: number;
+  totalAlunos: number;
+}
+
+// Virada de ano: matricula em lote os alunos ativos ainda sem matrícula no ano.
+export function useMatricularAno() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (ano: number) =>
+      apiPost<MatriculaLoteResultado>(ApiRotas.matricularAno(ano)),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["matriculas"] });
+    },
+  });
+}
+
 export function useRecusarInscricao() {
   const qc = useQueryClient();
   return useMutation({
