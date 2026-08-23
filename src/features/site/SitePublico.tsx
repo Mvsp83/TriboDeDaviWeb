@@ -71,6 +71,9 @@ export function SitePublico() {
               {s.label}
             </a>
           ))}
+          <Link to="/transparencia" className="transition-colors hover:text-foreground">
+            Transparência
+          </Link>
         </nav>
 
         <div className="order-2 flex items-center gap-2 md:order-3">
@@ -250,6 +253,13 @@ export function SitePublico() {
                 Os relatórios serão publicados aqui em breve.
               </p>
             )}
+            <Button asChild variant="outline" className="mt-6">
+              <Link to="/transparencia">
+                <Receipt className="size-4" />
+                Ver transparência e impacto
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
           </div>
         </section>
       )}

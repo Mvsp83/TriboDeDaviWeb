@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { FileDown, Info, Loader2, Users, MapPin, CalendarDays, Percent } from "lucide-react";
+import { FileDown, Info, Loader2, Users, MapPin, CalendarDays, Percent, ClipboardCopy } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAlunos } from "@/features/alunos/alunosApi";
 import { useAulas } from "@/features/aulas/aulasApi";
@@ -138,6 +138,32 @@ export function ImpactoPage() {
   const semMatriculas = (matriculas ?? []).length === 0;
   const anos = [anoAtual, anoAtual - 1, anoAtual - 2, anoAtual - 3].map(String);
 
+  // Monta o bloco `impacto` no formato de conteudoTransparencia.ts, para o
+  // coordenador colar na página pública sem redigitar nem recalcular nada.
+  async function copiarParaTransparencia() {
+    const lista = (itens: { nome: string; quantidade: number }[]) =>
+      itens.map((i) => `\n      { nome: ${JSON.stringify(i.nome)}, quantidade: ${i.quantidade} },`).join("");
+    const snippet = `impacto: {
+    ano: ${impacto.ano},
+    atendidos: ${impacto.atendidos},
+    polos: ${impacto.polos},
+    aulas: ${impacto.aulas},
+    frequenciaMedia: ${impacto.frequenciaMedia ?? 0},
+    escolas: ${impacto.escolas},
+    bairros: ${impacto.bairros.length},
+    faixasEtarias: [${lista(impacto.faixasEtarias.map((f) => ({ nome: f.rotulo, quantidade: f.quantidade })))}
+    ],
+    graduacoes: [${lista(impacto.graduacoes)}
+    ],
+  },`;
+    try {
+      await navigator.clipboard.writeText(snippet);
+      toast.success("Números copiados. Cole no bloco `impacto` de conteudoTransparencia.ts.");
+    } catch {
+      toast.error("Não foi possível copiar. Verifique a permissão da área de transferência.");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-start gap-2 rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
@@ -169,6 +195,14 @@ export function ImpactoPage() {
           <Button
             variant="outline"
             className="ml-auto"
+            disabled={carregando || impacto.atendidos === 0}
+            onClick={copiarParaTransparencia}
+          >
+            <ClipboardCopy className="size-4" />
+            Números para a página pública
+          </Button>
+          <Button
+            variant="outline"
             disabled={carregando || impacto.atendidos === 0}
             onClick={() => {
               if (!imprimirImpacto(impacto)) {

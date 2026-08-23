@@ -5,6 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { DoacaoPage } from "@/features/doacao/DoacaoPage";
 import { SitePublico } from "@/features/site/SitePublico";
+import { TransparenciaPage } from "@/features/transparencia/TransparenciaPage";
 import { MatriculaPage } from "@/features/matricula/MatriculaPage";
 import { ResponsavelPortal } from "@/features/responsavel/ResponsavelPortal";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -162,6 +163,7 @@ export default function App() {
       <Route path="/" element={<Raiz />} />
       <Route path="/site" element={<SitePublico />} />
       <Route path="/doar" element={<DoacaoPage />} />
+      <Route path="/transparencia" element={<TransparenciaPage />} />
       <Route path="/matricula" element={<MatriculaPage />} />
       <Route path="/responsavel" element={<ResponsavelPortal />} />
 
