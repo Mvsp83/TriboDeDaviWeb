@@ -50,6 +50,8 @@ export default defineConfig({
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
+        // Adiciona os handlers de Web Push ao SW gerado, sem alterar o precache.
+        importScripts: ["push-sw.js"],
       },
       // Permite testar o PWA/offline rodando `npm run dev`.
       devOptions: { enabled: true, type: "module", navigateFallback: "index.html" },

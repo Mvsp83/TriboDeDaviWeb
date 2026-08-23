@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Menu, LogOut, ImageIcon, ShieldCheck } from "lucide-react";
+import { Menu, LogOut, ImageIcon, ShieldCheck, Bell } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useMeuAvatar } from "@/features/perfil/perfilApi";
 import { AvatarView } from "@/features/perfil/presets";
 import { AvatarDialog } from "@/features/perfil/AvatarDialog";
 import { Seguranca2FADialog } from "@/features/seguranca/Seguranca2FADialog";
+import { NotificacoesDialog } from "@/features/notificacoes/NotificacoesDialog";
 import { Badge } from "@/components/ui/badge";
 import { SyncIndicator } from "@/components/layout/SyncIndicator";
 import {
@@ -27,6 +28,7 @@ export function Topbar({
   const { data: avatar } = useMeuAvatar();
   const [dialogAvatar, setDialogAvatar] = useState(false);
   const [dialog2fa, setDialog2fa] = useState(false);
+  const [dialogNotif, setDialogNotif] = useState(false);
 
   const nome = sessao?.login ?? "?";
 
@@ -70,6 +72,10 @@ export function Topbar({
             <ShieldCheck className="size-4" />
             Verificação em 2 etapas
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDialogNotif(true)}>
+            <Bell className="size-4" />
+            Notificações
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={sair}
             className="text-destructive focus:text-destructive"
@@ -88,6 +94,8 @@ export function Topbar({
       />
 
       <Seguranca2FADialog aberto={dialog2fa} onOpenChange={setDialog2fa} />
+
+      <NotificacoesDialog aberto={dialogNotif} onOpenChange={setDialogNotif} />
     </header>
   );
 }

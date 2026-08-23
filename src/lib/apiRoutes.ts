@@ -37,6 +37,12 @@ export const ApiRotas = {
   responsavelAutorizarImagem: "/api/Responsavel/autorizar-imagem",
   responsavelJustificarFalta: "/api/Responsavel/justificar-falta",
 
+  // Web Push (notificações no dispositivo do usuário logado).
+  pushVapidPublicKey: "/api/Push/vapid-public-key",
+  pushInscrever: "/api/Push/inscrever",
+  pushDesinscrever: "/api/Push/desinscrever",
+  pushTestar: "/api/Push/testar",
+
   aulasGetAll: "/api/Aula/get-all",
   aulasPorPolo: `/api/Aula/get-por-polo?${TODAS_TURMAS}`,
   aulaCreate: "/api/Aula/create",
