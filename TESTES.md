@@ -28,10 +28,22 @@ Foco na **lógica pura e de alto risco**, sem depender de rede/DOM completo:
 `lint` (oxlint), `test` (Vitest) e `build` (tsc + vite). O deploy do front
 (estático — Cloudflare Pages/Netlify) fica pendente da decisão de hospedagem.
 
-## Próximo passo: E2E de navegador (adiado)
+## E2E de navegador (Playwright)
 
-O E2E completo do fluxo de chamada (Playwright: login → criar aula → registrar
-presença → validar offline/sync) foi **deixado para depois** porque exige a
-**API + banco no ar** e um service worker registrado — instável em CI sem essa
-infra. A lógica offline central já está coberta por unidade aqui; quando houver
-um ambiente de staging da API, vale um smoke test Playwright do caminho feliz.
+Config em `playwright.config.ts`, testes em `e2e/`. Rode com:
+
+```bash
+npm run e2e        # roda os testes (sobe o dev server se preciso)
+npm run e2e:ui     # modo interativo
+```
+
+Cobre hoje as **telas públicas** — que não dependem da API no ar (`e2e/publico.spec.ts`):
+site (herói, chamadas, skip-link de acessibilidade, navegação até a
+transparência), transparência (identificação/CNPJ) e doação, além do título de
+aba por rota. O `webServer` reaproveita um dev server já rodando na 5173.
+
+**Ainda adiado (exige staging da API + banco):** o fluxo completo de chamada
+(login → criar aula → registrar presença → offline/sync) e as demais telas
+autenticadas (portal do responsável, matrícula com envio, painel). A lógica
+offline central já está coberta por unidade aqui; quando houver staging, vale
+o smoke test Playwright do caminho feliz.

@@ -30,6 +30,28 @@ jobs:
       - name: Build (tsc + vite)
         run: npm run build
 
+  # E2E das telas públicas (não dependem da API): o próprio Playwright sobe o
+  # dev server. Mantido em job separado para não travar o build/testes de unidade.
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Instalar navegador do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E (Playwright — telas públicas)
+        run: npm run e2e
+
   # Deploy: pendente da decisão de hospedagem do front (Cloudflare Pages /
   # Netlify — estático). Quando definido, adicionar um job "deploy" que roda
   # após build-test no push do master.
