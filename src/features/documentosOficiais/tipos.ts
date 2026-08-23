@@ -47,4 +47,7 @@ export const RECIBO_DEFAULT: ReciboConteudo = {
 export const TIPO_DOC_LABEL: Record<number, string> = {
   0: "Ofício",
   1: "Recibo",
+  // Tipo 2: recibo emitido a partir de uma doação (fluxo Doações), com
+  // numeração própria. Aparece aqui junto dos demais documentos oficiais.
+  2: "Recibo de doação",
 };

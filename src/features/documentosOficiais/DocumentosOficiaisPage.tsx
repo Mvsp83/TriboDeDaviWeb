@@ -63,7 +63,13 @@ export function DocumentosOficiaisPage() {
   const filtrados = useMemo(
     () =>
       (docs ?? [])
-        .filter((d) => filtroTipo === "todos" || d.tipo === Number(filtroTipo))
+        .filter((d) => {
+          if (filtroTipo === "todos") return true;
+          // "Recibos" agrupa recibo comum (1) e recibo de doação (2), que têm
+          // numeração própria mas são ambos recibos para quem filtra.
+          if (filtroTipo === "recibos") return d.tipo === 1 || d.tipo === 2;
+          return d.tipo === Number(filtroTipo);
+        })
         .sort((a, b) => b.dataDocumento.localeCompare(a.dataDocumento)),
     [docs, filtroTipo],
   );
@@ -125,7 +131,7 @@ export function DocumentosOficiaisPage() {
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="0">Ofícios</SelectItem>
-                <SelectItem value="1">Recibos</SelectItem>
+                <SelectItem value="recibos">Recibos</SelectItem>
               </SelectContent>
             </Select>
           </div>
