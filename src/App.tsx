@@ -22,6 +22,9 @@ const MatriculaPage = lazy(() =>
 const ResponsavelPortal = lazy(() =>
   import("@/features/responsavel/ResponsavelPortal").then((m) => ({ default: m.ResponsavelPortal })),
 );
+const GaleriaPage = lazy(() =>
+  import("@/features/galeria/GaleriaPage").then((m) => ({ default: m.GaleriaPage })),
+);
 
 // Fallback enquanto um chunk carrega (público, fora do AppLayout).
 function CarregandoTela() {
@@ -187,6 +190,7 @@ export default function App() {
       <Route path="/site" element={<SitePublico />} />
       <Route path="/doar" element={<DoacaoPage />} />
       <Route path="/transparencia" element={<TransparenciaPage />} />
+      <Route path="/galeria" element={<GaleriaPage />} />
       <Route path="/matricula" element={<MatriculaPage />} />
       <Route path="/responsavel" element={<ResponsavelPortal />} />
 

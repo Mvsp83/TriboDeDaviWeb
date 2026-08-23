@@ -81,6 +81,9 @@ export function SitePublico() {
               {s.label}
             </a>
           ))}
+          <Link to="/galeria" className="transition-colors hover:text-foreground">
+            Galeria
+          </Link>
           <Link to="/transparencia" className="transition-colors hover:text-foreground">
             Transparência
           </Link>
@@ -226,6 +229,13 @@ export function SitePublico() {
               Em breve — fotos das aulas, eventos e graduações do projeto.
             </p>
           )}
+          <Button asChild variant="outline" className="mt-6">
+            <Link to="/galeria">
+              <Camera className="size-4" />
+              Ver galeria por evento
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
         </div>
       </section>
 

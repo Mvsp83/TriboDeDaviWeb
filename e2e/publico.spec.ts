@@ -51,6 +51,22 @@ test.describe("Doação", () => {
   });
 });
 
+test.describe("Galeria", () => {
+  test("carrega a galeria por evento", async ({ page }) => {
+    await page.goto("/galeria");
+    await expect(page).toHaveTitle(/Galeria de fotos/);
+    await expect(
+      page.getByRole("heading", { name: /Galeria de fotos/i }),
+    ).toBeVisible();
+  });
+
+  test("é acessível pelo menu do site", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("link", { name: "Galeria" }).first().click();
+    await expect(page).toHaveURL(/\/galeria$/);
+  });
+});
+
 test.describe("Títulos por rota", () => {
   test("cada tela pública tem seu próprio título", async ({ page }) => {
     await page.goto("/matricula");
