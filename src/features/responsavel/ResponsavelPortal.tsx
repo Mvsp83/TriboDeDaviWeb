@@ -14,6 +14,13 @@ import {
   Camera,
   MessageSquarePlus,
   CloudOff,
+  Flame,
+  Star,
+  Trophy,
+  Award,
+  Zap,
+  Sparkles,
+  Lock,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import {
@@ -29,6 +36,11 @@ import {
   type PainelResponsavel,
   type PresencaItem,
 } from "@/features/responsavel/responsavelApi";
+import {
+  calcularSelos,
+  proximoSelo,
+  type Selo,
+} from "@/features/responsavel/conquistas";
 import { faixaInfo } from "@/features/alunos/faixa";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { LogoLockup } from "@/components/Logo";
@@ -60,6 +72,83 @@ function FaixaBadge({ faixa }: { faixa: number }) {
 
 function dataBR(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR");
+}
+
+// Ícone lucide de cada selo (a lógica de conquistas não conhece a UI).
+const ICONE_SELO = {
+  medal: Medal,
+  flame: Flame,
+  star: Star,
+  trophy: Trophy,
+  award: Award,
+  zap: Zap,
+} as const;
+
+function SeloCard({ selo }: { selo: Selo }) {
+  const Icone = ICONE_SELO[selo.icone];
+  const pct = selo.meta > 0 ? Math.min(100, Math.round((selo.atual * 100) / selo.meta)) : 0;
+  return (
+    <div
+      className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-center ${
+        selo.conquistado
+          ? "border-primary/40 bg-primary/5"
+          : "border-dashed border-border opacity-70"
+      }`}
+    >
+      <div
+        className={`flex size-11 items-center justify-center rounded-full ${
+          selo.conquistado ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"
+        }`}
+      >
+        {selo.conquistado ? <Icone className="size-6" /> : <Lock className="size-4" />}
+      </div>
+      <div className="text-xs font-semibold leading-tight">{selo.nome}</div>
+      <div className="text-[11px] leading-tight text-muted-foreground">{selo.descricao}</div>
+      {!selo.conquistado && (
+        <div className="mt-0.5 w-full">
+          <div className="h-1 overflow-hidden rounded-full bg-secondary">
+            <div className="h-full rounded-full bg-primary/60" style={{ width: `${pct}%` }} />
+          </div>
+          <div className="mt-0.5 text-[10px] tabular-nums text-muted-foreground">
+            {selo.atual}/{selo.meta}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Card de conquistas do aluno: selos por presença/sequência/assiduidade.
+function ConquistasCard({ painel }: { painel: PainelResponsavel }) {
+  const selos = calcularSelos(painel.frequencia, painel.presencas);
+  const conquistados = selos.filter((s) => s.conquistado);
+  const proximo = proximoSelo(selos);
+
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+          <Sparkles className="size-4" /> Conquistas
+        </h2>
+        {conquistados.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Cada aula presente aproxima o primeiro selo. Bora não faltar! 🥋
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {conquistados.length} selo{conquistados.length > 1 ? "s" : ""} conquistado
+            {conquistados.length > 1 ? "s" : ""}.
+            {proximo && ` Falta pouco para "${proximo.nome}".`}
+          </p>
+        )}
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4">
+          {selos.map((s) => (
+            <SeloCard key={s.id} selo={s} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export function ResponsavelPortal() {
@@ -383,6 +472,9 @@ export function ResponsavelPortal() {
             )}
           </CardContent>
         </Card>
+
+        {/* Conquistas (gamificação da frequência) */}
+        <ConquistasCard painel={painel} />
 
         {/* Graduação */}
         <Card>
