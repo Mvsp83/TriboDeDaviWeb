@@ -390,6 +390,11 @@ export function ExtratosPage() {
                 <Resumo label="Saldo atual" valor={moeda(saldoAtual)} />
                 <Resumo label="Saldo conciliado" valor={moeda(saldoConcil)} />
               </div>
+              <p className="text-xs text-muted-foreground">
+                <span className="font-medium">Saldo atual</span>: todos os lançamentos.{" "}
+                <span className="font-medium">Saldo conciliado</span>: só os já conferidos
+                com o banco (marcados ✓ na coluna Concil.).
+              </p>
 
               <div className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-secondary/30 p-3">
                 <div>
@@ -403,22 +408,28 @@ export function ExtratosPage() {
                     className="w-44"
                   />
                 </div>
-                <div className="text-sm">
+                <div className="max-w-md text-sm">
                   {diffBanco === null ? (
                     <p className="text-muted-foreground">
-                      Informe o saldo do banco para conferir a conciliação.
+                      Digite o saldo final que aparece no <span className="font-medium text-foreground">extrato do seu banco</span>.
+                      O sistema compara com o <span className="font-medium text-foreground">Saldo conciliado</span> (soma
+                      dos lançamentos marcados ✓ na coluna Concil.) — quando os dois baterem, a conta está conciliada.
                       <br />
                       {pendentes} lançamento(s) ainda não conciliado(s).
                     </p>
                   ) : Math.abs(diffBanco) < 0.005 ? (
                     <p className="flex items-center gap-1.5 font-medium text-success">
                       <CheckCircle2 className="size-4" />
-                      Conciliado — saldo confere com o banco.
+                      Confere com o banco — conciliação fechada.
                     </p>
                   ) : (
-                    <p className="font-medium text-warning">
-                      Diferença de {moeda(diffBanco)} entre o saldo conciliado e
-                      o banco. {pendentes} lançamento(s) pendente(s).
+                    <p className="text-warning">
+                      <span className="font-medium">
+                        Diferença de {moeda(diffBanco)}
+                      </span>{" "}
+                      entre o saldo conciliado e o banco. Marque os lançamentos que
+                      faltam na coluna Concil. (ou revise valores) até zerar.
+                      {pendentes > 0 && ` ${pendentes} ainda não conciliado(s).`}
                     </p>
                   )}
                 </div>
