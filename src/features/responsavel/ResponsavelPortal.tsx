@@ -39,7 +39,11 @@ import {
 import {
   calcularSelos,
   proximoSelo,
+  presencasDoAno,
+  anosComPresenca,
+  resumoDoAno,
   type Selo,
+  type ResumoFrequencia,
 } from "@/features/responsavel/conquistas";
 import { faixaInfo } from "@/features/alunos/faixa";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -120,8 +124,15 @@ function SeloCard({ selo }: { selo: Selo }) {
 }
 
 // Card de conquistas do aluno: selos por presença/sequência/assiduidade.
-function ConquistasCard({ painel }: { painel: PainelResponsavel }) {
-  const selos = calcularSelos(painel.frequencia, painel.presencas);
+// Recebe já escopado ao ano selecionado (os índices reiniciam a cada ciclo).
+function ConquistasCard({
+  resumo,
+  presencas,
+}: {
+  resumo: ResumoFrequencia;
+  presencas: PresencaItem[];
+}) {
+  const selos = calcularSelos(resumo, presencas);
   const conquistados = selos.filter((s) => s.conquistado);
   const proximo = proximoSelo(selos);
 
@@ -159,6 +170,8 @@ export function ResponsavelPortal() {
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [painel, setPainel] = useState<PainelResponsavel | null>(null);
+  // Ano do ciclo em exibição (índices reiniciam por ano).
+  const [anoSel, setAnoSel] = useState(new Date().getFullYear());
   // Ids das faltas com justificativa aguardando envio (fila offline).
   const [pendentes, setPendentes] = useState<Set<number>>(new Set());
 
@@ -373,7 +386,13 @@ export function ResponsavelPortal() {
     );
   }
 
-  const { aluno, frequencia, presencas, graduacoes, avisos, eventos } = painel;
+  const { aluno, graduacoes, avisos, eventos } = painel;
+
+  // Índices reiniciam por ano (ciclo anual): frequência, presenças e conquistas
+  // contam só o ano selecionado. O seletor mostra os anos com registro.
+  const anos = anosComPresenca(painel.presencas, new Date().getFullYear());
+  const presencas = presencasDoAno(painel.presencas, anoSel);
+  const frequencia = resumoDoAno(presencas);
 
   return (
     <div className="min-h-svh bg-background">
@@ -402,30 +421,56 @@ export function ResponsavelPortal() {
           </CardContent>
         </Card>
 
-        {/* Frequência */}
+        {/* Frequência (do ano selecionado) */}
         <Card>
           <CardContent className="p-5">
-            <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
-              Frequência
-            </h2>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div>
-                <div className="text-2xl font-bold">{frequencia.percentual}%</div>
-                <div className="text-xs text-muted-foreground">Presença</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-emerald-600">
-                  {frequencia.presencas}
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-muted-foreground">
+                Frequência em {anoSel}
+              </h2>
+              {anos.length > 1 && (
+                <div className="flex gap-1">
+                  {anos.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAnoSel(a)}
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium tabular-nums transition-colors ${
+                        a === anoSel
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {a}
+                    </button>
+                  ))}
                 </div>
-                <div className="text-xs text-muted-foreground">Presenças</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-destructive">
-                  {frequencia.faltas}
-                </div>
-                <div className="text-xs text-muted-foreground">Faltas</div>
-              </div>
+              )}
             </div>
+            {frequencia.totalAulas === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma aula registrada em {anoSel} ainda.
+              </p>
+            ) : (
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <div className="text-2xl font-bold">{frequencia.percentual}%</div>
+                  <div className="text-xs text-muted-foreground">Presença</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-emerald-600">
+                    {frequencia.presencas}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Presenças</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-destructive">
+                    {frequencia.totalAulas - frequencia.presencas}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Faltas</div>
+                </div>
+              </div>
+            )}
             {presencas.length > 0 && (
               <div className="mt-4 flex flex-col divide-y divide-border/60">
                 {presencas.slice(0, 10).map((p) => {
@@ -487,8 +532,8 @@ export function ResponsavelPortal() {
           </CardContent>
         </Card>
 
-        {/* Conquistas (gamificação da frequência) */}
-        <ConquistasCard painel={painel} />
+        {/* Conquistas (gamificação da frequência) — do ano selecionado */}
+        <ConquistasCard resumo={frequencia} presencas={presencas} />
 
         {/* Graduação */}
         <Card>

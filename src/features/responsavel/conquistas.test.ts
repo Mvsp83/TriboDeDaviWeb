@@ -3,6 +3,9 @@ import {
   sequenciaAtual,
   calcularSelos,
   proximoSelo,
+  presencasDoAno,
+  anosComPresenca,
+  resumoDoAno,
   type PresencaLite,
 } from "@/features/responsavel/conquistas";
 
@@ -63,6 +66,44 @@ describe("calcularSelos", () => {
     const selos = calcularSelos({ presencas: 6, percentual: 100, totalAulas: 6 }, lista);
     expect(selos.find((s) => s.id === "seq-5")!.conquistado).toBe(true);
     expect(selos.find((s) => s.id === "seq-10")!.conquistado).toBe(false);
+  });
+});
+
+describe("escopo por ano (ciclo anual)", () => {
+  const lista = [
+    p("2026-03-01", true),
+    p("2026-03-08", false),
+    p("2025-11-10", true),
+    p("2025-11-17", true),
+  ];
+
+  it("presencasDoAno filtra pelo ano", () => {
+    expect(presencasDoAno(lista, 2026)).toHaveLength(2);
+    expect(presencasDoAno(lista, 2025)).toHaveLength(2);
+    expect(presencasDoAno(lista, 2024)).toHaveLength(0);
+  });
+
+  it("anosComPresenca lista anos com registro + o corrente, desc", () => {
+    expect(anosComPresenca(lista, 2026)).toEqual([2026, 2025]);
+    // ano corrente sem registros ainda aparece mesmo assim
+    expect(anosComPresenca(lista, 2027)).toEqual([2027, 2026, 2025]);
+  });
+
+  it("resumoDoAno calcula frequência da lista filtrada", () => {
+    const r2026 = resumoDoAno(presencasDoAno(lista, 2026));
+    expect(r2026).toEqual({ totalAulas: 2, presencas: 1, percentual: 50 });
+    const r2025 = resumoDoAno(presencasDoAno(lista, 2025));
+    expect(r2025).toEqual({ totalAulas: 2, presencas: 2, percentual: 100 });
+  });
+
+  it("índices reiniciam: os selos de um ano ignoram os outros", () => {
+    // 2025 tem 2 presenças; não conquista o selo de 10 presenças.
+    const selos2025 = calcularSelos(
+      resumoDoAno(presencasDoAno(lista, 2025)),
+      presencasDoAno(lista, 2025),
+    );
+    expect(selos2025.find((s) => s.id === "total-10")!.conquistado).toBe(false);
+    expect(selos2025.find((s) => s.id === "total-10")!.atual).toBe(2);
   });
 });
 

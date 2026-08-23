@@ -25,6 +25,33 @@ export interface Selo {
   conquistado: boolean;
 }
 
+// Presenças de um ano específico (índices reiniciam por ciclo anual).
+export function presencasDoAno<T extends PresencaLite>(presencas: T[], ano: number): T[] {
+  return presencas.filter((p) => new Date(p.data).getFullYear() === ano);
+}
+
+// Anos com presença registrada, mais recente primeiro — alimenta o seletor de
+// ano. Sempre inclui o ano informado (corrente), mesmo sem registros ainda.
+export function anosComPresenca(presencas: PresencaLite[], anoCorrente: number): number[] {
+  const anos = new Set<number>([anoCorrente]);
+  for (const p of presencas) {
+    const a = new Date(p.data).getFullYear();
+    if (!Number.isNaN(a)) anos.add(a);
+  }
+  return [...anos].sort((a, b) => b - a);
+}
+
+// Resumo de frequência a partir de uma lista JÁ filtrada (ex.: por ano).
+export function resumoDoAno(presencas: PresencaLite[]): ResumoFrequencia {
+  const totalAulas = presencas.length;
+  const presentes = presencas.filter((p) => p.presente).length;
+  return {
+    totalAulas,
+    presencas: presentes,
+    percentual: totalAulas > 0 ? Math.round((presentes * 100) / totalAulas) : 0,
+  };
+}
+
 // Maior sequência de presenças consecutivas terminando na aula mais recente.
 // A lista vem mais recente primeiro (como no painel do responsável); paramos na
 // primeira falta. É a "sequência atual" — o que o aluno tem a perder faltando.
