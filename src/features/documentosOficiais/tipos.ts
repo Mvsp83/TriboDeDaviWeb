@@ -44,10 +44,26 @@ export const RECIBO_DEFAULT: ReciboConteudo = {
   documentoAssinante: "",
 };
 
-// Recibo comum (1) e recibo de doação (2) compartilham o mesmo conteúdo
-// (ReciboConteudo) e o mesmo layout — só a numeração é separada. Este helper
-// evita repetir a checagem em cada lugar (PDF, editor, filtro).
-export const ehRecibo = (tipo: number) => tipo === 1 || tipo === 2;
+// Tipo do recibo emitido pelo fluxo de Doações (numeração própria). O conteúdo
+// tem outro formato (dados do doador), tratado à parte no PDF; não é editável
+// nesta tela (nasce aprovado a partir da doação).
+export const TIPO_RECIBO_DOACAO = 2;
+
+// Recibo comum (1) e recibo de doação (2) são ambos "recibos" para filtro e
+// layout base. Este helper evita repetir a checagem (PDF, editor, filtro).
+export const ehRecibo = (tipo: number) => tipo === 1 || tipo === TIPO_RECIBO_DOACAO;
+
+// Conteúdo do recibo de doação (formato gravado pelo DoacaoService).
+export interface ReciboDoacaoConteudo {
+  doadorNome: string;
+  doadorDocumento: string;
+  doadorEndereco: string;
+  doadorCidade: string;
+  valor: number;
+  data: string;
+  forma: string;
+  finalidade: string;
+}
 
 export const TIPO_DOC_LABEL: Record<number, string> = {
   0: "Ofício",

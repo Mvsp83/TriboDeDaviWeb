@@ -16,7 +16,7 @@ import {
   useExcluirDocumentoOficial,
 } from "@/features/documentosOficiais/documentosOficiaisApi";
 import { exportarDocumentoOficialPdf } from "@/features/documentosOficiais/documentosOficiaisPdf";
-import { TIPO_DOC_LABEL } from "@/features/documentosOficiais/tipos";
+import { TIPO_DOC_LABEL, TIPO_RECIBO_DOACAO } from "@/features/documentosOficiais/tipos";
 import { dataCurtaBR } from "@/lib/format";
 import { ApiError } from "@/lib/api";
 import { STATUS_DOC, type DocumentoOficial } from "@/types";
@@ -172,11 +172,22 @@ export function DocumentosOficiaisPage() {
               {!isLoading &&
                 filtrados.map((d) => {
                   const aprovado = d.status === STATUS_DOC.Aprovado;
+                  // Recibo de doação nasce da tela de Doações e é imutável: não
+                  // abre no editor (o conteúdo tem outro formato). Só o PDF.
+                  const editavel = d.tipo !== TIPO_RECIBO_DOACAO;
                   return (
                     <TableRow
                       key={d.id}
-                      className="cursor-pointer transition-colors hover:bg-secondary/40"
-                      onClick={() => navigate(`/documentos-oficiais/editor/${d.id}`)}
+                      className={
+                        editavel
+                          ? "cursor-pointer transition-colors hover:bg-secondary/40"
+                          : "transition-colors"
+                      }
+                      onClick={
+                        editavel
+                          ? () => navigate(`/documentos-oficiais/editor/${d.id}`)
+                          : undefined
+                      }
                     >
                       <TableCell className="font-medium tabular-nums">
                         {d.numeroFormatado || "—"}

@@ -3,8 +3,12 @@
 import { abrirParaImpressao, esc } from "@/lib/impressaoDocumento";
 import { moeda } from "@/lib/format";
 import type { DocumentoOficial } from "@/types";
-import type { OficioConteudo, ReciboConteudo } from "@/features/documentosOficiais/tipos";
-import { TIPO_DOC_LABEL, ehRecibo } from "@/features/documentosOficiais/tipos";
+import type {
+  OficioConteudo,
+  ReciboConteudo,
+  ReciboDoacaoConteudo,
+} from "@/features/documentosOficiais/tipos";
+import { TIPO_DOC_LABEL, ehRecibo, TIPO_RECIBO_DOACAO } from "@/features/documentosOficiais/tipos";
 
 const MESES = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
@@ -61,6 +65,30 @@ function reciboCorpo(c: ReciboConteudo): string {
   `;
 }
 
+// Recibo emitido a partir de uma doação: o conteúdo traz os dados do doador
+// (formato diferente do recibo comum), então tem seu próprio corpo.
+function reciboDoacaoCorpo(c: ReciboDoacaoConteudo): string {
+  const valorFmt = moeda(c.valor);
+  const docDoador = c.doadorDocumento ? ` (${esc(c.doadorDocumento)})` : "";
+  const forma = c.forma ? ` por ${esc(c.forma)}` : "";
+  const finalidade = c.finalidade ? `, destinada a ${esc(c.finalidade)}` : "";
+  const endereco = [c.doadorEndereco, c.doadorCidade].filter(Boolean).join(", ");
+  return `
+    <p style="font-size:16px;"><strong>Valor: ${valorFmt}</strong></p>
+    <p style="margin-top:12px;line-height:1.7;">
+      Recebemos de <strong>${esc(c.doadorNome)}</strong>${docDoador}${endereco ? `, ${esc(endereco)}` : ""}
+      a importância de <strong>${valorFmt}</strong>, a título de doação${forma}${finalidade}.
+    </p>
+    <p style="margin-top:8px;line-height:1.7;">
+      Firmamos o presente recibo para os devidos fins de comprovação.
+    </p>
+    <p style="margin-top:48px;text-align:center;">
+      _______________________________________<br/>
+      Instituto Tribo de Davi
+    </p>
+  `;
+}
+
 export function exportarDocumentoOficialPdf(doc: DocumentoOficial): boolean {
   let conteudo: OficioConteudo | ReciboConteudo;
   try {
@@ -74,9 +102,12 @@ export function exportarDocumentoOficialPdf(doc: DocumentoOficial): boolean {
     .filter(Boolean)
     .join(", ") + ".";
 
-  const corpoHtml = ehRecibo(doc.tipo)
-    ? reciboCorpo(conteudo as ReciboConteudo)
-    : oficioCorpo(conteudo as OficioConteudo);
+  const corpoHtml =
+    doc.tipo === TIPO_RECIBO_DOACAO
+      ? reciboDoacaoCorpo(conteudo as unknown as ReciboDoacaoConteudo)
+      : ehRecibo(doc.tipo)
+        ? reciboCorpo(conteudo as ReciboConteudo)
+        : oficioCorpo(conteudo as OficioConteudo);
 
   return abrirParaImpressao({
     titulo: numeroRotulo(doc),
