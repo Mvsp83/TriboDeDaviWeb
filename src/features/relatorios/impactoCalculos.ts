@@ -74,17 +74,12 @@ export function calcularImpacto({
   nomePolo: (id: number) => string;
   nomeFaixa: (faixa: number) => string;
 }): Impacto {
-  // Base do relatório: quem teve matrícula no ano. Se ainda não há matrículas
-  // registradas (anos anteriores à adoção), cai no cadastro de alunos para o
-  // relatório não sair zerado.
-  const usandoMatriculas = matriculas.length > 0;
-  const porId = new Map(alunos.map((a) => [a.id, a]));
-
-  const atendidosLista: Aluno[] = usandoMatriculas
-    ? matriculas
-        .map((m) => porId.get(m.alunoId))
-        .filter((a): a is Aluno => Boolean(a))
-    : alunos;
+  // Base do relatório: todos os alunos ativos que o usuário enxerga. A matrícula
+  // do ano, quando existe, é usada só para atribuir o polo daquele ano (o aluno
+  // pode ter mudado de polo depois) — e NÃO para filtrar quem conta. Filtrar por
+  // matrícula quebrava o relatório na transição: enquanto só parte dos alunos
+  // tem matrícula (ex.: só os cadastrados pela web), ele mostrava apenas esses.
+  const atendidosLista: Aluno[] = alunos;
 
   // Polo do ano vem da matrícula (o aluno pode ter mudado de polo depois).
   const poloDoAluno = new Map<number, number>(

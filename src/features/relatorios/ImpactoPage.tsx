@@ -135,7 +135,6 @@ export function ImpactoPage() {
     [anoNum, matriculas, alunos, aulas, presencas, nomePolo],
   );
 
-  const semMatriculas = (matriculas ?? []).length === 0;
   const anos = [anoAtual, anoAtual - 1, anoAtual - 2, anoAtual - 3].map(String);
 
   // Monta o bloco `impacto` no formato de conteudoTransparencia.ts, para o
@@ -170,8 +169,8 @@ export function ImpactoPage() {
         <Info className="mt-0.5 size-4 shrink-0" />
         <p>
           Números do projeto no ano, prontos para <span className="font-medium text-foreground">prestação
-          de contas e inscrição em editais</span>. Tudo é calculado a partir das
-          matrículas, aulas e chamadas já registradas.
+          de contas e inscrição em editais</span>. Os atendidos vêm do cadastro de
+          alunos; aulas e frequência, das chamadas do ano selecionado.
         </p>
       </div>
 
@@ -215,15 +214,6 @@ export function ImpactoPage() {
           </Button>
         </CardContent>
       </Card>
-
-      {semMatriculas && !carregando && (
-        <div className="rounded-md border border-warning/40 bg-warning/10 p-3 text-sm text-muted-foreground">
-          Ainda não há matrículas registradas em {ano}. Os números abaixo usam o
-          cadastro de alunos como base — a partir do ano em que a matrícula
-          passar a ser feita pelo sistema, eles refletem exatamente quem foi
-          atendido naquele ano.
-        </div>
-      )}
 
       {carregando ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
