@@ -15,6 +15,7 @@ import { moeda, dataCurtaBR } from "@/lib/format";
 import { ApiError } from "@/lib/api";
 import type { BemPatrimonial } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
+import { IdRef } from "@/components/IdRef";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -230,6 +231,7 @@ export function PatrimonioPage() {
                       <Badge variant="outline">{CATEGORIA_BEM_LABEL[b.categoria]}</Badge>
                     </TableCell>
                     <TableCell className="font-medium">
+                      <IdRef id={b.id} />
                       {b.descricao}
                       {b.numeroPatrimonio ? (
                         <span className="ml-1 text-xs text-muted-foreground">
