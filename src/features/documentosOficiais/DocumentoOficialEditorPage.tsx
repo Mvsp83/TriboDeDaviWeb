@@ -11,6 +11,7 @@ import {
   OFICIO_DEFAULT,
   RECIBO_DEFAULT,
   TIPO_DOC_LABEL,
+  ehRecibo,
   type OficioConteudo,
   type ReciboConteudo,
 } from "@/features/documentosOficiais/tipos";
@@ -18,7 +19,7 @@ import { exportarDocumentoOficialPdf } from "@/features/documentosOficiais/docum
 import { valorPorExtenso } from "@/features/documentosOficiais/valorExtenso";
 import { paraInputDate } from "@/lib/format";
 import { ApiError } from "@/lib/api";
-import { TIPO_DOC_OFICIAL, STATUS_DOC, type DocumentoOficial } from "@/types";
+import { STATUS_DOC, type DocumentoOficial } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,7 +40,8 @@ export function DocumentoOficialEditorPage() {
   const aprovar = useAprovarDocumentoOficial();
 
   const tipo = doc ? doc.tipo : tipoParam === "recibo" ? 1 : 0;
-  const isRecibo = tipo === TIPO_DOC_OFICIAL.Recibo;
+  // Recibo comum (1) e recibo de doação (2) usam o mesmo formulário/layout.
+  const isRecibo = ehRecibo(tipo);
   const travado = doc?.status === STATUS_DOC.Aprovado;
 
   const [dataDocumento, setDataDocumento] = useState(
@@ -55,7 +57,7 @@ export function DocumentoOficialEditorPage() {
     setDataDocumento(paraInputDate(doc.dataDocumento));
     try {
       const c = JSON.parse(doc.conteudo || "{}");
-      if (doc.tipo === TIPO_DOC_OFICIAL.Recibo)
+      if (ehRecibo(doc.tipo))
         setRecibo({ ...RECIBO_DEFAULT, ...c });
       else setOficio({ ...OFICIO_DEFAULT, ...c });
     } catch {

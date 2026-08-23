@@ -3,9 +3,8 @@
 import { abrirParaImpressao, esc } from "@/lib/impressaoDocumento";
 import { moeda } from "@/lib/format";
 import type { DocumentoOficial } from "@/types";
-import { TIPO_DOC_OFICIAL } from "@/types";
 import type { OficioConteudo, ReciboConteudo } from "@/features/documentosOficiais/tipos";
-import { TIPO_DOC_LABEL } from "@/features/documentosOficiais/tipos";
+import { TIPO_DOC_LABEL, ehRecibo } from "@/features/documentosOficiais/tipos";
 
 const MESES = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
@@ -75,10 +74,9 @@ export function exportarDocumentoOficialPdf(doc: DocumentoOficial): boolean {
     .filter(Boolean)
     .join(", ") + ".";
 
-  const corpoHtml =
-    doc.tipo === TIPO_DOC_OFICIAL.Recibo
-      ? reciboCorpo(conteudo as ReciboConteudo)
-      : oficioCorpo(conteudo as OficioConteudo);
+  const corpoHtml = ehRecibo(doc.tipo)
+    ? reciboCorpo(conteudo as ReciboConteudo)
+    : oficioCorpo(conteudo as OficioConteudo);
 
   return abrirParaImpressao({
     titulo: numeroRotulo(doc),
