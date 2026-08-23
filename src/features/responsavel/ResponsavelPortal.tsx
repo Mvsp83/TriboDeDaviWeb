@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -12,6 +12,8 @@ import {
   XCircle,
   ArrowLeft,
   Camera,
+  MessageSquarePlus,
+  CloudOff,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import {
@@ -19,7 +21,13 @@ import {
   autorizarImagem,
   clearRespToken,
   obterPainel,
+  justificarFalta,
+  enfileirarJustificativa,
+  lerFilaJustificativas,
+  sincronizarJustificativas,
+  ehErroDeRede,
   type PainelResponsavel,
+  type PresencaItem,
 } from "@/features/responsavel/responsavelApi";
 import { faixaInfo } from "@/features/alunos/faixa";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
@@ -27,7 +35,16 @@ import { LogoLockup } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 function FaixaBadge({ faixa }: { faixa: number }) {
   const info = faixaInfo(faixa);
@@ -51,6 +68,27 @@ export function ResponsavelPortal() {
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [painel, setPainel] = useState<PainelResponsavel | null>(null);
+  // Ids das faltas com justificativa aguardando envio (fila offline).
+  const [pendentes, setPendentes] = useState<Set<number>>(new Set());
+
+  const atualizarPendentes = useCallback(() => {
+    setPendentes(new Set(lerFilaJustificativas().map((j) => j.presencaId)));
+  }, []);
+
+  // Recarrega o painel e, antes, tenta esvaziar a fila offline. Chamado no
+  // login, ao voltar a conexão e após justificar.
+  const recarregar = useCallback(async () => {
+    const enviados = await sincronizarJustificativas();
+    if (enviados.length > 0) {
+      toast.success(
+        enviados.length === 1
+          ? "Justificativa pendente enviada."
+          : `${enviados.length} justificativas pendentes enviadas.`,
+      );
+    }
+    setPainel(await obterPainel());
+    atualizarPendentes();
+  }, [atualizarPendentes]);
 
   async function entrar(e: React.FormEvent) {
     e.preventDefault();
@@ -62,7 +100,7 @@ export function ResponsavelPortal() {
     setCarregando(true);
     try {
       await acessar(codigo.trim().toUpperCase(), nascimento);
-      setPainel(await obterPainel());
+      await recarregar();
     } catch (err) {
       setErro(
         err instanceof ApiError && err.status
@@ -74,11 +112,67 @@ export function ResponsavelPortal() {
     }
   }
 
+  // Ao voltar a conexão, reenvia a fila e atualiza o painel (só com sessão ativa).
+  useEffect(() => {
+    if (!painel) return;
+    const aoVoltarOnline = () => {
+      recarregar().catch(() => {
+        /* segue offline; a fila permanece para a próxima tentativa */
+      });
+    };
+    window.addEventListener("online", aoVoltarOnline);
+    return () => window.removeEventListener("online", aoVoltarOnline);
+  }, [painel, recarregar]);
+
   function sair() {
     clearRespToken();
     setPainel(null);
     setCodigo("");
     setNascimento("");
+  }
+
+  // Justificar falta
+  const [faltaAlvo, setFaltaAlvo] = useState<PresencaItem | null>(null);
+  const [textoJustif, setTextoJustif] = useState("");
+  const [salvandoJustif, setSalvandoJustif] = useState(false);
+
+  function abrirJustificar(falta: PresencaItem) {
+    setFaltaAlvo(falta);
+    setTextoJustif(falta.justificativa ?? "");
+  }
+
+  async function enviarJustificativa() {
+    if (!faltaAlvo) return;
+    const texto = textoJustif.trim();
+    if (!texto) {
+      toast.warning("Escreva o motivo da falta.");
+      return;
+    }
+    setSalvandoJustif(true);
+    try {
+      await justificarFalta(faltaAlvo.id, texto);
+      toast.success("Falta justificada.");
+      setFaltaAlvo(null);
+      setPainel(await obterPainel());
+      atualizarPendentes();
+    } catch (err) {
+      // Sem rede: guarda para reenviar depois, em vez de perder o que a família
+      // escreveu. Erro de regra (validação) volta como aviso normal.
+      if (ehErroDeRede(err)) {
+        enfileirarJustificativa({
+          presencaId: faltaAlvo.id,
+          justificativa: texto,
+          em: new Date().toISOString(),
+        });
+        atualizarPendentes();
+        setFaltaAlvo(null);
+        toast.message("Sem conexão agora — a justificativa será enviada assim que a internet voltar.");
+      } else {
+        toast.error(err instanceof ApiError ? err.message : "Não foi possível justificar.");
+      }
+    } finally {
+      setSalvandoJustif(false);
+    }
   }
 
   const [salvandoImagem, setSalvandoImagem] = useState(false);
@@ -230,26 +324,61 @@ export function ResponsavelPortal() {
               </div>
             </div>
             {presencas.length > 0 && (
-              <div className="mt-4 flex flex-col gap-1">
-                {presencas.slice(0, 10).map((p, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between border-b border-border/60 py-1.5 text-sm last:border-0"
-                  >
-                    <span className="tabular-nums text-muted-foreground">
-                      {dataBR(p.data)}
-                    </span>
-                    {p.presente ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-600">
-                        <CheckCircle2 className="size-4" /> Presente
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-destructive">
-                        <XCircle className="size-4" /> Falta
-                      </span>
-                    )}
-                  </div>
-                ))}
+              <div className="mt-4 flex flex-col divide-y divide-border/60">
+                {presencas.slice(0, 10).map((p) => {
+                  const pendente = pendentes.has(p.id);
+                  const justificada = Boolean(p.justificadaEm) || Boolean(p.justificativa);
+                  return (
+                    <div key={p.id} className="py-2 text-sm">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="tabular-nums text-muted-foreground">
+                          {dataBR(p.data)}
+                        </span>
+                        {p.presente ? (
+                          <span className="inline-flex items-center gap-1 text-emerald-600">
+                            <CheckCircle2 className="size-4" /> Presente
+                          </span>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1 text-destructive">
+                              <XCircle className="size-4" /> Falta
+                            </span>
+                            {pendente ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+                                <CloudOff className="size-3" /> Envio pendente
+                              </span>
+                            ) : justificada ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs text-muted-foreground"
+                                onClick={() => abrirJustificar(p)}
+                              >
+                                Justificada · editar
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => abrirJustificar(p)}
+                              >
+                                <MessageSquarePlus className="size-3.5" />
+                                Justificar
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {/* Texto da justificativa (enviada ou aguardando envio). */}
+                      {!p.presente && (justificada || pendente) && p.justificativa && (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          “{p.justificativa}”
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -380,6 +509,37 @@ export function ResponsavelPortal() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Justificar falta */}
+      <Dialog open={faltaAlvo !== null} onOpenChange={(v) => !v && setFaltaAlvo(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Justificar falta</DialogTitle>
+            <DialogDescription>
+              {faltaAlvo && `Falta do dia ${dataBR(faltaAlvo.data)}.`} Conte ao
+              professor o motivo — por exemplo, uma consulta médica ou um
+              compromisso de família.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={textoJustif}
+            onChange={(e) => setTextoJustif(e.target.value)}
+            placeholder="Ex.: Estava doente, com atestado."
+            rows={4}
+            maxLength={500}
+            autoFocus
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFaltaAlvo(null)} disabled={salvandoJustif}>
+              Cancelar
+            </Button>
+            <Button onClick={enviarJustificativa} disabled={salvandoJustif}>
+              {salvandoJustif && <Loader2 className="size-4 animate-spin" />}
+              Enviar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

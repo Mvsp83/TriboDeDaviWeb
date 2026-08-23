@@ -35,6 +35,7 @@ export const ApiRotas = {
   responsavelAcesso: "/api/Responsavel/acesso",
   responsavelPainel: "/api/Responsavel/painel",
   responsavelAutorizarImagem: "/api/Responsavel/autorizar-imagem",
+  responsavelJustificarFalta: "/api/Responsavel/justificar-falta",
 
   aulasGetAll: "/api/Aula/get-all",
   aulasPorPolo: `/api/Aula/get-por-polo?${TODAS_TURMAS}`,

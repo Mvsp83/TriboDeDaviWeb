@@ -61,6 +61,15 @@ export interface AcessoResposta {
   aluno: AcessoAluno;
 }
 
+export interface PresencaItem {
+  id: number;
+  data: string;
+  presente: boolean;
+  // Justificativa da falta enviada pelo responsável (null/"" = não justificada).
+  justificativa: string | null;
+  justificadaEm: string | null;
+}
+
 export interface PainelResponsavel {
   aluno: {
     nome: string;
@@ -76,7 +85,7 @@ export interface PainelResponsavel {
     faltas: number;
     percentual: number;
   };
-  presencas: { data: string; presente: boolean }[];
+  presencas: PresencaItem[];
   graduacoes: { data: string; faixaAnterior: number; faixaNova: number }[];
   avisos: { titulo: string; mensagem: string; data: string }[];
   eventos: {
@@ -131,4 +140,81 @@ export async function autorizarImagem(
   } catch (error) {
     throw toApiError(error);
   }
+}
+
+// O responsável justifica uma falta específica do filho. Retorna o item
+// atualizado (com a justificativa e a data de registro).
+export async function justificarFalta(
+  presencaId: number,
+  justificativa: string,
+): Promise<PresencaItem> {
+  try {
+    const { data } = await httpResp.post<ResultViewModel<PresencaItem>>(
+      ApiRotas.responsavelJustificarFalta,
+      { presencaId, justificativa },
+    );
+    return unwrap(data);
+  } catch (error) {
+    throw toApiError(error);
+  }
+}
+
+// ── Fila offline ──────────────────────────────────────────────────────────
+// Quando o envio falha por falta de rede, guardamos a justificativa localmente
+// e reenviamos quando a conexão volta. Chave por presença: a última tentativa
+// para uma falta substitui a anterior.
+
+const FILA_KEY = "responsavel_justificativas_pendentes";
+
+export interface JustificativaPendente {
+  presencaId: number;
+  justificativa: string;
+  em: string; // ISO de quando o responsável escreveu
+}
+
+export function lerFilaJustificativas(): JustificativaPendente[] {
+  try {
+    const bruto = localStorage.getItem(FILA_KEY);
+    return bruto ? (JSON.parse(bruto) as JustificativaPendente[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function gravarFila(fila: JustificativaPendente[]): void {
+  localStorage.setItem(FILA_KEY, JSON.stringify(fila));
+}
+
+export function enfileirarJustificativa(item: JustificativaPendente): void {
+  const fila = lerFilaJustificativas().filter((j) => j.presencaId !== item.presencaId);
+  fila.push(item);
+  gravarFila(fila);
+}
+
+export function removerDaFila(presencaId: number): void {
+  gravarFila(lerFilaJustificativas().filter((j) => j.presencaId !== presencaId));
+}
+
+// Reenvia tudo que está pendente. Retorna os ids enviados com sucesso; os que
+// falharem de novo continuam na fila para a próxima tentativa.
+export async function sincronizarJustificativas(): Promise<number[]> {
+  const fila = lerFilaJustificativas();
+  const enviados: number[] = [];
+  for (const item of fila) {
+    try {
+      await justificarFalta(item.presencaId, item.justificativa);
+      removerDaFila(item.presencaId);
+      enviados.push(item.presencaId);
+    } catch {
+      // Mantém na fila e para na primeira falha (provável rede caiu de novo).
+      break;
+    }
+  }
+  return enviados;
+}
+
+// Erro de rede (sem resposta do servidor) vs. erro de regra (4xx/5xx com corpo).
+// Só o primeiro justifica cair na fila offline.
+export function ehErroDeRede(error: unknown): boolean {
+  return error instanceof ApiError && error.status === undefined;
 }
