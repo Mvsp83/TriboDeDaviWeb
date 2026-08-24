@@ -38,14 +38,37 @@ function normalizarPrograma(p: ProgramaFaixa): ProgramaFaixa {
 
 // Mescla raso com o default: se uma versão antiga não tiver algum campo novo,
 // ele entra do default em vez de ficar undefined. Também migra o formato dos
-// graus/programas para o esquema atual.
+// graus/programas para o esquema atual e, quando a semente é ampliada (bump de
+// versao), acrescenta o conteúdo NOVO da semente — sem sobrescrever o que o
+// usuário já editou (une por id de posição e por faixaBase de programa).
 function mesclar(bruto: Partial<ConfigGraduacao> | null): ConfigGraduacao {
   if (!bruto) return CONFIG_DEFAULT;
+
+  const versaoGuardada = bruto.versao ?? 0;
+  let posicoes = bruto.posicoes ?? [];
+  let programas = (bruto.programas ?? []).map(normalizarPrograma);
+
+  // Migração aditiva: só quando a semente é mais nova que o guardado.
+  if (versaoGuardada < CONFIG_DEFAULT.versao) {
+    const idsPos = new Set(posicoes.map((p) => p.id));
+    posicoes = [
+      ...posicoes,
+      ...CONFIG_DEFAULT.posicoes.filter((p) => !idsPos.has(p.id)),
+    ];
+    const bases = new Set(programas.map((p) => p.faixaBase));
+    programas = [
+      ...programas,
+      ...CONFIG_DEFAULT.programas
+        .filter((p) => !bases.has(p.faixaBase))
+        .map(normalizarPrograma),
+    ];
+  }
+
   return {
-    versao: bruto.versao ?? CONFIG_DEFAULT.versao,
-    posicoes: bruto.posicoes ?? CONFIG_DEFAULT.posicoes,
+    versao: Math.max(versaoGuardada, CONFIG_DEFAULT.versao),
+    posicoes: posicoes.length > 0 ? posicoes : CONFIG_DEFAULT.posicoes,
     golpesRestritos: bruto.golpesRestritos ?? CONFIG_DEFAULT.golpesRestritos,
-    programas: (bruto.programas ?? CONFIG_DEFAULT.programas).map(normalizarPrograma),
+    programas: programas.length > 0 ? programas : CONFIG_DEFAULT.programas,
   };
 }
 
