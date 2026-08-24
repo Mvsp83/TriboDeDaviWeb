@@ -25,7 +25,11 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
-import { statusRecadoLabel, statusRecadoTom } from "@/lib/ocorrencias";
+import {
+  statusRecadoLabel,
+  statusRecadoTom,
+  statusRecadoEmoji,
+} from "@/lib/ocorrencias";
 import {
   acessar,
   autorizarImagem,
@@ -295,6 +299,9 @@ export function ResponsavelPortal() {
   }
 
   const [salvandoImagem, setSalvandoImagem] = useState(false);
+  // Alvo da confirmação de imagem (true=autorizar, false=revogar; null=fechado).
+  // A troca passa por um diálogo para não ser clicada sem querer (é consentimento).
+  const [imagemAlvo, setImagemAlvo] = useState<boolean | null>(null);
   async function alternarImagem(autoriza: boolean) {
     setSalvandoImagem(true);
     try {
@@ -551,23 +558,48 @@ export function ResponsavelPortal() {
               <div className="flex flex-col gap-3">
                 {recados.map((r, i) => {
                   const tom = statusRecadoTom(r.status);
-                  const cor =
+                  const est =
                     tom === "atencao"
-                      ? "border-warning/40 bg-warning/10"
+                      ? {
+                          card: "border-amber-500/30 bg-amber-500/5",
+                          badge: "bg-amber-500/15",
+                          titulo: "text-amber-600 dark:text-amber-400",
+                        }
                       : tom === "positivo"
-                        ? "border-primary/30 bg-primary/5"
-                        : "border-border";
+                        ? {
+                            card: "border-emerald-500/30 bg-emerald-500/5",
+                            badge: "bg-emerald-500/15",
+                            titulo: "text-emerald-600 dark:text-emerald-400",
+                          }
+                        : {
+                            card: "border-border",
+                            badge: "bg-muted",
+                            titulo: "text-foreground",
+                          };
                   return (
-                    <div key={i} className={`rounded-md border p-3 ${cor}`}>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-medium">
-                          {statusRecadoLabel(r.status)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{dataBR(r.data)}</span>
+                    <div
+                      key={i}
+                      className={`flex gap-3 rounded-xl border p-3.5 ${est.card}`}
+                    >
+                      <div
+                        className={`flex size-10 shrink-0 items-center justify-center rounded-full text-xl ${est.badge}`}
+                        aria-hidden
+                      >
+                        {statusRecadoEmoji(r.status)}
                       </div>
-                      {r.texto && (
-                        <p className="mt-1 text-sm text-muted-foreground">{r.texto}</p>
-                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`font-semibold ${est.titulo}`}>
+                            {statusRecadoLabel(r.status)}
+                          </span>
+                          <span className="shrink-0 text-xs text-muted-foreground">
+                            {dataBR(r.data)}
+                          </span>
+                        </div>
+                        {r.texto && (
+                          <p className="mt-0.5 text-sm text-muted-foreground">{r.texto}</p>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -587,13 +619,23 @@ export function ResponsavelPortal() {
                 {advertencias.map((a, i) => (
                   <div
                     key={i}
-                    className="rounded-md border border-destructive/30 bg-destructive/5 p-3"
+                    className="flex gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3.5"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium text-destructive">Advertência</span>
-                      <span className="text-xs text-muted-foreground">{dataBR(a.data)}</span>
+                    <div
+                      className="flex size-10 shrink-0 items-center justify-center rounded-full bg-destructive/15 text-xl"
+                      aria-hidden
+                    >
+                      🚩
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">{a.motivo}</p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold text-destructive">Advertência</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {dataBR(a.data)}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-sm text-muted-foreground">{a.motivo}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -700,27 +742,26 @@ export function ResponsavelPortal() {
                 Atualizado em {dataBR(aluno.autorizaImagemEm)}.
               </p>
             )}
-            <div className="mt-3 flex gap-2">
+            {/* Links (não botões) para não trocar o consentimento sem querer —
+                a mudança passa por um diálogo de confirmação. */}
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
               {aluno.autorizaImagem !== true && (
-                <Button
-                  size="sm"
-                  onClick={() => alternarImagem(true)}
-                  disabled={salvandoImagem}
+                <button
+                  type="button"
+                  className="font-medium text-primary underline underline-offset-2 hover:opacity-80"
+                  onClick={() => setImagemAlvo(true)}
                 >
-                  {salvandoImagem && <Loader2 className="size-4 animate-spin" />}
-                  Autorizar
-                </Button>
+                  Autorizar uso de imagem
+                </button>
               )}
               {aluno.autorizaImagem !== false && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => alternarImagem(false)}
-                  disabled={salvandoImagem}
+                <button
+                  type="button"
+                  className="font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                  onClick={() => setImagemAlvo(false)}
                 >
-                  {salvandoImagem && <Loader2 className="size-4 animate-spin" />}
                   Não autorizar
-                </Button>
+                </button>
               )}
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
@@ -730,6 +771,40 @@ export function ResponsavelPortal() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Confirmar mudança de autorização de imagem (LGPD) */}
+      <Dialog open={imagemAlvo !== null} onOpenChange={(v) => !v && setImagemAlvo(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {imagemAlvo ? "Autorizar uso de imagem?" : "Não autorizar uso de imagem?"}
+            </DialogTitle>
+            <DialogDescription>
+              {imagemAlvo
+                ? `Você autoriza o instituto a usar a imagem e a voz de ${aluno.nome} nos canais oficiais (site, redes e materiais do projeto).`
+                : `O instituto deixará de publicar a imagem e a voz de ${aluno.nome} nos canais oficiais. Você pode mudar essa escolha quando quiser.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImagemAlvo(null)} disabled={salvandoImagem}>
+              Cancelar
+            </Button>
+            <Button
+              variant={imagemAlvo ? "default" : "destructive"}
+              onClick={async () => {
+                const alvo = imagemAlvo;
+                if (alvo === null) return;
+                await alternarImagem(alvo);
+                setImagemAlvo(null);
+              }}
+              disabled={salvandoImagem}
+            >
+              {salvandoImagem && <Loader2 className="size-4 animate-spin" />}
+              {imagemAlvo ? "Autorizar" : "Não autorizar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Justificar falta */}
       <Dialog open={faltaAlvo !== null} onOpenChange={(v) => !v && setFaltaAlvo(null)}>

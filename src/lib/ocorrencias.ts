@@ -21,3 +21,8 @@ export function statusRecadoTom(i: number): "positivo" | "atencao" | "neutro" {
   if (i === 0 || i === 3) return "positivo"; // evoluindo bem / ótima participação
   return "neutro";
 }
+
+// Emoji do status — dá um toque visual amigável no portal da família.
+export function statusRecadoEmoji(i: number): string {
+  return ["🌱", "👀", "🎒", "🌟"][i] ?? "💬";
+}
