@@ -420,8 +420,8 @@ export function ProgramaEditorPage() {
             </p>
           )}
 
-          {/* Graus */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {/* Graus — empilhados, um abaixo do outro */}
+          <div className="grid grid-cols-1 gap-4">
             {prog.graus.map((g, gi) => {
               const reqsVis = g.requisitos.filter((r) =>
                 valeParaIdade(r.faixaEtariaId, filtroIdade),
@@ -435,7 +435,9 @@ export function ProgramaEditorPage() {
                 <Card key={g.id}>
                   <CardContent className="space-y-3 p-4">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold text-primary">{gi + 1}º</span>
+                      <span className="whitespace-nowrap text-base font-bold text-primary">
+                        {gi + 1}º GRAU
+                      </span>
                       <Input
                         value={g.titulo}
                         onChange={(e) => patchGrau(g.id, { titulo: e.target.value })}
