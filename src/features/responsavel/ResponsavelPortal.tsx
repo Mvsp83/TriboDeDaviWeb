@@ -21,8 +21,11 @@ import {
   Zap,
   Sparkles,
   Lock,
+  AlertTriangle,
+  MessageSquare,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
+import { statusRecadoLabel, statusRecadoTom } from "@/lib/ocorrencias";
 import {
   acessar,
   autorizarImagem,
@@ -387,6 +390,9 @@ export function ResponsavelPortal() {
   }
 
   const { aluno, graduacoes, avisos, eventos } = painel;
+  // `?? []` protege enquanto a API não estiver atualizada (campos novos ausentes).
+  const advertencias = painel.advertencias ?? [];
+  const recados = painel.recados ?? [];
 
   // Índices reiniciam por ano (ciclo anual): frequência, presenças e conquistas
   // contam só o ano selecionado. O seletor mostra os anos com registro.
@@ -534,6 +540,70 @@ export function ResponsavelPortal() {
 
         {/* Conquistas (gamificação da frequência) — do ano selecionado */}
         <ConquistasCard resumo={frequencia} presencas={presencas} />
+
+        {/* Recados do professor */}
+        {recados.length > 0 && (
+          <Card>
+            <CardContent className="p-5">
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <MessageSquare className="size-4" /> Recados do professor
+              </h2>
+              <div className="flex flex-col gap-3">
+                {recados.map((r, i) => {
+                  const tom = statusRecadoTom(r.status);
+                  const cor =
+                    tom === "atencao"
+                      ? "border-warning/40 bg-warning/10"
+                      : tom === "positivo"
+                        ? "border-primary/30 bg-primary/5"
+                        : "border-border";
+                  return (
+                    <div key={i} className={`rounded-md border p-3 ${cor}`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium">
+                          {statusRecadoLabel(r.status)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{dataBR(r.data)}</span>
+                      </div>
+                      {r.texto && (
+                        <p className="mt-1 text-sm text-muted-foreground">{r.texto}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Comportamento (advertências) */}
+        {advertencias.length > 0 && (
+          <Card>
+            <CardContent className="p-5">
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <AlertTriangle className="size-4 text-warning" /> Comportamento
+              </h2>
+              <div className="flex flex-col gap-2">
+                {advertencias.map((a, i) => (
+                  <div
+                    key={i}
+                    className="rounded-md border border-destructive/30 bg-destructive/5 p-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-medium text-destructive">Advertência</span>
+                      <span className="text-xs text-muted-foreground">{dataBR(a.data)}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">{a.motivo}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                As advertências são registradas pelo professor para alinhar o
+                comportamento junto com a família.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Graduação */}
         <Card>

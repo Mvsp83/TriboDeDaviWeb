@@ -132,6 +132,11 @@ export const ApiRotas = {
   // Transcrição (legenda traduzida) de vídeo do YouTube, p/ o plano de aula.
   videoTranscricao: (videoId: string) => `/api/Video/transcricao/${videoId}`,
 
+  // Advertências e recados do professor sobre um aluno.
+  ocorrenciasPorAluno: (alunoId: number) => `/api/Ocorrencia/aluno/${alunoId}`,
+  ocorrenciaCriar: "/api/Ocorrencia",
+  ocorrenciaExcluir: (id: number) => `/api/Ocorrencia/${id}`,
+
   graduacoes: (ano: number) => `/api/Graduacao?ano=${ano}`,
   graduacoesDoAluno: (alunoId: number) => `/api/Graduacao/aluno/${alunoId}`,
   graduacaoRegistrar: "/api/Graduacao/registrar",

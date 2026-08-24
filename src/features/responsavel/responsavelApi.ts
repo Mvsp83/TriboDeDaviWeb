@@ -95,6 +95,8 @@ export interface PainelResponsavel {
     descricao: string;
     tipo: number;
   }[];
+  advertencias: { data: string; motivo: string }[];
+  recados: { data: string; status: number; texto: string }[];
 }
 
 // ── Chamadas ────────────────────────────────────────────────────────────────

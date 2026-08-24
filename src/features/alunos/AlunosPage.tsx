@@ -6,6 +6,7 @@ import {
   Trash2,
   Loader2,
   QrCode,
+  MessageSquare,
   Download,
   ShieldX,
   KeyRound,
@@ -24,6 +25,7 @@ import {
 } from "@/features/alunos/alunosApi";
 import { AlunoFormDialog } from "@/features/alunos/AlunoFormDialog";
 import { CodigoResponsavelDialog } from "@/features/responsavel/CodigoResponsavelDialog";
+import { OcorrenciasDialog } from "@/features/ocorrencias/OcorrenciasDialog";
 import { imprimirCodigos } from "@/features/responsavel/imprimirCodigos";
 import { imprimirSemImagem } from "@/features/alunos/imprimirSemImagem";
 import { faixaInfo } from "@/features/alunos/faixa";
@@ -91,6 +93,7 @@ export function AlunosPage() {
   const [alunoExcluir, setAlunoExcluir] = useState<Aluno | null>(null);
   const [alunoAnonimizar, setAlunoAnonimizar] = useState<Aluno | null>(null);
   const [alunoCodigo, setAlunoCodigo] = useState<Aluno | null>(null);
+  const [alunoOcorrencias, setAlunoOcorrencias] = useState<Aluno | null>(null);
 
   const nomePorPolo = useMemo(() => {
     const map = new Map<number, string>();
@@ -426,6 +429,15 @@ export function AlunosPage() {
                         >
                           <KeyRound className="size-4" />
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setAlunoOcorrencias(a)}
+                          aria-label="Comportamento e recados"
+                          title="Comportamento e recados (aparecem no portal da família)"
+                        >
+                          <MessageSquare className="size-4" />
+                        </Button>
                         {admin && (
                           <Button
                             variant="ghost"
@@ -561,6 +573,13 @@ export function AlunosPage() {
         aluno={alunoCodigo}
         aberto={alunoCodigo !== null}
         onOpenChange={(o) => !o && setAlunoCodigo(null)}
+      />
+
+      <OcorrenciasDialog
+        alunoId={alunoOcorrencias?.id ?? null}
+        alunoNome={alunoOcorrencias?.nome ?? ""}
+        aberto={alunoOcorrencias !== null}
+        onOpenChange={(o) => !o && setAlunoOcorrencias(null)}
       />
     </div>
   );
