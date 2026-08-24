@@ -18,6 +18,7 @@ import {
   useAnosCalendario,
   useExcluirEvento,
   useCopiarAno,
+  useProcessarAvisos,
 } from "@/features/calendario/calendarioApi";
 import { EventoFormDialog } from "@/features/calendario/EventoFormDialog";
 import {
@@ -70,6 +71,25 @@ export function CalendarioPage() {
   const { data: polos } = usePolos();
   const excluir = useExcluirEvento();
   const copiar = useCopiarAno();
+  const processarAvisos = useProcessarAvisos();
+
+  async function dispararAvisos() {
+    try {
+      const r = await processarAvisos.mutateAsync();
+      if (r.erros.length > 0) {
+        toast.error(
+          `${r.enviados} enviado(s). Erros: ${r.erros.slice(0, 3).join(" · ")}`,
+          { duration: 10000 },
+        );
+      } else if (r.enviados > 0) {
+        toast.success(`${r.enviados} aviso(s) enviado(s) por email.`);
+      } else {
+        toast.info("Nenhum aviso pendente para enviar agora.");
+      }
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Falha ao processar avisos.");
+    }
+  }
 
   const [dialogEvento, setDialogEvento] = useState(false);
   const [emEdicao, setEmEdicao] = useState<EventoCalendario | null>(null);
@@ -184,6 +204,21 @@ export function CalendarioPage() {
 
         {podeGerenciar && (
           <div className="flex gap-2">
+            {sessao?.isAdministrador && (
+              <Button
+                variant="outline"
+                onClick={dispararAvisos}
+                disabled={processarAvisos.isPending}
+                title="Envia agora os avisos por email dos eventos com notificação pendente (para testar sem esperar o horário diário)."
+              >
+                {processarAvisos.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Bell className="size-4" />
+                )}
+                Processar avisos agora
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => {

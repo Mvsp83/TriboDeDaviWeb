@@ -64,6 +64,23 @@ export function useExcluirEvento() {
   });
 }
 
+// Resultado do disparo manual dos avisos.
+export interface ProcessamentoAvisos {
+  processados: number;
+  enviados: number;
+  ignorados: number;
+  erros: string[];
+}
+
+// Dispara agora o processamento dos avisos por email (admin). Útil para testar
+// o SMTP sem esperar o job diário.
+export function useProcessarAvisos() {
+  return useMutation({
+    mutationFn: () =>
+      apiPost<ProcessamentoAvisos>(ApiRotas.calendarioProcessarAvisos),
+  });
+}
+
 export function useCopiarAno() {
   const qc = useQueryClient();
   return useMutation({

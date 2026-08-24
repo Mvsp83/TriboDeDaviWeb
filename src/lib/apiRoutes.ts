@@ -161,6 +161,9 @@ export const ApiRotas = {
   calendarioDelete: (id: number) => `/api/EventoCalendario/delete/${id}`,
   calendarioCopiar: (origem: number, destino: number) =>
     `/api/EventoCalendario/copiar/${origem}/${destino}`,
+  // Dispara agora o processamento dos avisos por email (admin) — para testar
+  // sem esperar o job diário.
+  calendarioProcessarAvisos: "/api/EventoCalendario/processar-avisos",
 
   docOficialPorAno: (ano: number) => `/api/DocumentoOficial/ano/${ano}`,
   docOficialAnos: "/api/DocumentoOficial/anos",
