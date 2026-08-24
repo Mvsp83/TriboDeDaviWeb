@@ -7,7 +7,7 @@
 
 export const DOACAO = {
   // Chave Pix: CNPJ (só números), e-mail, telefone ou chave aleatória.
-  chave: "",
+  chave: "11407173000145",
   // Nome do recebedor como aparece no app do banco (máx. 25 caracteres).
   nome: "Instituto Tribo de Davi",
   // Cidade do recebedor (máx. 15 caracteres).
