@@ -156,21 +156,23 @@ function corpoApostilaFaixa(
   return `${banda}${perfil}${grade}${dica}`;
 }
 
-// Reúne as URLs de vídeo das posições usadas no programa (respeitando o filtro
+// Reúne as URLs de vídeo das posições usadas nos programas (respeitando o filtro
 // de idade) e gera um QR data URL para cada — autocontido, sem depender de rede
 // na hora de imprimir.
 async function gerarQrs(
-  programa: ProgramaFaixa,
+  programas: ProgramaFaixa[],
   cfg: ConfigGraduacao,
   filtro: string,
 ): Promise<Map<string, string>> {
   const porId = new Map(cfg.posicoes.map((p) => [p.id, p]));
   const urls = new Set<string>();
-  for (const g of programa.graus) {
-    for (const r of g.requisitos) {
-      if (!valeParaIdade(r.faixaEtariaId, filtro)) continue;
-      const p = r.posicaoId ? porId.get(r.posicaoId) : null;
-      if (p?.videoUrl) urls.add(p.videoUrl);
+  for (const programa of programas) {
+    for (const g of programa.graus) {
+      for (const r of g.requisitos) {
+        if (!valeParaIdade(r.faixaEtariaId, filtro)) continue;
+        const p = r.posicaoId ? porId.get(r.posicaoId) : null;
+        if (p?.videoUrl) urls.add(p.videoUrl);
+      }
     }
   }
   const mapa = new Map<string, string>();
@@ -196,12 +198,90 @@ export async function imprimirApostilaFaixa(
   const labelPorId = new Map(programa.faixasEtarias.map((f) => [f.id, f.label]));
   const banda = filtro !== "todas" ? labelPorId.get(filtro) : undefined;
 
-  const qrPorUrl = await gerarQrs(programa, cfg, filtro);
+  const qrPorUrl = await gerarQrs([programa], cfg, filtro);
   const html = montarDocumentoHtml(
     {
       titulo: `Apostila de Graduação — Faixa ${info.nome}${banda ? ` (${banda})` : ""}`,
       subtitulo: "Requisitos por grau · Instituto Tribo de Davi",
       corpoHtml: corpoApostilaFaixa(programa, cfg, filtro, qrPorUrl),
+    },
+    carregarDocumentoPadrao(),
+    true,
+  );
+
+  const win = window.open("", "_blank");
+  if (!win) return false;
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  return true;
+}
+
+// Capa + sumário da apostila completa.
+function capaHtml(programas: ProgramaFaixa[]): string {
+  const hoje = new Date().toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  const pills = programas
+    .map((p) => {
+      const info = faixaInfo(p.faixaBase);
+      return `<span style="display:inline-flex;align-items:center;gap:6px;border:1px solid #ccc;border-radius:100px;padding:4px 12px;font-size:12px;margin:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><span style="width:12px;height:12px;border-radius:50%;background:${info.cor};border:1px solid rgba(0,0,0,.1);"></span>${esc(info.nome)}</span>`;
+    })
+    .join("");
+  const sumario = programas
+    .map((p) => {
+      const info = faixaInfo(p.faixaBase);
+      return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dotted #ddd;">
+        <span style="width:16px;height:16px;border-radius:4px;background:${info.cor};border:1px solid rgba(0,0,0,.1);flex:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;"></span>
+        <span style="font-weight:600;">${esc(info.nome)}</span>
+        ${p.tag ? `<span style="color:#777;font-size:12px;">${esc(p.tag)}</span>` : ""}
+        <span style="margin-left:auto;color:#999;font-size:12px;">${p.graus.length} graus</span>
+      </div>`;
+    })
+    .join("");
+  return `<div style="break-after:page;">
+    <div style="text-align:center;padding:36px 0 8px;">
+      <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#3a3a8c;">Instituto Tribo de Davi · Jiu-Jitsu</div>
+      <h1 style="font-size:40px;margin:12px 0 6px;">Apostila de Graduação</h1>
+      <p style="color:#555;font-size:14px;max-width:520px;margin:0 auto;">O caminho da faixa branca à preta — o que cada aluno demonstra, grau a grau, para ser graduado.</p>
+      <div style="margin:20px 0;">${pills}</div>
+      <p style="color:#999;font-size:12px;">Gerado em ${esc(hoje)}</p>
+    </div>
+    <div style="max-width:560px;margin:16px auto 0;">
+      <h2 style="font-size:15px;border-bottom:2px solid #111;padding-bottom:4px;">Sumário</h2>
+      ${sumario}
+    </div>
+  </div>`;
+}
+
+// Abre a apostila COMPLETA (todas as faixas num PDF), com capa e sumário.
+export async function imprimirApostilaCompleta(
+  cfg: ConfigGraduacao,
+  filtro: string = "todas",
+): Promise<boolean> {
+  const programas = [...cfg.programas].sort((a, b) => a.faixaBase - b.faixaBase);
+  if (programas.length === 0) return false;
+
+  const qrPorUrl = await gerarQrs(programas, cfg, filtro);
+  const secoes = programas
+    .map(
+      (p, i) =>
+        `<section style="${i > 0 ? "break-before:page;" : ""}">${corpoApostilaFaixa(
+          p,
+          cfg,
+          filtro,
+          qrPorUrl,
+        )}</section>`,
+    )
+    .join("");
+
+  const html = montarDocumentoHtml(
+    {
+      titulo: "Apostila de Graduação — Instituto Tribo de Davi",
+      subtitulo: "Da faixa branca à preta · requisitos por grau",
+      corpoHtml: capaHtml(programas) + secoes,
     },
     carregarDocumentoPadrao(),
     true,

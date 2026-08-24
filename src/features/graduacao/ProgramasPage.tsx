@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { GraduationCap, Printer, Pencil, Plus } from "lucide-react";
+import { GraduationCap, Printer, Pencil, Plus, BookText } from "lucide-react";
 import { faixaInfo, OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
 import { useConfigGraduacao } from "./graduacaoApi";
-import { imprimirApostilaFaixa } from "./apostilaHtml";
+import { imprimirApostilaFaixa, imprimirApostilaCompleta } from "./apostilaHtml";
 import { type ProgramaFaixa } from "./tipos";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,13 @@ export function ProgramasPage() {
     }
   }
 
+  async function gerarCompleta() {
+    if (!cfg) return;
+    if (!(await imprimirApostilaCompleta(cfg, "todas"))) {
+      toast.error("Permita pop-ups para gerar a apostila.");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-start gap-2 rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
@@ -47,6 +54,13 @@ export function ProgramasPage() {
           <span className="font-medium text-foreground">Salvo neste navegador</span>{" "}
           por enquanto.
         </p>
+      </div>
+
+      <div className="flex justify-end">
+        <Button variant="outline" onClick={gerarCompleta}>
+          <BookText className="size-4" />
+          Apostila completa (todas as faixas)
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
