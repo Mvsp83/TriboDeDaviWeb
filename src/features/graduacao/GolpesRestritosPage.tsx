@@ -193,7 +193,7 @@ export function GolpesRestritosPage() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="sticky left-0 z-10 bg-card p-2 text-left font-medium">
+                  <th className="sticky left-0 z-10 min-w-[30rem] bg-card p-2 text-left font-medium">
                     Golpe / posição
                   </th>
                   {DIVISOES.map((d) => (
@@ -218,8 +218,9 @@ export function GolpesRestritosPage() {
                         </span>
                         <Input
                           value={g.descricao}
+                          title={g.descricao}
                           onChange={(e) => editarDescricao(g.id, e.target.value)}
-                          className="h-8 min-w-56"
+                          className="h-8 w-full"
                         />
                       </div>
                     </td>
