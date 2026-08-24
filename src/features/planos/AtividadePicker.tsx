@@ -84,6 +84,9 @@ export function AtividadePicker({
             <li key={a.id}>
               <button
                 type="button"
+                // Impede o input de perder o foco (e a lista de fechar) antes do
+                // clique — senão a seleção "não acontece" no clique.
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => adicionar(a)}
                 className="flex w-full items-center rounded-sm px-2 py-1.5 text-left text-sm hover:bg-secondary"
               >
