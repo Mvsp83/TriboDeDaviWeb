@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Save, Plus, Trash2, ShieldAlert, Image as ImageIcon } from "lucide-react";
+import { Save, Plus, Trash2, ShieldAlert, Image as ImageIcon, Search } from "lucide-react";
 import { useConfigGraduacao, useSalvarGolpes } from "./graduacaoApi";
 import {
   DIVISOES,
@@ -54,6 +54,12 @@ export function GolpesRestritosPage() {
   const [golpes, setGolpes] = useState<GolpeRestrito[]>([]);
   const [sujo, setSujo] = useState(false);
   const [verTabela, setVerTabela] = useState(false);
+  const [busca, setBusca] = useState("");
+
+  const termo = busca.trim().toLowerCase();
+  const visiveis = termo
+    ? golpes.filter((g) => g.descricao.toLowerCase().includes(termo))
+    : golpes;
 
   useEffect(() => {
     if (cfg) {
@@ -136,6 +142,16 @@ export function GolpesRestritosPage() {
             {verTabela ? "Ocultar" : "Ver"} tabela oficial
           </Button>
 
+          <div className="relative w-full sm:w-64">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar golpe..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+
           <div className="ml-auto flex flex-wrap items-center gap-3 text-xs">
             <span className="flex items-center gap-1.5">
               <span className="size-3 rounded-full bg-red-600" /> Falta gravíssima
@@ -193,12 +209,12 @@ export function GolpesRestritosPage() {
                 </tr>
               </thead>
               <tbody>
-                {golpes.map((g, i) => (
+                {visiveis.map((g) => (
                   <tr key={g.id} className="border-b border-border/60">
                     <td className="sticky left-0 z-10 bg-card p-1.5">
                       <div className="flex items-center gap-2">
                         <span className="w-5 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
-                          {i + 1}
+                          {golpes.findIndex((x) => x.id === g.id) + 1}
                         </span>
                         <Input
                           value={g.descricao}
@@ -228,10 +244,10 @@ export function GolpesRestritosPage() {
                     </td>
                   </tr>
                 ))}
-                {golpes.length === 0 && (
+                {visiveis.length === 0 && (
                   <tr>
                     <td colSpan={DIVISOES.length + 2} className="py-10 text-center text-muted-foreground">
-                      Nenhum golpe cadastrado.
+                      {termo ? "Nenhum golpe encontrado." : "Nenhum golpe cadastrado."}
                     </td>
                   </tr>
                 )}
