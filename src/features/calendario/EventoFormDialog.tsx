@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { useSalvarEvento } from "@/features/calendario/calendarioApi";
 import { TIPOS_EVENTO } from "@/features/calendario/tipos";
 import { ApiError } from "@/lib/api";
@@ -204,6 +204,13 @@ export function EventoFormDialog({
                   <p className="mt-1 text-xs text-muted-foreground">
                     Separe vários endereços por vírgula ou ponto-e-vírgula.
                   </p>
+                  {!emails.trim() && (
+                    <p className="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-500">
+                      <AlertTriangle className="size-3.5 shrink-0" />
+                      Informe ao menos um email — sem destinatário, nenhum aviso
+                      será enviado.
+                    </p>
+                  )}
                 </div>
                 <div className="w-48">
                   <Label className="mb-1.5">Enviar quantos dias antes</Label>
