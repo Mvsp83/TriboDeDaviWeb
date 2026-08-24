@@ -447,15 +447,26 @@ const DESCRICOES_GOLPES = [
   "Suplex derrubando o adversário de cabeça ou pescoço ao solo",
 ];
 
-const GOLPES_SEED: GolpeRestrito[] = DESCRICOES_GOLPES.map((descricao, i) => ({
-  id: `golpe-${i + 1}`,
-  descricao,
-  severidadePorDivisao: {},
-}));
+// Escada de restrição lida da grade oficial (pág. 1 do PDF): para cada golpe, o
+// número de divisões (d1..d6, na ordem de DIVISOES) em que ele é restrito. As
+// bolinhas vermelhas da tabela = Falta Gravíssima; célula vazia = permitido.
+// Ordem das divisões: [4-12, 13-15, 16-17+branca, azul/roxa, marrom-preta
+// exceto sem-kimono, marrom-preta sem-kimono].
+const RESTRITO_ATE: number[] = [
+  1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6,
+];
+
+const GOLPES_SEED: GolpeRestrito[] = DESCRICOES_GOLPES.map((descricao, i) => {
+  const n = RESTRITO_ATE[i] ?? 0;
+  const sev: Record<string, string> = {};
+  for (let d = 0; d < n; d++) sev[`d${d + 1}`] = "gravissima";
+  return { id: `golpe-${i + 1}`, descricao, severidadePorDivisao: sev };
+});
 
 export const CONFIG_DEFAULT: ConfigGraduacao = {
   // Bump ao ampliar a semente (dispara a migração aditiva no store).
-  versao: 2,
+  // v3: severidades dos golpes restritos lidas da grade oficial.
+  versao: 3,
   posicoes: POSICOES_SEED,
   golpesRestritos: GOLPES_SEED,
   programas: [

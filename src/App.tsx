@@ -166,6 +166,11 @@ const PosicoesPage = lazy(() =>
     default: m.PosicoesPage,
   })),
 );
+const GolpesRestritosPage = lazy(() =>
+  import("@/features/graduacao/GolpesRestritosPage").then((m) => ({
+    default: m.GolpesRestritosPage,
+  })),
+);
 const DrePage = lazy(() =>
   import("@/features/administrativo/DrePage").then((m) => ({ default: m.DrePage })),
 );
@@ -245,6 +250,7 @@ export default function App() {
             <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
             <Route path="graduacao/programas" element={<ProgramasGraduacaoPage />} />
             <Route path="graduacao/posicoes" element={<PosicoesPage />} />
+            <Route path="graduacao/golpes" element={<GolpesRestritosPage />} />
             <Route path="documentos-oficiais" element={<DocumentosOficiaisPage />} />
             <Route path="patrimonio" element={<PatrimonioPage />} />
             <Route path="avisos" element={<AvisosPage />} />

@@ -47,6 +47,7 @@ function mesclar(bruto: Partial<ConfigGraduacao> | null): ConfigGraduacao {
   const versaoGuardada = bruto.versao ?? 0;
   let posicoes = bruto.posicoes ?? [];
   let programas = (bruto.programas ?? []).map(normalizarPrograma);
+  let golpes = bruto.golpesRestritos ?? [];
 
   // Migração aditiva: só quando a semente é mais nova que o guardado.
   if (versaoGuardada < CONFIG_DEFAULT.versao) {
@@ -62,12 +63,26 @@ function mesclar(bruto: Partial<ConfigGraduacao> | null): ConfigGraduacao {
         .filter((p) => !bases.has(p.faixaBase))
         .map(normalizarPrograma),
     ];
+    // Golpes: mantém os do usuário; para os da semente sem severidade editada,
+    // preenche com a severidade oficial; acrescenta os que faltam.
+    const porId = new Map(golpes.map((g) => [g.id, g]));
+    const idsSemente = new Set(CONFIG_DEFAULT.golpesRestritos.map((g) => g.id));
+    const daSemente = CONFIG_DEFAULT.golpesRestritos.map((sg) => {
+      const atual = porId.get(sg.id);
+      if (!atual) return sg;
+      const temSev = Object.keys(atual.severidadePorDivisao ?? {}).length > 0;
+      return temSev
+        ? atual
+        : { ...atual, severidadePorDivisao: sg.severidadePorDivisao };
+    });
+    const extras = golpes.filter((g) => !idsSemente.has(g.id));
+    golpes = [...daSemente, ...extras];
   }
 
   return {
     versao: Math.max(versaoGuardada, CONFIG_DEFAULT.versao),
     posicoes: posicoes.length > 0 ? posicoes : CONFIG_DEFAULT.posicoes,
-    golpesRestritos: bruto.golpesRestritos ?? CONFIG_DEFAULT.golpesRestritos,
+    golpesRestritos: golpes.length > 0 ? golpes : CONFIG_DEFAULT.golpesRestritos,
     programas: programas.length > 0 ? programas : CONFIG_DEFAULT.programas,
   };
 }

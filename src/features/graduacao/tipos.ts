@@ -67,19 +67,21 @@ export const SEVERIDADE_LABEL: Record<string, string> = {
   gravissima: "Falta gravíssima",
 };
 
-// As 6 divisões de idade/faixa da matriz de golpes restritos (pág. 1 do PDF).
+// As 6 divisões de idade/faixa da matriz de golpes restritos (pág. 1 do PDF),
+// na mesma ordem das colunas da tabela oficial (esquerda → direita).
 export interface Divisao {
   id: string;
   label: string;
+  curto: string; // rótulo compacto para o cabeçalho da matriz
 }
 
 export const DIVISOES: Divisao[] = [
-  { id: "d1", label: "4 a 12 anos" },
-  { id: "d2", label: "13 a 15 anos" },
-  { id: "d3", label: "16–17 (todas) e branca adulto→Master 7" },
-  { id: "d4", label: "Adulto→Master 7 (azul e roxa)" },
-  { id: "d5", label: "Adulto (marrom e preta) sem kimono" },
-  { id: "d6", label: "Adulto→Master 7 (marrom e preta) exceto sem kimono" },
+  { id: "d1", curto: "4–12", label: "4 a 12 anos" },
+  { id: "d2", curto: "13–15", label: "13 a 15 anos" },
+  { id: "d3", curto: "16–17 / branca", label: "16 e 17 anos (todas as faixas) e faixa branca (Adulto a Master 7)" },
+  { id: "d4", curto: "azul / roxa", label: "Adulto a Master 7 (azul e roxa)" },
+  { id: "d5", curto: "marrom-preta · gi", label: "Adulto a Master 7 (marrom e preta), com kimono (exceto sem kimono)" },
+  { id: "d6", curto: "marrom-preta · no-gi", label: "Adultos (marrom e preta), sem kimono" },
 ];
 
 // Uma técnica proibida/restrita e sua severidade em cada divisão.
@@ -88,6 +90,8 @@ export interface GolpeRestrito {
   descricao: string;
   // divisaoId -> severidade. Ausente = "normal" (permitido).
   severidadePorDivisao: Record<string, string>;
+  // Imagem ilustrativa opcional (URL); a matriz oficial fica em /golpes.
+  imagem?: string | null;
 }
 
 // Uma faixa etária dentro de uma cor de faixa (ex.: Branca "4 a 5 anos").

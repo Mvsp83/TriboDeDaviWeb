@@ -10,6 +10,7 @@ import {
   type ConfigGraduacao,
   type Posicao,
   type ProgramaFaixa,
+  type GolpeRestrito,
   novoId,
 } from "./tipos";
 import { carregarConfig, salvarConfig } from "./graduacaoStore";
@@ -75,6 +76,22 @@ export function useExcluirPosicao() {
           })),
         })),
       };
+      salvarConfig(nova);
+      return nova;
+    },
+    onSuccess: (cfg) => qc.setQueryData(CHAVE_QUERY, cfg),
+  });
+}
+
+// ---- Golpes restritos (matriz por idade/faixa) ----
+
+// Substitui a lista inteira de golpes restritos.
+export function useSalvarGolpes() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (golpes: GolpeRestrito[]) => {
+      const cfg = carregarConfig();
+      const nova = { ...cfg, golpesRestritos: golpes };
       salvarConfig(nova);
       return nova;
     },
