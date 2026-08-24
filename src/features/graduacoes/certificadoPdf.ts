@@ -74,8 +74,8 @@ export function imprimirCertificado(g: Graduacao): boolean {
   ${cfg.mostrarLogo ? `<img class="marca" src="${window.location.origin}/pwa-512.png" alt="" onerror="this.style.display='none'" />` : ""}
   <div class="inst">${esc(cfg.tituloCabecalho || "Instituto Tribo de Davi")}</div>
 
-  <h1>Certificado de Graduação</h1>
-  <p class="sub">Projeto Jiu-Jitsu — Tribo de Davi</p>
+  <h1>${esc(cfg.certificado.titulo)}</h1>
+  <p class="sub">${esc(cfg.certificado.subtitulo)}</p>
 
   <p class="texto">Certificamos que</p>
   <div class="aluno">${esc(g.nomeAluno ?? "")}</div>
@@ -94,8 +94,8 @@ export function imprimirCertificado(g: Graduacao): boolean {
   </p>
 
   <div class="assinaturas">
-    <div>Professor responsável</div>
-    <div>Instituto Tribo de Davi</div>
+    <div>${esc(cfg.certificado.assinaturaEsquerda)}</div>
+    <div>${esc(cfg.certificado.assinaturaDireita)}</div>
   </div>
 </div>`;
 

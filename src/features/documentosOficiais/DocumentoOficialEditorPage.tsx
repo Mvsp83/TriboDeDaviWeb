@@ -20,6 +20,7 @@ import {
 import { exportarDocumentoOficialPdf } from "@/features/documentosOficiais/documentosOficiaisPdf";
 import { valorPorExtenso } from "@/features/documentosOficiais/valorExtenso";
 import { paraInputDate, moeda, dataCurtaBR } from "@/lib/format";
+import { carregarDocumentoPadrao } from "@/lib/documentoPadrao";
 import { ApiError } from "@/lib/api";
 import { STATUS_DOC, type DocumentoOficial } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,8 +60,17 @@ export function DocumentoOficialEditorPage() {
   const [dataDocumento, setDataDocumento] = useState(
     paraInputDate(new Date().toISOString()),
   );
-  const [oficio, setOficio] = useState<OficioConteudo>(OFICIO_DEFAULT);
-  const [recibo, setRecibo] = useState<ReciboConteudo>(RECIBO_DEFAULT);
+  // Um novo documento já nasce com os textos-padrão configurados na tela
+  // "Padrão de Documentos" (saudação/fecho/assinante do ofício, assinante do
+  // recibo). Documentos existentes carregam o próprio conteúdo salvo (useEffect).
+  const [oficio, setOficio] = useState<OficioConteudo>(() => {
+    const p = carregarDocumentoPadrao().oficio;
+    return { ...OFICIO_DEFAULT, saudacao: p.saudacao, fecho: p.fecho, assinante: p.assinante, cargo: p.cargo };
+  });
+  const [recibo, setRecibo] = useState<ReciboConteudo>(() => ({
+    ...RECIBO_DEFAULT,
+    assinante: carregarDocumentoPadrao().recibo.assinante,
+  }));
   const [confirmarAprovar, setConfirmarAprovar] = useState(false);
 
   // Carrega o documento existente no formulário.
