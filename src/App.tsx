@@ -161,6 +161,11 @@ const ProgramasGraduacaoPage = lazy(() =>
     default: m.ProgramasPage,
   })),
 );
+const ProgramaEditorPage = lazy(() =>
+  import("@/features/graduacao/ProgramaEditorPage").then((m) => ({
+    default: m.ProgramaEditorPage,
+  })),
+);
 const PosicoesPage = lazy(() =>
   import("@/features/graduacao/PosicoesPage").then((m) => ({
     default: m.PosicoesPage,
@@ -249,6 +254,10 @@ export default function App() {
             <Route path="documentos" element={<DocumentosPage />} />
             <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
             <Route path="graduacao/programas" element={<ProgramasGraduacaoPage />} />
+            <Route
+              path="graduacao/programas/editor/:faixaBase"
+              element={<ProgramaEditorPage />}
+            />
             <Route path="graduacao/posicoes" element={<PosicoesPage />} />
             <Route path="graduacao/golpes" element={<GolpesRestritosPage />} />
             <Route path="documentos-oficiais" element={<DocumentosOficiaisPage />} />
