@@ -463,21 +463,44 @@ const GOLPES_SEED: GolpeRestrito[] = DESCRICOES_GOLPES.map((descricao, i) => {
   return { id: `golpe-${i + 1}`, descricao, severidadePorDivisao: sev };
 });
 
+const PROGRAMAS_SEED = [
+  PROGRAMA_BRANCA,
+  PROGRAMA_CINZA,
+  PROGRAMA_AMARELA,
+  PROGRAMA_LARANJA,
+  PROGRAMA_VERDE,
+  PROGRAMA_AZUL,
+  PROGRAMA_ROXA,
+  PROGRAMA_MARROM,
+  PROGRAMA_PRETA,
+];
+
+// Faixa recomendada de cada posição = a faixa (cor) mais baixa em que ela
+// aparece como requisito nos programas semente. Assim, usar uma posição antes
+// dessa faixa gera aviso. Posições não usadas ficam sem recomendação.
+const RECOMENDADA_POR_POSICAO = new Map<string, number>();
+for (const prog of PROGRAMAS_SEED) {
+  for (const g of prog.graus) {
+    for (const r of g.requisitos) {
+      if (!r.posicaoId) continue;
+      const atual = RECOMENDADA_POR_POSICAO.get(r.posicaoId);
+      if (atual == null || prog.faixaBase < atual) {
+        RECOMENDADA_POR_POSICAO.set(r.posicaoId, prog.faixaBase);
+      }
+    }
+  }
+}
+for (const p of POSICOES_SEED) {
+  const rec = RECOMENDADA_POR_POSICAO.get(p.id);
+  if (rec != null) p.faixaRecomendada = rec;
+}
+
 export const CONFIG_DEFAULT: ConfigGraduacao = {
   // Bump ao ampliar a semente (dispara a migração aditiva no store).
   // v3: severidades dos golpes restritos lidas da grade oficial.
-  versao: 3,
+  // v4: faixa recomendada por posição.
+  versao: 4,
   posicoes: POSICOES_SEED,
   golpesRestritos: GOLPES_SEED,
-  programas: [
-    PROGRAMA_BRANCA,
-    PROGRAMA_CINZA,
-    PROGRAMA_AMARELA,
-    PROGRAMA_LARANJA,
-    PROGRAMA_VERDE,
-    PROGRAMA_AZUL,
-    PROGRAMA_ROXA,
-    PROGRAMA_MARROM,
-    PROGRAMA_PRETA,
-  ],
+  programas: PROGRAMAS_SEED,
 };

@@ -1,8 +1,11 @@
 // Helpers para o vínculo posição ↔ golpe restrito: acha o golpe e resume em
 // que divisões de idade/faixa a técnica é proibida.
+import { faixaInfo } from "@/features/alunos/faixa";
 import {
   type ConfigGraduacao,
   type GolpeRestrito,
+  type Posicao,
+  type FaixaEtaria,
   DIVISOES,
   SEVERIDADE_LABEL,
 } from "./tipos";
@@ -46,4 +49,48 @@ export function textoRestricao(golpe: GolpeRestrito): string {
   return `Proibido: ${cels
     .map((c) => `${c.curto} (${SEVERIDADE_LABEL[c.severidade]})`)
     .join(", ")}`;
+}
+
+// Divisão IBJJF correspondente a uma faixa etária (pela idade). Para adulto
+// (18+) devolve d4, já que a coluna exata depende de gi/no-gi.
+export function divisaoDaFaixaEtaria(
+  fe: FaixaEtaria | null | undefined,
+): string | null {
+  if (!fe) return null;
+  const idade = fe.idadeMax ?? fe.idadeMin;
+  if (idade == null) return null;
+  if (idade <= 12) return "d1";
+  if (idade <= 15) return "d2";
+  if (idade <= 17) return "d3";
+  return "d4";
+}
+
+// Avisos (não bloqueantes) para o uso de uma posição num requisito de uma
+// faixa: adequação de faixa (recomendada) e proibição IBJJF pela idade.
+export function avisosPosicao(
+  posicao: Posicao | null | undefined,
+  faixaBase: number,
+  faixaEtaria: FaixaEtaria | null | undefined,
+  golpe: GolpeRestrito | undefined,
+): string[] {
+  const avisos: string[] = [];
+  if (!posicao) return avisos;
+
+  if (posicao.faixaRecomendada != null && posicao.faixaRecomendada > faixaBase) {
+    avisos.push(
+      `Recomendada a partir da faixa ${faixaInfo(posicao.faixaRecomendada).nome}`,
+    );
+  }
+
+  if (golpe) {
+    const div = divisaoDaFaixaEtaria(faixaEtaria);
+    if (div) {
+      const sev = golpe.severidadePorDivisao[div];
+      if (sev && sev !== "normal") {
+        avisos.push(`Proibido para ${faixaEtaria!.label} (${SEVERIDADE_LABEL[sev]})`);
+      }
+    }
+  }
+
+  return avisos;
 }

@@ -51,6 +51,16 @@ function mesclar(bruto: Partial<ConfigGraduacao> | null): ConfigGraduacao {
 
   // Migração aditiva: só quando a semente é mais nova que o guardado.
   if (versaoGuardada < CONFIG_DEFAULT.versao) {
+    // Preenche a faixa recomendada nas posições da semente que ainda não têm
+    // (sem tocar nas que o usuário já definiu).
+    const recPorId = new Map(
+      CONFIG_DEFAULT.posicoes.map((p) => [p.id, p.faixaRecomendada]),
+    );
+    posicoes = posicoes.map((p) =>
+      p.faixaRecomendada == null && recPorId.get(p.id) != null
+        ? { ...p, faixaRecomendada: recPorId.get(p.id) }
+        : p,
+    );
     const idsPos = new Set(posicoes.map((p) => p.id));
     posicoes = [
       ...posicoes,

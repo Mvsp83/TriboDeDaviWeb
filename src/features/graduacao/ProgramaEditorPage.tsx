@@ -11,10 +11,12 @@ import {
   Printer,
   Type,
   Users,
+  AlertTriangle,
 } from "lucide-react";
 import { faixaInfo } from "@/features/alunos/faixa";
 import { useConfigGraduacao, useSalvarPrograma } from "./graduacaoApi";
 import { imprimirApostilaFaixa } from "./apostilaHtml";
+import { acharGolpe, avisosPosicao } from "./restricao";
 import {
   type ProgramaFaixa,
   type Grau,
@@ -463,6 +465,9 @@ export function ProgramaEditorPage() {
                         )}
                         {reqsVis.map((r, ri) => {
                           const p = r.posicaoId ? nomePorId.get(r.posicaoId) : null;
+                          const faixaEt = bandas.find((b) => b.id === r.faixaEtariaId);
+                          const golpe = acharGolpe(cfg, p?.golpeRestritoId);
+                          const avisos = avisosPosicao(p, faixaBase, faixaEt, golpe);
                           return (
                             <li
                               key={r.id}
@@ -521,6 +526,14 @@ export function ProgramaEditorPage() {
                                   }
                                   className="h-8 flex-1"
                                 />
+                              )}
+                              {avisos.length > 0 && (
+                                <span
+                                  className="flex-none text-amber-600 dark:text-amber-500"
+                                  title={avisos.join("\n")}
+                                >
+                                  <AlertTriangle className="size-4" />
+                                </span>
                               )}
                               <EscopoIdade
                                 value={r.faixaEtariaId}

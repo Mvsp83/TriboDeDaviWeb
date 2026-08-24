@@ -1,5 +1,6 @@
 import { PlayCircle, Pencil, ShieldAlert } from "lucide-react";
 import { extrairVideoId, urlEmbed } from "@/lib/youtube";
+import { faixaInfo } from "@/features/alunos/faixa";
 import { CATEGORIA_LABEL, type Posicao } from "./tipos";
 import { useConfigGraduacao } from "./graduacaoApi";
 import { acharGolpe, divisoesRestritas } from "./restricao";
@@ -54,6 +55,15 @@ export function PosicaoDetalhesDialog({
               <Badge variant="secondary">
                 {CATEGORIA_LABEL[posicao.categoria] ?? posicao.categoria}
               </Badge>
+              {posicao.faixaRecomendada != null && (
+                <span className="flex items-center gap-1.5 rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground">
+                  <span
+                    className="size-2.5 rounded-full border border-black/10"
+                    style={{ backgroundColor: faixaInfo(posicao.faixaRecomendada).cor }}
+                  />
+                  A partir da faixa {faixaInfo(posicao.faixaRecomendada).nome}
+                </span>
+              )}
               {tags.map((tag) => (
                 <span
                   key={tag}

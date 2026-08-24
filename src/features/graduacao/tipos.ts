@@ -50,6 +50,10 @@ export interface Posicao {
   tags?: string; // separadas por vírgula
   // Vínculo opcional com uma restrição de golpe por idade/faixa (IBJJF).
   golpeRestritoId?: string | null;
+  // Faixa (cor) mínima recomendada para ensinar esta posição — base 0..40,
+  // espelha faixa.ts. Usada para avisar quando a posição é usada numa faixa
+  // anterior. null/undefined = sem recomendação (não avisa).
+  faixaRecomendada?: number | null;
 }
 
 // Severidade de uma restrição, seguindo o manual de golpes proibidos da IBJJF.

@@ -8,6 +8,7 @@ import { urlYouTubeValida, extrairVideoId, urlEmbed } from "@/lib/youtube";
 import { apiGet, ApiError } from "@/lib/api";
 import { ApiRotas } from "@/lib/apiRoutes";
 import { VideoSearchDialog } from "@/features/atividades/VideoSearchDialog";
+import { faixaInfo, OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
 import { useSalvarPosicao, useConfigGraduacao } from "./graduacaoApi";
 import { CATEGORIAS, type Posicao } from "./tipos";
 import { textoRestricao } from "./restricao";
@@ -40,6 +41,7 @@ const schema = z.object({
   descricao: z.string(),
   transcricao: z.string(),
   golpeRestritoId: z.string(), // "none" quando não vinculado
+  faixaRecomendada: z.string(), // "none" ou base 0..40
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -53,6 +55,7 @@ const VAZIO: FormValues = {
   descricao: "",
   transcricao: "",
   golpeRestritoId: "none",
+  faixaRecomendada: "none",
 };
 
 interface Props {
@@ -101,6 +104,10 @@ export function PosicaoFormDialog({ aberto, onOpenChange, posicao }: Props) {
             descricao: posicao.descricao ?? "",
             transcricao: posicao.transcricao ?? "",
             golpeRestritoId: posicao.golpeRestritoId ?? "none",
+            faixaRecomendada:
+              posicao.faixaRecomendada != null
+                ? String(posicao.faixaRecomendada)
+                : "none",
           }
         : VAZIO,
     );
@@ -128,6 +135,10 @@ export function PosicaoFormDialog({ aberto, onOpenChange, posicao }: Props) {
         transcricao: values.transcricao || undefined,
         golpeRestritoId:
           values.golpeRestritoId === "none" ? null : values.golpeRestritoId,
+        faixaRecomendada:
+          values.faixaRecomendada === "none"
+            ? null
+            : Number(values.faixaRecomendada),
       });
       toast.success(editando ? "Posição atualizada." : "Posição criada.");
       onOpenChange(false);
@@ -281,6 +292,33 @@ export function PosicaoFormDialog({ aberto, onOpenChange, posicao }: Props) {
               placeholder="Legenda do vídeo traduzida — preenchida pelo botão acima ou digitada."
               {...register("transcricao")}
             />
+          </div>
+
+          <div>
+            <Label className="mb-1.5">Faixa mínima recomendada (opcional)</Label>
+            <Controller
+              control={control}
+              name="faixaRecomendada"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sem recomendação" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sem recomendação</SelectItem>
+                    {OPCOES_FAIXA_BASE.map((f) => (
+                      <SelectItem key={f.valor} value={String(f.valor)}>
+                        {faixaInfo(f.valor).nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Avisa (sem bloquear) quando a posição é usada numa faixa anterior a
+              esta.
+            </p>
           </div>
 
           <div>
