@@ -129,6 +129,9 @@ export const ApiRotas = {
   matricularAno: (ano: number) => `/api/Inscricao/matricular-ano/${ano}`,
   inscricaoBuscarAluno: "/api/Inscricao/buscar-aluno",
 
+  // Transcrição (legenda traduzida) de vídeo do YouTube, p/ o plano de aula.
+  videoTranscricao: (videoId: string) => `/api/Video/transcricao/${videoId}`,
+
   graduacoes: (ano: number) => `/api/Graduacao?ano=${ano}`,
   graduacoesDoAluno: (alunoId: number) => `/api/Graduacao/aluno/${alunoId}`,
   graduacaoRegistrar: "/api/Graduacao/registrar",

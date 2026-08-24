@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Captions } from "lucide-react";
 import { toast } from "sonner";
 import { useSalvarAtividade } from "@/features/atividades/atividadesApi";
 import { VideoSearchDialog } from "@/features/atividades/VideoSearchDialog";
-import { urlYouTubeValida } from "@/lib/youtube";
-import { ApiError } from "@/lib/api";
+import { urlYouTubeValida, extrairVideoId } from "@/lib/youtube";
+import { apiGet, ApiError } from "@/lib/api";
+import { ApiRotas } from "@/lib/apiRoutes";
 import { TipoBloco, TIPOS_BLOCO, type Atividade } from "@/types";
 import {
   Dialog,
@@ -61,6 +62,7 @@ export function AtividadeFormDialog({ aberto, onOpenChange, atividade }: Props) 
   const salvar = useSalvarAtividade();
   const editando = atividade !== null;
   const [buscaAberta, setBuscaAberta] = useState(false);
+  const [transcrevendo, setTranscrevendo] = useState(false);
 
   const {
     register,
@@ -69,6 +71,7 @@ export function AtividadeFormDialog({ aberto, onOpenChange, atividade }: Props) 
     reset,
     watch,
     getValues,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -111,6 +114,38 @@ export function AtividadeFormDialog({ aberto, onOpenChange, atividade }: Props) 
       toast.error(
         err instanceof ApiError ? err.message : "Erro ao salvar a atividade.",
       );
+    }
+  }
+
+  // Traz a transcrição (legenda traduzida para PT) do vídeo informado e joga na
+  // descrição. Depende de o vídeo ter legenda e de o YouTube não bloquear.
+  async function trazerTranscricao() {
+    const videoId = extrairVideoId(getValues("videoUrl"));
+    if (!videoId) {
+      toast.warning("Informe primeiro um link de vídeo do YouTube.");
+      return;
+    }
+    setTranscrevendo(true);
+    try {
+      const r = await apiGet<{ texto: string; aviso: string }>(
+        ApiRotas.videoTranscricao(videoId),
+      );
+      if (!r.texto) {
+        toast.error(r.aviso || "Não foi possível trazer a transcrição.");
+        return;
+      }
+      const atual = getValues("descricao").trim();
+      // Não apaga o que já foi escrito: acrescenta abaixo.
+      setValue("descricao", atual ? `${atual}\n\n${r.texto}` : r.texto, {
+        shouldDirty: true,
+      });
+      toast.success("Transcrição traduzida adicionada à descrição.");
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError ? err.message : "Não foi possível trazer a transcrição.",
+      );
+    } finally {
+      setTranscrevendo(false);
     }
   }
 
@@ -219,7 +254,25 @@ export function AtividadeFormDialog({ aberto, onOpenChange, atividade }: Props) 
             )}
 
             <div>
-              <Label className="mb-1.5">Descrição</Label>
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <Label>Descrição</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={trazerTranscricao}
+                  disabled={transcrevendo}
+                  title="Traz a legenda do vídeo traduzida para o português"
+                >
+                  {transcrevendo ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Captions className="size-3.5" />
+                  )}
+                  Transcrição do vídeo (PT)
+                </Button>
+              </div>
               <Textarea rows={3} {...register("descricao")} />
             </div>
 
