@@ -1,6 +1,8 @@
-import { PlayCircle, Pencil } from "lucide-react";
+import { PlayCircle, Pencil, ShieldAlert } from "lucide-react";
 import { extrairVideoId, urlEmbed } from "@/lib/youtube";
 import { CATEGORIA_LABEL, type Posicao } from "./tipos";
+import { useConfigGraduacao } from "./graduacaoApi";
+import { acharGolpe, divisoesRestritas } from "./restricao";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,8 +32,11 @@ export function PosicaoDetalhesDialog({
   onOpenChange: (aberto: boolean) => void;
   onEditar: (p: Posicao) => void;
 }) {
+  const { data: cfg } = useConfigGraduacao();
   const tags = posicao ? tagsDe(posicao) : [];
   const videoId = extrairVideoId(posicao?.videoUrl);
+  const golpe = acharGolpe(cfg, posicao?.golpeRestritoId);
+  const restricoes = golpe ? divisoesRestritas(golpe) : [];
 
   return (
     <Dialog open={posicao !== null} onOpenChange={onOpenChange}>
@@ -68,6 +73,36 @@ export function PosicaoDetalhesDialog({
                   allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
+              </div>
+            )}
+
+            {golpe && (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
+                <p className="flex items-center gap-1.5 font-medium text-amber-700 dark:text-amber-400">
+                  <ShieldAlert className="size-4" /> Restrição por idade/faixa
+                </p>
+                <p className="mt-0.5 text-muted-foreground">{golpe.descricao}</p>
+                {restricoes.length > 0 ? (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {restricoes.map((r) => (
+                      <span
+                        key={r.curto}
+                        title={`${r.label} — ${r.severidade === "gravissima" ? "Falta gravíssima" : "Falta grave"}`}
+                        className={`rounded-md px-1.5 py-0.5 text-xs ${
+                          r.severidade === "gravissima"
+                            ? "bg-red-600/15 text-red-700 dark:text-red-400"
+                            : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                        }`}
+                      >
+                        {r.curto}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Sem divisões marcadas — ajuste na tela de Golpes Restritos.
+                  </p>
+                )}
               </div>
             )}
 

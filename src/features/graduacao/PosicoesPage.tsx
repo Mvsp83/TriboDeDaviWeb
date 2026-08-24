@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Video, Eye, ListChecks } from "lucide-react";
+import { Plus, Pencil, Trash2, Video, Eye, ListChecks, ShieldAlert } from "lucide-react";
 import { useConfigGraduacao, useExcluirPosicao } from "./graduacaoApi";
 import { CATEGORIAS, CATEGORIA_LABEL, type Posicao } from "./tipos";
 import { PosicaoFormDialog } from "./PosicaoFormDialog";
@@ -136,7 +136,15 @@ export function PosicoesPage() {
                   onClick={() => setVendo(p)}
                 >
                   <TableCell>
-                    <div className="font-medium">{p.nome}</div>
+                    <div className="flex items-center gap-1.5 font-medium">
+                      {p.nome}
+                      {p.golpeRestritoId && (
+                        <ShieldAlert
+                          className="size-3.5 text-amber-600 dark:text-amber-500"
+                          aria-label="Tem restrição por idade/faixa"
+                        />
+                      )}
+                    </div>
                     {p.nomeEn && (
                       <div className="text-xs text-muted-foreground">{p.nomeEn}</div>
                     )}

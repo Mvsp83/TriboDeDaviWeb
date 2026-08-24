@@ -14,7 +14,9 @@ import {
   type Posicao,
   type Requisito,
   type Criterio,
+  type GolpeRestrito,
 } from "./tipos";
+import { textoRestricao } from "./restricao";
 
 // Um item vale para uma idade quando é universal (sem faixa etária) ou é daquela
 // faixa. "todas" mostra tudo.
@@ -39,10 +41,21 @@ function chipIdade(
 function textoRequisito(
   r: Requisito,
   porId: Map<string, Posicao>,
-): { principal: string; secundario?: string; videoUrl?: string | null } {
+): {
+  principal: string;
+  secundario?: string;
+  videoUrl?: string | null;
+  golpeRestritoId?: string | null;
+} {
   if (r.posicaoId) {
     const p = porId.get(r.posicaoId);
-    if (p) return { principal: p.nome, secundario: p.nomeEn, videoUrl: p.videoUrl };
+    if (p)
+      return {
+        principal: p.nome,
+        secundario: p.nomeEn,
+        videoUrl: p.videoUrl,
+        golpeRestritoId: p.golpeRestritoId,
+      };
   }
   return { principal: r.texto || "(requisito sem descrição)", secundario: r.nota };
 }
@@ -51,6 +64,7 @@ function grauHtml(
   g: ProgramaFaixa["graus"][number],
   indice: number,
   porId: Map<string, Posicao>,
+  golpePorId: Map<string, GolpeRestrito>,
   labelPorId: Map<string, string>,
   filtro: string,
   qrPorUrl: Map<string, string>,
@@ -66,9 +80,14 @@ function grauHtml(
         t.videoUrl && qrPorUrl.get(t.videoUrl)
           ? `<img src="${qrPorUrl.get(t.videoUrl)}" width="42" height="42" alt="Vídeo" title="Aponte a câmera para assistir" style="flex:none;border:1px solid #eee;border-radius:3px;" />`
           : "";
+      const golpe = t.golpeRestritoId ? golpePorId.get(t.golpeRestritoId) : undefined;
+      const restr = golpe ? textoRestricao(golpe) : "";
+      const aviso = restr
+        ? `<div style="font-size:10px;color:#b45309;margin-top:1px;">⚠ ${esc(restr)}</div>`
+        : "";
       return `<li style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px dotted #e5e5e5;">
         <span style="flex:none;width:11px;height:11px;border:1.5px solid #bbb;border-radius:2px;"></span>
-        <span style="flex:1;">${esc(t.principal)}${sec}${chipIdade(r.faixaEtariaId, labelPorId)}</span>
+        <span style="flex:1;">${esc(t.principal)}${sec}${chipIdade(r.faixaEtariaId, labelPorId)}${aviso}</span>
         ${qr}
       </li>`;
     })
@@ -108,6 +127,7 @@ function corpoApostilaFaixa(
 ): string {
   const info = faixaInfo(programa.faixaBase);
   const porId = new Map(cfg.posicoes.map((p) => [p.id, p]));
+  const golpePorId = new Map(cfg.golpesRestritos.map((g) => [g.id, g]));
   const labelPorId = new Map(programa.faixasEtarias.map((f) => [f.id, f.label]));
   const bandaFiltro = filtro !== "todas" ? labelPorId.get(filtro) : undefined;
 
@@ -124,7 +144,7 @@ function corpoApostilaFaixa(
     : "";
 
   const graus = programa.graus
-    .map((g, i) => grauHtml(g, i, porId, labelPorId, filtro, qrPorUrl))
+    .map((g, i) => grauHtml(g, i, porId, golpePorId, labelPorId, filtro, qrPorUrl))
     .join("");
 
   const grade = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">${graus}</div>`;

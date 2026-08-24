@@ -8,8 +8,9 @@ import { urlYouTubeValida, extrairVideoId, urlEmbed } from "@/lib/youtube";
 import { apiGet, ApiError } from "@/lib/api";
 import { ApiRotas } from "@/lib/apiRoutes";
 import { VideoSearchDialog } from "@/features/atividades/VideoSearchDialog";
-import { useSalvarPosicao } from "./graduacaoApi";
+import { useSalvarPosicao, useConfigGraduacao } from "./graduacaoApi";
 import { CATEGORIAS, type Posicao } from "./tipos";
+import { textoRestricao } from "./restricao";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,7 @@ const schema = z.object({
   videoUrl: z.string().refine(urlYouTubeValida, "Link do YouTube inválido."),
   descricao: z.string(),
   transcricao: z.string(),
+  golpeRestritoId: z.string(), // "none" quando não vinculado
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -50,6 +52,7 @@ const VAZIO: FormValues = {
   videoUrl: "",
   descricao: "",
   transcricao: "",
+  golpeRestritoId: "none",
 };
 
 interface Props {
@@ -60,6 +63,8 @@ interface Props {
 
 export function PosicaoFormDialog({ aberto, onOpenChange, posicao }: Props) {
   const salvar = useSalvarPosicao();
+  const { data: cfg } = useConfigGraduacao();
+  const golpes = cfg?.golpesRestritos ?? [];
   const editando = posicao !== null;
   const [transcrevendo, setTranscrevendo] = useState(false);
   const [buscaAberta, setBuscaAberta] = useState(false);
@@ -80,6 +85,8 @@ export function PosicaoFormDialog({ aberto, onOpenChange, posicao }: Props) {
 
   const videoUrl = watch("videoUrl");
   const videoId = extrairVideoId(videoUrl);
+  const golpeSelId = watch("golpeRestritoId");
+  const golpeSel = golpes.find((g) => g.id === golpeSelId);
 
   useEffect(() => {
     if (!aberto) return;
@@ -93,6 +100,7 @@ export function PosicaoFormDialog({ aberto, onOpenChange, posicao }: Props) {
             videoUrl: posicao.videoUrl ?? "",
             descricao: posicao.descricao ?? "",
             transcricao: posicao.transcricao ?? "",
+            golpeRestritoId: posicao.golpeRestritoId ?? "none",
           }
         : VAZIO,
     );
@@ -118,7 +126,8 @@ export function PosicaoFormDialog({ aberto, onOpenChange, posicao }: Props) {
         videoUrl: values.videoUrl || undefined,
         descricao: values.descricao || undefined,
         transcricao: values.transcricao || undefined,
-        golpeRestritoId: posicao?.golpeRestritoId ?? null,
+        golpeRestritoId:
+          values.golpeRestritoId === "none" ? null : values.golpeRestritoId,
       });
       toast.success(editando ? "Posição atualizada." : "Posição criada.");
       onOpenChange(false);
@@ -272,6 +281,38 @@ export function PosicaoFormDialog({ aberto, onOpenChange, posicao }: Props) {
               placeholder="Legenda do vídeo traduzida — preenchida pelo botão acima ou digitada."
               {...register("transcricao")}
             />
+          </div>
+
+          <div>
+            <Label className="mb-1.5">Restrição por idade/faixa (IBJJF, opcional)</Label>
+            <Controller
+              control={control}
+              name="golpeRestritoId"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Nenhuma" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhuma</SelectItem>
+                    {golpes.map((g) => (
+                      <SelectItem key={g.id} value={g.id}>
+                        {g.descricao}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {golpeSel && textoRestricao(golpeSel) && (
+              <p className="mt-1 text-xs text-amber-600 dark:text-amber-500">
+                {textoRestricao(golpeSel)}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-muted-foreground">
+              Vincula esta posição a um golpe da tabela de golpes restritos —
+              aparece como aviso no catálogo e na apostila.
+            </p>
           </div>
 
           <DialogFooter>
