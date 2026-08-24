@@ -24,6 +24,7 @@ import {
   FolderPlus,
   GraduationCap,
   Award,
+  ListChecks,
   NotebookPen,
   Calculator,
   Scale,
@@ -105,6 +106,23 @@ export const navGroups: NavGroup[] = [
           { label: "Presenças", href: "/presencas", icon: CheckCircle2 },
           { label: "Frequência", href: "/frequencia", icon: BarChart3 },
           { label: "Graduações", href: "/graduacoes", icon: Award },
+          {
+            label: "Programas de Graduação",
+            icon: ListChecks,
+            adminOnly: true,
+            children: [
+              {
+                label: "Programas",
+                href: "/graduacao/programas",
+                icon: GraduationCap,
+              },
+              {
+                label: "Posições",
+                href: "/graduacao/posicoes",
+                icon: BookOpen,
+              },
+            ],
+          },
           { label: "Aniversariantes", href: "/aniversariantes", icon: Cake },
         ],
       },
