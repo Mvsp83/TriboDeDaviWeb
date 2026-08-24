@@ -117,7 +117,7 @@ function unwrap<T>(result: ResultViewModel<T> | undefined | null): T {
   return result.data as T;
 }
 
-function toApiError(error: unknown): ApiError {
+export function toApiError(error: unknown): ApiError {
   if (error instanceof AxiosError) {
     const msg =
       (error.response?.data as ResultViewModel<unknown> | undefined)?.message ??

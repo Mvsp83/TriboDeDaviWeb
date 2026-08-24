@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiDelete, apiGet, http } from "@/lib/api";
+import { apiDelete, apiGet, http, toApiError, ApiError } from "@/lib/api";
+import type { ResultViewModel } from "@/lib/api";
 import { ApiRotas } from "@/lib/apiRoutes";
 import type { CategoriaDocumento, DocumentoArquivo } from "@/types";
 
@@ -15,10 +16,22 @@ export function useUploadDocumento(categoria: CategoriaDocumento) {
   const qc = useQueryClient();
   return useMutation({
     // Upload é multipart, então usa o axios http direto (não o apiPost JSON).
+    // Normaliza o erro para ApiError, expondo a mensagem real da API (ex.: 413
+    // arquivo grande, categoria inválida) em vez de um erro genérico.
     mutationFn: async (arquivo: File) => {
       const form = new FormData();
       form.append("arquivo", arquivo);
-      await http.post(ApiRotas.documentoContabilUpload(categoria), form);
+      try {
+        const { data } = await http.post<ResultViewModel<unknown>>(
+          ApiRotas.documentoContabilUpload(categoria),
+          form,
+        );
+        if (data && data.success === false) {
+          throw new ApiError(data.message ?? "Falha ao enviar o documento.");
+        }
+      } catch (error) {
+        throw toApiError(error);
+      }
     },
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ["documentos-contabeis", categoria] }),
