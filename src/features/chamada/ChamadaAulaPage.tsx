@@ -12,6 +12,7 @@ import {
   Users,
   X,
   QrCode,
+  MessageSquare,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas } from "@/features/aulas/aulasApi";
@@ -34,6 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AvisarFaltasDialog } from "@/features/chamada/AvisarFaltasDialog";
 import { LeitorQrDialog } from "@/features/chamada/LeitorQrDialog";
+import { OcorrenciasDialog } from "@/features/ocorrencias/OcorrenciasDialog";
 
 function mensagemErro(e: unknown, padrao: string): string {
   return e instanceof Error && e.message ? e.message : padrao;
@@ -155,6 +157,7 @@ function ChamadaPendente({
   const salvar = useSalvarChamada();
   const [marcadas, setMarcadas] = useState<Record<number, boolean>>({});
   const [confirmando, setConfirmando] = useState(false);
+  const [alunoOcorrencias, setAlunoOcorrencias] = useState<{ id: number; nome: string } | null>(null);
   // Ausentes da chamada recém-salva, para oferecer o aviso aos responsáveis.
   const [avisarAusentes, setAvisarAusentes] = useState<Aluno[] | null>(null);
   const [lendoQr, setLendoQr] = useState(false);
@@ -295,6 +298,7 @@ function ChamadaPendente({
             onToggle={() =>
               setMarcadas((m) => ({ ...m, [a.id]: !m[a.id] }))
             }
+            onOcorrencia={() => setAlunoOcorrencias({ id: a.id, nome: a.nome })}
           />
         ))}
       </ListaAlunos>
@@ -334,6 +338,13 @@ function ChamadaPendente({
         roster={roster.map((a) => ({ id: a.id, nome: a.nome }))}
         jaPresente={(id) => !!marcadas[id]}
         onPresente={(id) => setMarcadas((m) => ({ ...m, [id]: true }))}
+      />
+
+      <OcorrenciasDialog
+        alunoId={alunoOcorrencias?.id ?? null}
+        alunoNome={alunoOcorrencias?.nome ?? ""}
+        aberto={alunoOcorrencias !== null}
+        onOpenChange={(o) => !o && setAlunoOcorrencias(null)}
       />
 
       <AvisarFaltasDialog
@@ -466,6 +477,7 @@ function LinhaAluno({
   editavel,
   salvando = false,
   onToggle,
+  onOcorrencia,
 }: {
   nome: string;
   faixa?: number;
@@ -473,6 +485,7 @@ function LinhaAluno({
   editavel: boolean;
   salvando?: boolean;
   onToggle?: () => void;
+  onOcorrencia?: () => void;
 }) {
   const info = faixa != null ? faixaInfo(faixa) : null;
 
@@ -489,6 +502,18 @@ function LinhaAluno({
           </span>
         )}
       </div>
+
+      {onOcorrencia && (
+        <button
+          type="button"
+          onClick={onOcorrencia}
+          className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+          title="Comportamento e recados (aparecem no portal da família)"
+          aria-label="Comportamento e recados"
+        >
+          <MessageSquare className="size-4" />
+        </button>
+      )}
 
       <button
         type="button"
