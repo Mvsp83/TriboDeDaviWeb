@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import QRCode from "qrcode";
 import { toast } from "sonner";
-import { Copy, Check, HeartHandshake, QrCode } from "lucide-react";
+import { Copy, Check, HeartHandshake, QrCode, ArrowLeft } from "lucide-react";
 import { gerarPixBrCode } from "@/lib/pixBrCode";
 import { DOACAO, doacaoConfigurada } from "@/features/doacao/configDoacao";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -70,6 +71,15 @@ export function DoacaoPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6 p-4 md:p-8">
+      <div>
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/">
+            <ArrowLeft className="size-4" />
+            Voltar ao site
+          </Link>
+        </Button>
+      </div>
+
       <header className="space-y-2 text-center">
         <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/15 text-primary">
           <HeartHandshake className="size-7" />
