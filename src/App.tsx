@@ -258,13 +258,6 @@ export default function App() {
             <Route path="sincronizacao" element={<SincronizacaoPage />} />
             <Route path="documentos" element={<DocumentosPage />} />
             <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
-            <Route path="graduacao/programas" element={<ProgramasGraduacaoPage />} />
-            <Route
-              path="graduacao/programas/editor/:faixaBase"
-              element={<ProgramaEditorPage />}
-            />
-            <Route path="graduacao/posicoes" element={<PosicoesPage />} />
-            <Route path="graduacao/golpes" element={<GolpesRestritosPage />} />
             <Route path="documentos-oficiais" element={<DocumentosOficiaisPage />} />
             <Route path="patrimonio" element={<PatrimonioPage />} />
             <Route path="avisos" element={<AvisosPage />} />
@@ -308,6 +301,17 @@ export default function App() {
               path="administrativo/financeiro/contas/planilha"
               element={<PlanilhaFinanceiraPage />}
             />
+          </Route>
+
+          {/* Programa de Graduação: admin OU professor com permissão */}
+          <Route element={<ProtectedRoute graduacao />}>
+            <Route path="graduacao/programas" element={<ProgramasGraduacaoPage />} />
+            <Route
+              path="graduacao/programas/editor/:faixaBase"
+              element={<ProgramaEditorPage />}
+            />
+            <Route path="graduacao/posicoes" element={<PosicoesPage />} />
+            <Route path="graduacao/golpes" element={<GolpesRestritosPage />} />
           </Route>
         </Route>
       </Route>

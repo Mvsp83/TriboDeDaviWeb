@@ -152,6 +152,7 @@ function NavBranchItem({ node, depth, cor, onNavigate }: NodeProps & { node: Nav
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { sessao, sair } = useAuth();
   const admin = sessao?.isAdministrador ?? false;
+  const permiteGraduacao = sessao?.permiteGraduacao ?? false;
 
   return (
     <div className="flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground">
@@ -170,7 +171,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {navGroups.map((grupo, i) => {
-          const nodes = filtrarPorPapel(grupo.nodes, admin);
+          const nodes = filtrarPorPapel(grupo.nodes, admin, permiteGraduacao);
           if (nodes.length === 0) return null;
           return (
             <div

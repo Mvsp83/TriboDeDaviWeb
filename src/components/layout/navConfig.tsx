@@ -44,12 +44,15 @@ export interface NavLeaf {
   href: string;
   icon: LucideIcon;
   adminOnly?: boolean;
+  // Só admin OU professor com permissão de Programa de Graduação.
+  graduacao?: boolean;
 }
 
 export interface NavBranch {
   label: string;
   icon: LucideIcon;
   adminOnly?: boolean;
+  graduacao?: boolean;
   children: NavNode[];
 }
 
@@ -113,7 +116,7 @@ export const navGroups: NavGroup[] = [
       {
         label: "Programas de Graduação",
         icon: ListChecks,
-        adminOnly: true,
+        graduacao: true,
         children: [
           { label: "Programas", href: "/graduacao/programas", icon: GraduationCap },
           { label: "Posições", href: "/graduacao/posicoes", icon: BookOpen },
@@ -233,12 +236,18 @@ export function coletarFolhas(nodes: NavNode[]): NavLeaf[] {
   );
 }
 
-// Remove nós restritos a admin; um ramo some quando fica sem filhos visíveis.
-export function filtrarPorPapel(nodes: NavNode[], admin: boolean): NavNode[] {
+// Remove nós restritos a admin (e os de graduação sem a permissão); um ramo
+// some quando fica sem filhos visíveis.
+export function filtrarPorPapel(
+  nodes: NavNode[],
+  admin: boolean,
+  permiteGraduacao = false,
+): NavNode[] {
   return nodes.flatMap<NavNode>((n) => {
     if (n.adminOnly && !admin) return [];
+    if (n.graduacao && !(admin || permiteGraduacao)) return [];
     if (isBranch(n)) {
-      const filhos = filtrarPorPapel(n.children, admin);
+      const filhos = filtrarPorPapel(n.children, admin, permiteGraduacao);
       return filhos.length > 0 ? [{ ...n, children: filhos }] : [];
     }
     return [n];

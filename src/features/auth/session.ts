@@ -9,6 +9,7 @@ interface JwtClaims {
   role?: string;
   PoloId?: string;
   PoloNome?: string;
+  PermiteGraduacao?: string;
   exp?: number;
 }
 
@@ -34,6 +35,7 @@ export function sessaoDoToken(token: string | null): Sessao | null {
       poloNome: claims.PoloNome ?? "",
       isAdministrador: role === "Administrador",
       isProfessor: role === "Professor",
+      permiteGraduacao: claims.PermiteGraduacao === "true",
     };
   } catch {
     return null;

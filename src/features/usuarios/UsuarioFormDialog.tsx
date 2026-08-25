@@ -34,6 +34,7 @@ const schema = z
     password: z.string(),
     role: z.number(),
     poloId: z.number().nullable(),
+    permiteGraduacao: z.boolean(),
   })
   .refine((v) => v.role !== 2 || (v.poloId != null && v.poloId > 0), {
     message: "Selecione um polo para o professor.",
@@ -48,6 +49,7 @@ const VAZIO: FormValues = {
   password: "",
   role: 2,
   poloId: null,
+  permiteGraduacao: false,
 };
 
 interface Props {
@@ -93,6 +95,7 @@ export function UsuarioFormDialog({
             password: "",
             role: usuario.role,
             poloId: usuario.poloId ?? null,
+            permiteGraduacao: usuario.permiteGraduacao ?? false,
           }
         : VAZIO,
     );
@@ -115,6 +118,8 @@ export function UsuarioFormDialog({
       role: values.role,
       poloId: admin ? null : values.poloId,
       poloNome: admin ? null : (polo?.nome ?? ""),
+      // Só faz sentido para professor; o admin já acessa tudo.
+      permiteGraduacao: values.role === 2 ? values.permiteGraduacao : false,
     };
 
     try {
@@ -247,6 +252,30 @@ export function UsuarioFormDialog({
                   </p>
                 )}
               </div>
+            )}
+
+            {role === 2 && (
+              <Controller
+                control={control}
+                name="permiteGraduacao"
+                render={({ field }) => (
+                  <label className="flex items-start gap-2.5 rounded-md border border-border p-3 text-sm">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 size-4 accent-primary"
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                    <span>
+                      <span className="font-medium">Acesso ao Programa de Graduação</span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        Libera este professor a ver e editar posições, programas e
+                        golpes restritos.
+                      </span>
+                    </span>
+                  </label>
+                )}
+              />
             )}
           </div>
 

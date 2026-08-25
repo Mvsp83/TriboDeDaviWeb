@@ -25,6 +25,7 @@ export function useSalvarUsuario() {
           role: u.role,
           poloId: u.poloId ?? 0,
           poloNome: u.poloNome ?? "",
+          permiteGraduacao: u.permiteGraduacao ?? false,
         });
       }
       return apiPost(ApiRotas.usuarioCreate, {
@@ -35,6 +36,7 @@ export function useSalvarUsuario() {
         role: u.role,
         poloId: u.poloId ?? 0,
         poloNome: u.poloNome ?? "",
+        permiteGraduacao: u.permiteGraduacao ?? false,
       });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["usuarios"] }),

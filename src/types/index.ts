@@ -177,6 +177,8 @@ export interface Usuario {
   role: number; // 0=Administrador, 1=Supervisor, 2=Professor
   poloId?: number | null;
   poloNome?: string | null;
+  // Libera o professor a acessar o módulo Programa de Graduação.
+  permiteGraduacao?: boolean;
 }
 
 export const ROLE_LABEL: Record<number, string> = {
@@ -315,4 +317,6 @@ export interface Sessao {
   poloNome: string;
   isAdministrador: boolean;
   isProfessor: boolean;
+  // Permissão extra concedida pelo admin: acessar o Programa de Graduação.
+  permiteGraduacao: boolean;
 }
