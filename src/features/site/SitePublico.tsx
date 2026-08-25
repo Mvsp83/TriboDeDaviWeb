@@ -14,17 +14,58 @@ import {
   FileText,
 } from "lucide-react";
 import { SITE, temContato, temInformacoes } from "@/features/site/conteudoSite";
-import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 
-// Cores das faixas para a régua de progressão do herói. Espelha o sistema de
-// faixas do jiu-jitsu infantil usado no portal.
-const CORES_FAIXA = [
-  "#f5f5f4", "#9ca3af", "#facc15", "#fb923c",
-  "#22c55e", "#3b82f6", "#a855f7", "#78350f", "#18181b",
+// Faixas do jiu-jitsu infantil, com cores mais vivas para o herói do site.
+// `ponta` = cor do friso (onde ficam os graus); a preta tem ponta vermelha,
+// como a faixa preta real.
+const FAIXAS: { nome: string; cor: string; ponta?: string }[] = [
+  { nome: "Branca", cor: "#fbfbfa" },
+  { nome: "Cinza", cor: "#9aa1ac" },
+  { nome: "Amarela", cor: "#ffd60a" },
+  { nome: "Laranja", cor: "#ff7a1a" },
+  { nome: "Verde", cor: "#17c34a" },
+  { nome: "Azul", cor: "#2563ff" },
+  { nome: "Roxa", cor: "#9327ff" },
+  { nome: "Marrom", cor: "#7a3d15" },
+  { nome: "Preta", cor: "#161618", ponta: "#e11d2a" },
 ];
+
+// Uma faixa "realista": barra com brilho de couro, friso (ponta) e 4 graus.
+// Tudo em CSS, sem imagens.
+function FaixaBelt({
+  nome,
+  cor,
+  ponta = "#141416",
+}: {
+  nome: string;
+  cor: string;
+  ponta?: string;
+}) {
+  const relevo = (c: string) =>
+    `linear-gradient(180deg, color-mix(in srgb, ${c} 78%, #fff) 0%, ${c} 46%, color-mix(in srgb, ${c} 82%, #000) 100%)`;
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div
+        className="relative h-7 w-full overflow-hidden rounded-[4px] shadow-md ring-1 ring-black/25"
+        style={{ background: relevo(cor) }}
+      >
+        {/* Friso com os 4 graus */}
+        <div
+          className="absolute inset-y-0 right-2 flex w-[30%] items-center justify-evenly px-1.5"
+          style={{ background: relevo(ponta) }}
+        >
+          {[0, 1, 2, 3].map((i) => (
+            <span key={i} className="h-full w-[2px] rounded-[1px] bg-white/90" />
+          ))}
+        </div>
+      </div>
+      <span className="text-xs font-medium text-muted-foreground">{nome}</span>
+    </div>
+  );
+}
 
 function Numero({ valor, rotulo }: { valor: number; rotulo: string }) {
   if (!valor) return null;
@@ -67,7 +108,7 @@ export function SitePublico() {
 
       {/* Topo */}
       <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
-        <img src="/logo.png" alt={SITE.nome} className="h-10 w-auto md:h-12" />
+        <img src="/logo.png" alt={SITE.nome} className="h-[7.5rem] w-auto md:h-36" />
 
         <nav className="order-3 flex w-full flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground md:order-2 md:w-auto">
           {secoes.map((s) => (
@@ -131,17 +172,16 @@ export function SitePublico() {
             </Button>
           </div>
 
-          {/* Régua de faixas: a progressão do aluno, em uma linha. */}
+          {/* Faixas: a progressão do aluno, da branca à preta. */}
           <div className="mt-10">
-            <div className="flex h-2.5 overflow-hidden rounded-full">
-              {CORES_FAIXA.map((cor, i) => (
-                <div key={i} className="flex-1" style={{ backgroundColor: cor }} />
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Da faixa branca à preta
+            </p>
+            <div className="grid max-w-xl grid-cols-3 gap-x-4 gap-y-3 sm:grid-cols-3">
+              {FAIXAS.map((f) => (
+                <FaixaBelt key={f.nome} nome={f.nome} cor={f.cor} ponta={f.ponta} />
               ))}
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Da faixa branca à preta —{" "}
-              {OPCOES_FAIXA_BASE.map((f) => f.nome).join(" · ")}
-            </p>
           </div>
         </div>
       </section>
