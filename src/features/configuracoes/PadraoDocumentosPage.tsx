@@ -105,12 +105,16 @@ export function PadraoDocumentosPage() {
             </div>
 
             <div>
-              <Label className="mb-1.5">Linha extra do cabeçalho (opcional)</Label>
-              <Input
+              <Label className="mb-1.5">Linhas extras do cabeçalho (opcional)</Label>
+              <Textarea
+                rows={3}
                 value={cfg.linhaExtra}
                 onChange={(e) => set("linhaExtra", e.target.value)}
-                placeholder="Endereço, CNPJ ou contato"
+                placeholder={"Endereço · contato\ninstituto@email.com | www.site.com.br\nCNPJ 00.000.000/0001-00"}
               />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Uma informação por linha (aparece abaixo do nome no cabeçalho).
+              </p>
             </div>
 
             <div>

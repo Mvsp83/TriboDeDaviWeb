@@ -46,8 +46,12 @@ export function montarDocumentoHtml(
   const instHtml = cfg.tituloCabecalho
     ? `<div class="inst">${esc(cfg.tituloCabecalho)}</div>`
     : "";
+  // linhaExtra pode ter várias linhas (email, site, CNPJ) — cada uma numa linha.
   const extraHtml = cfg.linhaExtra
-    ? `<div class="extra">${esc(cfg.linhaExtra)}</div>`
+    ? `<div class="extra">${cfg.linhaExtra
+        .split("\n")
+        .map((l) => esc(l))
+        .join("<br>")}</div>`
     : "";
   const dataHtml = cfg.mostrarDataGeracao
     ? `<span>Gerado em ${esc(geradoEm)}</span>`
