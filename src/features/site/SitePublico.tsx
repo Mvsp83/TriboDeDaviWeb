@@ -173,16 +173,17 @@ export function SitePublico() {
             </Button>
           </div>
 
-          {/* Faixas: a progressão do aluno, da branca à preta. */}
-          <div className="mt-10">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Da faixa branca à preta
-            </p>
-            <div className="grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-x-1.5">
-              {FAIXAS.map((f) => (
-                <FaixaBelt key={f.nome} nome={f.nome} cor={f.cor} ponta={f.ponta} />
-              ))}
-            </div>
+        </div>
+
+        {/* Faixas: centralizadas na seção. */}
+        <div className="mt-12 text-center">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Da faixa branca à preta
+          </p>
+          <div className="mx-auto grid max-w-3xl grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-x-1.5">
+            {FAIXAS.map((f) => (
+              <FaixaBelt key={f.nome} nome={f.nome} cor={f.cor} ponta={f.ponta} />
+            ))}
           </div>
         </div>
       </section>
