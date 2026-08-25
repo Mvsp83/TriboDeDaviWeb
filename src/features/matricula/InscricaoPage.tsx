@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Users, User } from "lucide-react";
+import { Users, User } from "lucide-react";
 import { MatriculaPage } from "@/features/matricula/MatriculaPage";
 import { MatriculaAdultoPage } from "@/features/matricula/MatriculaAdultoPage";
-import { Button } from "@/components/ui/button";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import { PaginaPublica } from "@/components/PaginaPublica";
 
 type Publico = "crianca" | "adulto";
 
@@ -20,7 +19,7 @@ export function InscricaoPage() {
     return <MatriculaAdultoPage onVoltar={() => setPublico(null)} />;
 
   return (
-    <div className="min-h-svh bg-background text-foreground">
+    <PaginaPublica larguraMax="max-w-lg">
       <div className="mx-auto max-w-lg px-4 py-16">
         <h1 className="text-center text-2xl font-bold tracking-tight">
           Fazer inscrição
@@ -55,15 +54,7 @@ export function InscricaoPage() {
           </button>
         </div>
 
-        <div className="mt-6 text-center">
-          <Button asChild variant="ghost">
-            <Link to="/">
-              <ArrowLeft className="size-4" />
-              Voltar ao início
-            </Link>
-          </Button>
-        </div>
       </div>
-    </div>
+    </PaginaPublica>
   );
 }

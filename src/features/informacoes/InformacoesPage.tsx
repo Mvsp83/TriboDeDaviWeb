@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
 import {
-  ArrowLeft,
-  LogIn,
   Info,
   MapPin,
   Clock,
@@ -11,6 +9,7 @@ import {
 import { SITE } from "@/features/site/conteudoSite";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
+import { PaginaPublica } from "@/components/PaginaPublica";
 
 // Um id de âncora estável a partir do índice — evita depender do texto do
 // título (que o instituto pode editar).
@@ -21,7 +20,6 @@ const idTopico = (i: number) => `topico-${i}`;
 // endereços/horários. Conteúdo curado em conteudoSite.ts.
 export function InformacoesPage() {
   useDocumentTitle(`Informações — ${SITE.nome}`);
-  const anoAtual = new Date().getFullYear();
   const { informacoes, polos } = SITE;
 
   const topicos = informacoes.topicos.filter((t) => t.itens.length > 0);
@@ -34,28 +32,7 @@ export function InformacoesPage() {
   ];
 
   return (
-    <div className="min-h-svh bg-background text-foreground">
-      {/* Topo */}
-      <header className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-5">
-        <Link to="/" className="inline-flex items-center gap-2">
-          <img src="/logo.png" alt={SITE.nome} className="h-10 w-auto md:h-12" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/">
-              <ArrowLeft className="size-4" />
-              Voltar ao site
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/login">
-              <LogIn className="size-4" />
-              Acesso da equipe
-            </Link>
-          </Button>
-        </div>
-      </header>
-
+    <PaginaPublica larguraMax="max-w-4xl">
       {/* Título + intro */}
       <section className="mx-auto max-w-4xl px-4 pb-6 pt-4">
         <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight md:text-4xl">
@@ -155,17 +132,6 @@ export function InformacoesPage() {
         </div>
       </section>
 
-      {/* Rodapé */}
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-4 py-8 text-xs text-muted-foreground">
-          <span>© {anoAtual} {SITE.nome}</span>
-          <div className="flex items-center gap-x-6">
-            <Link to="/" className="hover:text-foreground">Site</Link>
-            <Link to="/galeria" className="hover:text-foreground">Galeria</Link>
-            <Link to="/transparencia" className="hover:text-foreground">Transparência</Link>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PaginaPublica>
   );
 }

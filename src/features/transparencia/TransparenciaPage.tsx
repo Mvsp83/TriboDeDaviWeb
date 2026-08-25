@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
 import {
   HeartHandshake,
-  LogIn,
-  ArrowLeft,
   ArrowRight,
   Users,
   MapPin,
@@ -22,6 +20,7 @@ import { SITE } from "@/features/site/conteudoSite";
 import { moeda } from "@/lib/format";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
+import { PaginaPublica } from "@/components/PaginaPublica";
 
 function Numero({ valor, rotulo }: { valor: string; rotulo: string }) {
   return (
@@ -83,28 +82,7 @@ export function TransparenciaPage() {
   const maxFin = Math.max(totalReceitas, totalDespesas, 1);
 
   return (
-    <div className="min-h-svh bg-background text-foreground">
-      {/* Topo */}
-      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
-        <Link to="/" className="inline-flex items-center gap-2">
-          <img src="/logo.png" alt={SITE.nome} className="h-10 w-auto md:h-12" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/">
-              <ArrowLeft className="size-4" />
-              Voltar ao site
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/login">
-              <LogIn className="size-4" />
-              Acesso da equipe
-            </Link>
-          </Button>
-        </div>
-      </header>
-
+    <PaginaPublica>
       {/* Herói */}
       <section className="mx-auto max-w-5xl px-4 pb-10 pt-4 md:pb-14 md:pt-8">
         <div className="max-w-2xl">
@@ -355,26 +333,6 @@ export function TransparenciaPage() {
           </div>
         </div>
       </section>
-
-      {/* Rodapé */}
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-8 text-xs text-muted-foreground">
-          <span>
-            © {anoAtual} {SITE.nome}
-          </span>
-          <div className="flex items-center gap-x-6">
-            <Link to="/" className="hover:text-foreground">
-              Site
-            </Link>
-            <Link to="/doar" className="hover:text-foreground">
-              Doar
-            </Link>
-            <Link to="/login" className="hover:text-foreground">
-              Acesso da equipe
-            </Link>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PaginaPublica>
   );
 }
