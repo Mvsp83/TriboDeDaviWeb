@@ -187,6 +187,11 @@ const RelatorioAtividadesPage = lazy(() =>
     default: m.RelatorioAtividadesPage,
   })),
 );
+const RelatorioAtividadesModeloPage = lazy(() =>
+  import("@/features/administrativo/RelatorioAtividadesModeloPage").then((m) => ({
+    default: m.RelatorioAtividadesModeloPage,
+  })),
+);
 const ExtratosPage = lazy(() =>
   import("@/features/administrativo/financeiro/ExtratosPage").then((m) => ({
     default: m.ExtratosPage,
@@ -280,6 +285,10 @@ export default function App() {
             <Route
               path="administrativo/contabilidade/relatorio-atividades"
               element={<RelatorioAtividadesPage />}
+            />
+            <Route
+              path="administrativo/contabilidade/relatorio-atividades/modelo"
+              element={<RelatorioAtividadesModeloPage />}
             />
             <Route
               path="administrativo/contabilidade/balanco"

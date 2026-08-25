@@ -37,6 +37,30 @@ function desenharQuadrado(img: HTMLImageElement, tamanho: number): HTMLCanvasEle
   return canvas;
 }
 
+// Redimensiona uma foto preservando a proporção, para uso em documentos (PDF).
+// Reduz a largura máxima e comprime em JPEG — mantém o arquivo gerado leve.
+export async function redimensionarFoto(
+  file: File,
+  larguraMax = 1200,
+  qualidade = 0.82,
+): Promise<string> {
+  if (!TIPOS_ACEITOS.includes(file.type)) {
+    throw new Error("Formato não suportado. Use PNG, JPEG ou WebP.");
+  }
+  if (file.size > ENTRADA_MAX_BYTES) {
+    throw new Error("A imagem é muito grande. Escolha um arquivo de até 10 MB.");
+  }
+
+  const img = await carregarImagem(file);
+  const escala = Math.min(1, larguraMax / img.width);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(img.width * escala);
+  canvas.height = Math.round(img.height * escala);
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", qualidade);
+}
+
 export async function redimensionarQuadrado(
   file: File,
   tamanho = 128,
