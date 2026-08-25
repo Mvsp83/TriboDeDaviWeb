@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/features/auth/AuthContext";
 import type { ModuloId } from "@/config/modulos";
+import { ModuloIndisponivel } from "@/components/ModuloIndisponivel";
 
 // Guarda de rotas: sem sessão, manda para o login guardando a origem.
 // - adminOnly restringe a área às contas Administrador (papel do usuário).
@@ -33,9 +34,8 @@ export function ProtectedRoute({
 
   const moduloExigido: ModuloId | undefined = modulo ?? (graduacao ? "graduacao" : undefined);
   if (moduloExigido && !sessao?.modulos.includes(moduloExigido)) {
-    // Conta não contratou o módulo. Por ora volta ao painel; aqui é o ponto
-    // natural para uma tela de "Contrate este módulo" (upsell).
-    return <Navigate to="/painel" replace />;
+    // Conta não contratou o módulo: mostra a tela de upsell (mantém a URL).
+    return <ModuloIndisponivel modulo={moduloExigido} />;
   }
 
   return <Outlet />;

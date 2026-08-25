@@ -228,14 +228,20 @@ export default function App() {
           <Route path="painel" element={<DashboardPage />} />
           <Route path="alunos" element={<AlunosPage />} />
           <Route path="inscricoes" element={<InscricoesPage />} />
-          <Route path="impacto" element={<ImpactoPage />} />
           <Route path="graduacoes" element={<GraduacoesPage />} />
-          <Route path="doacoes" element={<DoacoesPage />} />
+          {/* Captação & Impacto */}
+          <Route element={<ProtectedRoute modulo="captacao" />}>
+            <Route path="impacto" element={<ImpactoPage />} />
+            <Route path="doacoes" element={<DoacoesPage />} />
+          </Route>
           <Route path="auditoria" element={<AuditoriaPage />} />
           <Route path="aulas" element={<AulasPage />} />
           <Route path="chamada" element={<ChamadaPage />} />
           <Route path="chamada/:aulaId" element={<ChamadaAulaPage />} />
-          <Route path="calendario" element={<CalendarioPage />} />
+          {/* Relacionamento */}
+          <Route element={<ProtectedRoute modulo="relacionamento" />}>
+            <Route path="calendario" element={<CalendarioPage />} />
+          </Route>
           <Route path="planos-de-aula" element={<PlanosDeAulaPage />} />
           <Route path="planos-de-aula/ver/:id" element={<PlanoViewPage />} />
           <Route path="planos-de-aula/editor" element={<PlanoEditorPage />} />
@@ -258,49 +264,60 @@ export default function App() {
             <Route path="sincronizacao" element={<SincronizacaoPage />} />
             <Route path="documentos" element={<DocumentosPage />} />
             <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
-            <Route path="documentos-oficiais" element={<DocumentosOficiaisPage />} />
-            <Route path="patrimonio" element={<PatrimonioPage />} />
-            <Route path="avisos" element={<AvisosPage />} />
-            <Route
-              path="documentos-oficiais/novo/:tipo"
-              element={<DocumentoOficialEditorPage />}
-            />
-            <Route
-              path="documentos-oficiais/editor/:id"
-              element={<DocumentoOficialEditorPage />}
-            />
 
-            {/* Administrativo → Contabilidade */}
-            <Route
-              path="administrativo/contabilidade/dre"
-              element={<DrePage />}
-            />
-            <Route
-              path="administrativo/contabilidade/relatorio-atividades"
-              element={<RelatorioAtividadesPage />}
-            />
-            <Route
-              path="administrativo/contabilidade/relatorio-atividades/modelo"
-              element={<RelatorioAtividadesModeloPage />}
-            />
-            <Route
-              path="administrativo/contabilidade/balanco"
-              element={<BalancoPage />}
-            />
+            {/* Relacionamento */}
+            <Route element={<ProtectedRoute modulo="relacionamento" />}>
+              <Route path="avisos" element={<AvisosPage />} />
+            </Route>
 
-            {/* Administrativo → Financeiro → Contas */}
-            <Route
-              path="administrativo/financeiro/contas/extratos"
-              element={<ExtratosPage />}
-            />
-            <Route
-              path="administrativo/financeiro/contas/aplicacoes"
-              element={<AplicacoesPage />}
-            />
-            <Route
-              path="administrativo/financeiro/contas/planilha"
-              element={<PlanilhaFinanceiraPage />}
-            />
+            {/* Financeiro & Contábil */}
+            <Route element={<ProtectedRoute modulo="financeiro" />}>
+              <Route
+                path="documentos-oficiais"
+                element={<DocumentosOficiaisPage />}
+              />
+              <Route
+                path="documentos-oficiais/novo/:tipo"
+                element={<DocumentoOficialEditorPage />}
+              />
+              <Route
+                path="documentos-oficiais/editor/:id"
+                element={<DocumentoOficialEditorPage />}
+              />
+              <Route path="patrimonio" element={<PatrimonioPage />} />
+
+              {/* Administrativo → Contabilidade */}
+              <Route
+                path="administrativo/contabilidade/dre"
+                element={<DrePage />}
+              />
+              <Route
+                path="administrativo/contabilidade/relatorio-atividades"
+                element={<RelatorioAtividadesPage />}
+              />
+              <Route
+                path="administrativo/contabilidade/relatorio-atividades/modelo"
+                element={<RelatorioAtividadesModeloPage />}
+              />
+              <Route
+                path="administrativo/contabilidade/balanco"
+                element={<BalancoPage />}
+              />
+
+              {/* Administrativo → Financeiro → Contas */}
+              <Route
+                path="administrativo/financeiro/contas/extratos"
+                element={<ExtratosPage />}
+              />
+              <Route
+                path="administrativo/financeiro/contas/aplicacoes"
+                element={<AplicacoesPage />}
+              />
+              <Route
+                path="administrativo/financeiro/contas/planilha"
+                element={<PlanilhaFinanceiraPage />}
+              />
+            </Route>
           </Route>
 
           {/* Programa de Graduação: exige o módulo "graduacao" (admin OU
