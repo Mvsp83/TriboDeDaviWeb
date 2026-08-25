@@ -1,5 +1,7 @@
 // Modelos do domínio, espelhando os DTOs da API Tribo de Davi.
 
+import type { ModuloId } from "@/config/modulos";
+
 export interface Aluno {
   id: number;
   nome: string;
@@ -319,4 +321,7 @@ export interface Sessao {
   isProfessor: boolean;
   // Permissão extra concedida pelo admin: acessar o Programa de Graduação.
   permiteGraduacao: boolean;
+  // Módulos comerciais que a conta contratou. Decide o que aparece no menu e
+  // o que as rotas liberam. Ver src/config/modulos.ts.
+  modulos: ModuloId[];
 }

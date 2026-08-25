@@ -47,4 +47,48 @@ describe("sessaoDoToken", () => {
     expect(sessaoDoToken(null)).toBeNull();
     expect(sessaoDoToken("não-é-um-jwt")).toBeNull();
   });
+
+  // --- Módulos ---
+
+  it("sem claim Modulos: fallback dá os módulos base, sem graduação para professor", () => {
+    const sessao = sessaoDoToken(
+      fakeJwt({ unique_name: "prof", role: "Professor", exp: agora + 3600 }),
+    );
+    expect(sessao!.modulos).toEqual(
+      expect.arrayContaining(["core", "captacao", "financeiro", "relacionamento"]),
+    );
+    expect(sessao!.modulos).not.toContain("graduacao");
+  });
+
+  it("sem claim Modulos: professor com permissão ganha graduação", () => {
+    const sessao = sessaoDoToken(
+      fakeJwt({
+        unique_name: "prof",
+        role: "Professor",
+        PermiteGraduacao: "true",
+        exp: agora + 3600,
+      }),
+    );
+    expect(sessao!.modulos).toContain("graduacao");
+  });
+
+  it("sem claim Modulos: admin sempre tem graduação", () => {
+    const sessao = sessaoDoToken(
+      fakeJwt({ unique_name: "admin", role: "Administrador", exp: agora + 3600 }),
+    );
+    expect(sessao!.modulos).toContain("graduacao");
+  });
+
+  it("com claim Modulos: a claim manda e ignora entradas inválidas", () => {
+    const sessao = sessaoDoToken(
+      fakeJwt({
+        unique_name: "admin",
+        role: "Administrador",
+        Modulos: "core, captacao, inexistente",
+        exp: agora + 3600,
+      }),
+    );
+    // Mesmo sendo admin, só vê o que a conta contratou.
+    expect(sessao!.modulos).toEqual(["core", "captacao"]);
+  });
 });
