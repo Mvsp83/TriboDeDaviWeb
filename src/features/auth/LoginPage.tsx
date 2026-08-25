@@ -1,24 +1,13 @@
 import { useState } from "react";
-import { useNavigate, useLocation, Navigate, Link } from "react-router-dom";
-import { Eye, EyeOff, Loader2, LogIn, User, Lock, ShieldCheck, ArrowLeft } from "lucide-react";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
+import { Eye, EyeOff, Loader2, LogIn, User, Lock, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { ApiError } from "@/lib/api";
 import { LogoLockup } from "@/components/Logo";
+import { PaginaPublica } from "@/components/PaginaPublica";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-// Versão do portal web (exibida no "Sobre o Aplicativo").
-const VERSAO_APP = "1.0.0";
 
 export function LoginPage() {
   const { entrar, autenticado } = useAuth();
@@ -30,7 +19,6 @@ export function LoginPage() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
-  const [sobreAberto, setSobreAberto] = useState(false);
   // Segunda etapa: exibida quando a API responde que o usuário tem 2FA.
   const [etapa2fa, setEtapa2fa] = useState(false);
   const [codigo2fa, setCodigo2fa] = useState("");
@@ -90,16 +78,8 @@ export function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background p-4">
-      {/* Voltar para a página inicial */}
-      <Link
-        to="/"
-        className="absolute left-4 top-4 z-20 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Voltar ao início
-      </Link>
-
+    <PaginaPublica>
+    <div className="relative flex min-h-[75svh] items-center justify-center overflow-hidden p-4">
       {/* Brilho dourado de fundo */}
       <div
         className="pointer-events-none absolute -top-40 left-1/2 size-[38rem] -translate-x-1/2 rounded-full opacity-25 blur-[120px]"
@@ -229,52 +209,8 @@ export function LoginPage() {
           </form>
         </div>
 
-        <div className="mt-6 flex flex-col items-center gap-1 text-center text-xs text-muted-foreground">
-          <span>Instituto Tribo de Davi · {new Date().getFullYear()}</span>
-          <button
-            type="button"
-            onClick={() => setSobreAberto(true)}
-            className="transition-colors hover:text-foreground"
-          >
-            Desenvolvido por eMeVe ©
-          </button>
-        </div>
       </div>
-
-      {/* Sobre o aplicativo — autoria eMeVe (portado do app Flutter) */}
-      <Dialog open={sobreAberto} onOpenChange={setSobreAberto}>
-        <DialogContent className="max-w-xs">
-          <DialogHeader>
-            <DialogTitle className="text-center">Sobre o Aplicativo</DialogTitle>
-            <DialogDescription className="sr-only">
-              Informações sobre o desenvolvimento do aplicativo.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex flex-col items-center gap-3 py-1 text-center text-sm text-muted-foreground">
-            <span>Desenvolvido por</span>
-            <img src="/emeve.png" alt="eMeVe" className="h-20 w-auto" />
-            <span>Versão {VERSAO_APP}</span>
-            <div className="pt-1">
-              <p>Dúvidas e sugestões</p>
-              <a
-                href="mailto:marcusviniciussp.dev@gmail.com"
-                className="text-primary hover:underline"
-              >
-                marcusviniciussp.dev@gmail.com
-              </a>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline" className="w-full">
-                Fechar
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
+    </PaginaPublica>
   );
 }
