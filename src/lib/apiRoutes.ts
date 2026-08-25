@@ -141,6 +141,7 @@ export const ApiRotas = {
   graduacoesDoAluno: (alunoId: number) => `/api/Graduacao/aluno/${alunoId}`,
   graduacaoRegistrar: "/api/Graduacao/registrar",
   graduacaoExcluir: (id: number) => `/api/Graduacao/${id}`,
+  graduacaoAptidao: "/api/Graduacao/aptidao",
 
   doadores: "/api/Doacao/doadores",
   doadorSalvar: "/api/Doacao/doadores/salvar",

@@ -5,6 +5,7 @@ import {
   type ConfigGraduacao,
   type ProgramaFaixa,
   type Grau,
+  type ParametrosFaixa,
   novoId,
 } from "./tipos";
 import { CONFIG_DEFAULT } from "./seed";
@@ -25,6 +26,25 @@ function normalizarGrau(g: Grau & { criterioExame?: string }): Grau {
     titulo: g.titulo ?? "",
     requisitos: g.requisitos ?? [],
     criterios,
+  };
+}
+
+// Migra o parâmetro do formato antigo (semAdvertencias: boolean) para o novo
+// (maxAdvertencias: number | null): exigia => 0 permitidas; não exigia => null.
+function normalizarParametro(
+  p: ParametrosFaixa & { semAdvertencias?: boolean },
+): ParametrosFaixa {
+  const maxAdvertencias =
+    p.maxAdvertencias !== undefined
+      ? p.maxAdvertencias
+      : p.semAdvertencias
+        ? 0
+        : null;
+  return {
+    faixaBase: p.faixaBase,
+    aulasMinimas: p.aulasMinimas ?? 0,
+    mesesMinimos: p.mesesMinimos ?? 0,
+    maxAdvertencias,
   };
 }
 
@@ -94,6 +114,8 @@ function mesclar(bruto: Partial<ConfigGraduacao> | null): ConfigGraduacao {
     posicoes: posicoes.length > 0 ? posicoes : CONFIG_DEFAULT.posicoes,
     golpesRestritos: golpes.length > 0 ? golpes : CONFIG_DEFAULT.golpesRestritos,
     programas: programas.length > 0 ? programas : CONFIG_DEFAULT.programas,
+    // Parâmetros são do usuário; ausentes em configs antigas = lista vazia.
+    parametros: (bruto.parametros ?? []).map(normalizarParametro),
   };
 }
 

@@ -11,6 +11,7 @@ import {
   type Posicao,
   type ProgramaFaixa,
   type GolpeRestrito,
+  type ParametrosFaixa,
   novoId,
 } from "./tipos";
 import { carregarConfig, salvarConfig } from "./graduacaoStore";
@@ -92,6 +93,22 @@ export function useSalvarGolpes() {
     mutationFn: async (golpes: GolpeRestrito[]) => {
       const cfg = carregarConfig();
       const nova = { ...cfg, golpesRestritos: golpes };
+      salvarConfig(nova);
+      return nova;
+    },
+    onSuccess: (cfg) => qc.setQueryData(CHAVE_QUERY, cfg),
+  });
+}
+
+// ---- Parâmetros de aptidão (por faixa) ----
+
+// Substitui a lista inteira de parâmetros por faixa.
+export function useSalvarParametros() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (parametros: ParametrosFaixa[]) => {
+      const cfg = carregarConfig();
+      const nova = { ...cfg, parametros };
       salvarConfig(nova);
       return nova;
     },
