@@ -107,12 +107,12 @@ export function SitePublico() {
       </a>
 
       {/* Topo */}
-      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
-        <img src="/logo.png" alt={SITE.nome} className="h-[7.5rem] w-auto md:h-36" />
+      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-5">
+        <img src="/logo.png" alt={SITE.nome} className="h-14 w-auto md:h-20" />
 
         {/* Menu e acessos no mesmo grupo, alinhados à direita e na mesma linha. */}
-        <div className="flex flex-1 flex-wrap items-center justify-end gap-x-5 gap-y-2">
-          <nav className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted-foreground">
+        <div className="flex flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-2 md:flex-nowrap">
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground md:flex-nowrap md:whitespace-nowrap">
             {secoes.map((s) => (
               <a key={s.id} href={`#${s.id}`} className="transition-colors hover:text-foreground">
                 {s.label}
