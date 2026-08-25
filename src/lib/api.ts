@@ -40,6 +40,12 @@ http.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // Uploads (FormData): remove o Content-Type JSON padrão para o navegador
+  // definir multipart/form-data com o boundary correto — senão a API rejeita
+  // o upload com 415 Unsupported Media Type.
+  if (config.data instanceof FormData) {
+    config.headers.delete("Content-Type");
+  }
   return config;
 });
 
