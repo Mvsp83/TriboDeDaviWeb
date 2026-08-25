@@ -10,6 +10,7 @@ import {
   Wallet,
   TrendingUp,
   UserPlus,
+  FileBarChart,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import { dataBR, formatarTelefone } from "@/lib/format";
@@ -27,6 +28,10 @@ import {
   type Doador,
   type Doacao,
 } from "@/features/doadores/doacoesApi";
+import {
+  exportarDoacoesPdf,
+  exportarDoadoresPdf,
+} from "@/features/doadores/doacoesRelatorioPdf";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { IdRef } from "@/components/IdRef";
@@ -443,24 +448,35 @@ export function DoacoesPage() {
               </SelectContent>
             </Select>
           </div>
-          {aba === "doacoes" && (
-            <div className="w-32">
-              <Label className="mb-1.5">Ano</Label>
-              <Select value={ano} onValueChange={setAno}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {anos.map((a) => (
-                    <SelectItem key={a} value={a}>
-                      {a}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="w-32">
+            <Label className="mb-1.5">Ano</Label>
+            <Select value={ano} onValueChange={setAno}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {anos.map((a) => (
+                  <SelectItem key={a} value={a}>
+                    {a}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="ml-auto flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                const ok =
+                  aba === "doacoes"
+                    ? exportarDoacoesPdf(doacoes ?? [], Number(ano), resumo)
+                    : exportarDoadoresPdf(doadores ?? [], doacoes ?? [], Number(ano));
+                if (!ok) toast.error("Permita pop-ups para o relatório.");
+              }}
+            >
+              <FileBarChart className="size-4" />
+              Relatório
+            </Button>
             <Button
               variant="outline"
               onClick={() => {

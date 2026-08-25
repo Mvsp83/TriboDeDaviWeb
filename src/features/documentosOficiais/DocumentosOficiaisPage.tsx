@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileDown,
+  FileBarChart,
 } from "lucide-react";
 import {
   useDocumentosOficiais,
@@ -16,6 +17,7 @@ import {
   useExcluirDocumentoOficial,
 } from "@/features/documentosOficiais/documentosOficiaisApi";
 import { exportarDocumentoOficialPdf } from "@/features/documentosOficiais/documentosOficiaisPdf";
+import { exportarDocumentosOficiaisPdf } from "@/features/documentosOficiais/documentosOficiaisRelatorioPdf";
 import { TIPO_DOC_LABEL, TIPO_RECIBO_DOACAO } from "@/features/documentosOficiais/tipos";
 import { dataCurtaBR } from "@/lib/format";
 import { ApiError } from "@/lib/api";
@@ -111,6 +113,21 @@ export function DocumentosOficiaisPage() {
         </div>
 
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              const rotulo =
+                filtroTipo === "0"
+                  ? "Ofícios"
+                  : filtroTipo === "recibos"
+                    ? "Recibos"
+                    : "Todos";
+              const ok = exportarDocumentosOficiaisPdf(filtrados, ano, rotulo);
+              if (!ok) toast.error("Permita pop-ups para o relatório.");
+            }}
+          >
+            <FileBarChart className="size-4" /> Relatório
+          </Button>
           <Button variant="outline" onClick={() => navigate("/documentos-oficiais/novo/oficio")}>
             <FilePlus className="size-4" /> Novo ofício
           </Button>
