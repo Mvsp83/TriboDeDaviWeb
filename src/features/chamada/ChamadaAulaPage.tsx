@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas } from "@/features/aulas/aulasApi";
 import { useAlunos } from "@/features/alunos/alunosApi";
+import { ehAlunoAdulto } from "@/features/alunos/publico";
 import { usePolos } from "@/features/polos/polosApi";
 import {
   useAtualizarPresenca,
@@ -264,6 +265,7 @@ function ChamadaPendente({
               presente={false}
               editavel={false}
               apto={aptidao.get(a.id)?.exame}
+              adulto={ehAlunoAdulto(a)}
             />
           ))}
         </ListaAlunos>
@@ -301,6 +303,7 @@ function ChamadaPendente({
             presente={!!marcadas[a.id]}
             editavel
             apto={aptidao.get(a.id)?.exame}
+            adulto={ehAlunoAdulto(a)}
             onToggle={() =>
               setMarcadas((m) => ({ ...m, [a.id]: !m[a.id] }))
             }
@@ -380,9 +383,20 @@ function ChamadaSalva({
   aula: Aula;
   podeEditar: boolean;
 }) {
+  const { sessao } = useAuth();
   const { data: presencas, isLoading } = usePresencasDaAula(aula.id);
   const atualizar = useAtualizarPresenca();
   const { mapa: aptidao } = useMapaAptidao();
+  // Presença não guarda nascimento; para o selo "Adulto" na aula já salva,
+  // cruzamos com a lista de alunos (id -> é adulto).
+  const { data: alunos } = useAlunos(sessao?.isAdministrador ?? false);
+  const adultoPorId = useMemo(() => {
+    const s = new Set<number>();
+    (alunos ?? []).forEach((a) => {
+      if (ehAlunoAdulto(a)) s.add(a.id);
+    });
+    return s;
+  }, [alunos]);
   // Espelho otimista: mostra o novo valor enquanto o PUT roda.
   const [override, setOverride] = useState<Record<number, boolean>>({});
   const [salvandoId, setSalvandoId] = useState<number | null>(null);
@@ -453,6 +467,7 @@ function ChamadaSalva({
             editavel={podeEditar}
             salvando={salvandoId === p.id}
             apto={aptidao.get(p.alunoId)?.exame}
+            adulto={adultoPorId.has(p.alunoId)}
             onToggle={() => alternar(p)}
           />
         ))}
@@ -485,6 +500,7 @@ function LinhaAluno({
   editavel,
   salvando = false,
   apto,
+  adulto = false,
   onToggle,
   onOcorrencia,
 }: {
@@ -494,6 +510,7 @@ function LinhaAluno({
   editavel: boolean;
   salvando?: boolean;
   apto?: string; // rótulo do exame quando apto; ausente = não sinaliza
+  adulto?: boolean;
   onToggle?: () => void;
   onOcorrencia?: () => void;
 }) {
@@ -517,6 +534,11 @@ function LinhaAluno({
             className="inline-flex shrink-0 items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-600"
           >
             <Award className="size-3.5" /> Apto
+          </span>
+        )}
+        {adulto && (
+          <span className="shrink-0 rounded-md bg-sky-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-sky-600">
+            Adulto
           </span>
         )}
       </div>

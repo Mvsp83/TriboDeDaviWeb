@@ -16,8 +16,8 @@ const DoacaoPage = lazy(() =>
 const TransparenciaPage = lazy(() =>
   import("@/features/transparencia/TransparenciaPage").then((m) => ({ default: m.TransparenciaPage })),
 );
-const MatriculaPage = lazy(() =>
-  import("@/features/matricula/MatriculaPage").then((m) => ({ default: m.MatriculaPage })),
+const InscricaoPage = lazy(() =>
+  import("@/features/matricula/InscricaoPage").then((m) => ({ default: m.InscricaoPage })),
 );
 const ResponsavelPortal = lazy(() =>
   import("@/features/responsavel/ResponsavelPortal").then((m) => ({ default: m.ResponsavelPortal })),
@@ -237,7 +237,7 @@ export default function App() {
       <Route path="/transparencia" element={<TransparenciaPage />} />
       <Route path="/galeria" element={<GaleriaPage />} />
       <Route path="/informacoes" element={<InformacoesPage />} />
-      <Route path="/matricula" element={<MatriculaPage />} />
+      <Route path="/matricula" element={<InscricaoPage />} />
       <Route path="/responsavel" element={<ResponsavelPortal />} />
 
       <Route element={<ProtectedRoute />}>
