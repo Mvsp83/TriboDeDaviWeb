@@ -61,24 +61,49 @@ export function exportarDoacoesPdf(
   return abrirParaImpressao({ titulo: "Doações", subtitulo, corpoHtml });
 }
 
-// Relatório dos doadores cadastrados (aba "Doadores").
-export function exportarDoadoresPdf(doadores: Doador[]): boolean {
-  const total = doadores.reduce((s, d) => s + d.totalDoado, 0);
+// Relatório dos doadores no ano (aba "Doadores"). Agrega as doações do ano por
+// doador — quantidade, total e última doação no período — em vez dos totais
+// históricos. Doações anônimas (sem doador) ficam de fora. Ordena por total.
+export function exportarDoadoresPdf(
+  doadores: Doador[],
+  doacoes: Doacao[],
+  ano: number,
+): boolean {
+  const porDoador = new Map<
+    number,
+    { qtd: number; total: number; ultima: string }
+  >();
+  for (const d of doacoes) {
+    if (d.doadorId == null) continue;
+    const cur = porDoador.get(d.doadorId) ?? { qtd: 0, total: 0, ultima: "" };
+    cur.qtd += 1;
+    cur.total += d.valor;
+    if (!cur.ultima || d.data > cur.ultima) cur.ultima = d.data;
+    porDoador.set(d.doadorId, cur);
+  }
 
-  const linhas = doadores
+  const byId = new Map(doadores.map((x) => [x.id, x]));
+  const linhasDados = [...porDoador.entries()]
+    .map(([id, agg]) => ({ doador: byId.get(id), agg }))
+    .filter((r): r is { doador: Doador; agg: (typeof r)["agg"] } => !!r.doador)
+    .sort((a, b) => b.agg.total - a.agg.total);
+
+  const total = linhasDados.reduce((s, r) => s + r.agg.total, 0);
+
+  const linhas = linhasDados
     .map(
-      (d) => `<tr>
+      ({ doador: d, agg }) => `<tr>
         <td>${esc(d.nome)}${d.tipoPessoa === 1 ? " (PJ)" : ""}</td>
         <td class="nowrap">${esc(d.documento || "-")}</td>
         <td>${esc(d.email || d.telefone || "-")}</td>
-        <td class="num">${d.quantidadeDoacoes}</td>
-        <td class="num">${moeda(d.totalDoado)}</td>
-        <td class="nowrap">${d.ultimaDoacao ? dataCurtaBR(d.ultimaDoacao) : "—"}</td>
+        <td class="num">${agg.qtd}</td>
+        <td class="num">${moeda(agg.total)}</td>
+        <td class="nowrap">${agg.ultima ? dataCurtaBR(agg.ultima) : "—"}</td>
       </tr>`,
     )
     .join("");
 
-  const vazio = `<tr><td colspan="6" style="text-align:center;color:#777;padding:12px;">Nenhum doador cadastrado.</td></tr>`;
+  const vazio = `<tr><td colspan="6" style="text-align:center;color:#777;padding:12px;">Nenhum doador identificado em ${ano}.</td></tr>`;
 
   const corpoHtml = `${ESTILO}
 <table class="rel">
@@ -95,7 +120,7 @@ export function exportarDoadoresPdf(doadores: Doador[]): boolean {
 
   return abrirParaImpressao({
     titulo: "Doadores",
-    subtitulo: `${doadores.length} doador(es) · total arrecadado ${moeda(total)}`,
+    subtitulo: `Ano ${ano} · ${linhasDados.length} doador(es) · total ${moeda(total)}`,
     corpoHtml,
   });
 }

@@ -448,23 +448,21 @@ export function DoacoesPage() {
               </SelectContent>
             </Select>
           </div>
-          {aba === "doacoes" && (
-            <div className="w-32">
-              <Label className="mb-1.5">Ano</Label>
-              <Select value={ano} onValueChange={setAno}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {anos.map((a) => (
-                    <SelectItem key={a} value={a}>
-                      {a}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="w-32">
+            <Label className="mb-1.5">Ano</Label>
+            <Select value={ano} onValueChange={setAno}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {anos.map((a) => (
+                  <SelectItem key={a} value={a}>
+                    {a}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="ml-auto flex gap-2">
             <Button
               variant="outline"
@@ -472,7 +470,7 @@ export function DoacoesPage() {
                 const ok =
                   aba === "doacoes"
                     ? exportarDoacoesPdf(doacoes ?? [], Number(ano), resumo)
-                    : exportarDoadoresPdf(doadores ?? []);
+                    : exportarDoadoresPdf(doadores ?? [], doacoes ?? [], Number(ano));
                 if (!ok) toast.error("Permita pop-ups para o relatório.");
               }}
             >
