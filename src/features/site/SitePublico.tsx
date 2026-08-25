@@ -2,9 +2,6 @@ import { Link } from "react-router-dom";
 import {
   HeartHandshake,
   LogIn,
-  Mail,
-  AtSign,
-  MessageCircle,
   ClipboardList,
   ArrowRight,
   Users,
@@ -13,18 +10,60 @@ import {
   Receipt,
   FileText,
 } from "lucide-react";
-import { SITE, temContato, temInformacoes } from "@/features/site/conteudoSite";
-import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
+import { SITE, temInformacoes } from "@/features/site/conteudoSite";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
+import { SobreApp } from "@/components/SobreApp";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 
-// Cores das faixas para a régua de progressão do herói. Espelha o sistema de
-// faixas do jiu-jitsu infantil usado no portal.
-const CORES_FAIXA = [
-  "#f5f5f4", "#9ca3af", "#facc15", "#fb923c",
-  "#22c55e", "#3b82f6", "#a855f7", "#78350f", "#18181b",
+// Faixas do jiu-jitsu infantil, com cores mais vivas para o herói do site.
+// `ponta` = cor do friso (onde ficam os graus); a preta tem ponta vermelha,
+// como a faixa preta real.
+const FAIXAS: { nome: string; cor: string; ponta?: string }[] = [
+  { nome: "Branca", cor: "#fbfbfa" },
+  { nome: "Cinza", cor: "#9aa1ac" },
+  { nome: "Amarela", cor: "#ffd60a" },
+  { nome: "Laranja", cor: "#ff7a1a" },
+  { nome: "Verde", cor: "#17c34a" },
+  { nome: "Azul", cor: "#2563ff" },
+  { nome: "Roxa", cor: "#9327ff" },
+  { nome: "Marrom", cor: "#7a3d15" },
+  { nome: "Preta", cor: "#161618", ponta: "#e11d2a" },
 ];
+
+// Uma faixa "realista": barra com brilho de couro, friso (ponta) e 4 graus.
+// Tudo em CSS, sem imagens.
+function FaixaBelt({
+  nome,
+  cor,
+  ponta = "#141416",
+}: {
+  nome: string;
+  cor: string;
+  ponta?: string;
+}) {
+  const relevo = (c: string) =>
+    `linear-gradient(180deg, color-mix(in srgb, ${c} 78%, #fff) 0%, ${c} 46%, color-mix(in srgb, ${c} 82%, #000) 100%)`;
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div
+        className="relative h-6 w-full overflow-hidden rounded-[3px] shadow-md ring-1 ring-black/25"
+        style={{ background: relevo(cor) }}
+      >
+        {/* Friso com os 4 graus */}
+        <div
+          className="absolute inset-y-0 right-1.5 flex w-[30%] items-center justify-evenly px-1"
+          style={{ background: relevo(ponta) }}
+        >
+          {[0, 1, 2, 3].map((i) => (
+            <span key={i} className="h-full w-[2px] rounded-[1px] bg-white/90" />
+          ))}
+        </div>
+      </div>
+      <span className="text-xs font-medium text-muted-foreground">{nome}</span>
+    </div>
+  );
+}
 
 function Numero({ valor, rotulo }: { valor: number; rotulo: string }) {
   if (!valor) return null;
@@ -41,7 +80,7 @@ function Numero({ valor, rotulo }: { valor: number; rotulo: string }) {
 // Site público do instituto: apresenta o projeto, recebe doações e dá acesso
 // ao portal. É a página que qualquer pessoa vê ao abrir o endereço.
 export function SitePublico() {
-  const { contato, numeros, historia, fotos, prestacaoContas } = SITE;
+  const { numeros, historia, fotos, prestacaoContas } = SITE;
   const anoAtual = new Date().getFullYear();
   useDocumentTitle(`${SITE.nome} — Jiu-jitsu gratuito para crianças`);
 
@@ -49,10 +88,10 @@ export function SitePublico() {
     Boolean(prestacaoContas.texto) || prestacaoContas.documentos.length > 0;
 
   // Links de navegação — só aparecem para seções que têm conteúdo.
+  // "Prestação de contas" saiu do menu: o assunto vive em Transparência.
   const secoes = [
     { id: "historia", label: "História", on: historia.length > 0 },
     { id: "fotos", label: "Fotos", on: true },
-    { id: "prestacao", label: "Prestação de contas", on: temPrestacao },
   ].filter((s) => s.on);
 
   return (
@@ -66,43 +105,46 @@ export function SitePublico() {
       </a>
 
       {/* Topo */}
-      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
-        <img src="/logo.png" alt={SITE.nome} className="h-10 w-auto md:h-12" />
+      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-5">
+        <img src="/logo.png" alt={SITE.nome} className="h-14 w-auto md:h-20" />
 
-        <nav className="order-3 flex w-full flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground md:order-2 md:w-auto">
-          {secoes.map((s) => (
-            <a key={s.id} href={`#${s.id}`} className="transition-colors hover:text-foreground">
-              {s.label}
-            </a>
-          ))}
-          <Link to="/galeria" className="transition-colors hover:text-foreground">
-            Galeria
-          </Link>
-          {temInformacoes() && (
-            <Link to="/informacoes" className="transition-colors hover:text-foreground">
-              Informações
+        {/* Menu e acessos no mesmo grupo, alinhados à direita e na mesma linha. */}
+        <div className="flex flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-2 md:flex-nowrap">
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground md:flex-nowrap md:whitespace-nowrap">
+            {secoes.map((s) => (
+              <a key={s.id} href={`#${s.id}`} className="transition-colors hover:text-foreground">
+                {s.label}
+              </a>
+            ))}
+            <Link to="/galeria" className="transition-colors hover:text-foreground">
+              Galeria
             </Link>
-          )}
-          <Link to="/transparencia" className="transition-colors hover:text-foreground">
-            Transparência
-          </Link>
-        </nav>
+            {temInformacoes() && (
+              <Link to="/informacoes" className="transition-colors hover:text-foreground">
+                Informações
+              </Link>
+            )}
+            <Link to="/transparencia" className="transition-colors hover:text-foreground">
+              Transparência
+            </Link>
+          </nav>
 
-        <div className="order-2 flex items-center gap-2 md:order-3">
-          {/* Famílias: acompanham o aluno com código + nascimento. */}
-          <Button asChild size="sm">
-            <Link to="/responsavel">
-              <Users className="size-4" />
-              Área do Responsável
-            </Link>
-          </Button>
-          {/* Equipe: login com senha (admin/professor/supervisor). */}
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/login">
-              <LogIn className="size-4" />
-              Acesso da equipe
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Famílias: acompanham o aluno com código + nascimento. */}
+            <Button asChild size="sm">
+              <Link to="/responsavel">
+                <Users className="size-4" />
+                Área do Responsável
+              </Link>
+            </Button>
+            {/* Equipe: login com senha (admin/professor/supervisor). */}
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/login">
+                <LogIn className="size-4" />
+                Acesso da equipe
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -131,17 +173,17 @@ export function SitePublico() {
             </Button>
           </div>
 
-          {/* Régua de faixas: a progressão do aluno, em uma linha. */}
-          <div className="mt-10">
-            <div className="flex h-2.5 overflow-hidden rounded-full">
-              {CORES_FAIXA.map((cor, i) => (
-                <div key={i} className="flex-1" style={{ backgroundColor: cor }} />
-              ))}
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Da faixa branca à preta —{" "}
-              {OPCOES_FAIXA_BASE.map((f) => f.nome).join(" · ")}
-            </p>
+        </div>
+
+        {/* Faixas: centralizadas na seção. */}
+        <div className="mt-12 text-center">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Da faixa branca à preta
+          </p>
+          <div className="mx-auto grid max-w-3xl grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-x-1.5">
+            {FAIXAS.map((f) => (
+              <FaixaBelt key={f.nome} nome={f.nome} cor={f.cor} ponta={f.ponta} />
+            ))}
           </div>
         </div>
       </section>
@@ -304,72 +346,20 @@ export function SitePublico() {
         </div>
       </section>
 
-      {/* Rodapé */}
+      {/* Rodapé: só a linha e os dizeres. */}
       <footer className="border-t border-border">
-        <div className="mx-auto max-w-5xl px-4 py-10">
-          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-            <div>
-              <img src="/logo.png" alt={SITE.nome} className="h-10 w-auto" />
-              {contato.cidade && (
-                <p className="mt-3 text-sm text-muted-foreground">{contato.cidade}</p>
-              )}
-            </div>
-
-            {temContato() && (
-              <div className="flex flex-col gap-2 text-sm">
-                {contato.whatsapp && (
-                  <a
-                    className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-                    href={`https://wa.me/55${contato.whatsapp}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="size-4" /> WhatsApp
-                  </a>
-                )}
-                {contato.email && (
-                  <a
-                    className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-                    href={`mailto:${contato.email}`}
-                  >
-                    <Mail className="size-4" /> {contato.email}
-                  </a>
-                )}
-                {contato.instagram && (
-                  <a
-                    className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-                    href={`https://instagram.com/${contato.instagram}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <AtSign className="size-4" /> @{contato.instagram}
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border pt-6 text-xs text-muted-foreground">
-            <span>
-              © {anoAtual} {SITE.nome}
-            </span>
-            <span>
-              Desenvolvido por{" "}
-              <a
-                href="mailto:marcusviniciussp.dev@gmail.com"
-                className="font-medium hover:text-foreground"
-              >
-                eMeVe ©
-              </a>
-            </span>
-            <div className="flex items-center gap-x-6">
-              <Link to="/responsavel" className="hover:text-foreground">
-                Área do Responsável
-              </Link>
-              <Link to="/login" className="hover:text-foreground">
-                Acesso da equipe
-              </Link>
-            </div>
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 text-xs text-muted-foreground">
+          <span>
+            © {anoAtual} {SITE.nome}
+          </span>
+          <SobreApp className="font-medium transition-colors hover:text-foreground" />
+          <div className="flex items-center gap-x-6">
+            <Link to="/responsavel" className="hover:text-foreground">
+              Área do Responsável
+            </Link>
+            <Link to="/login" className="hover:text-foreground">
+              Acesso da equipe
+            </Link>
           </div>
         </div>
       </footer>
