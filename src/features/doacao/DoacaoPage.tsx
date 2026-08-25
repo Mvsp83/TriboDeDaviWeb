@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import QRCode from "qrcode";
 import { toast } from "sonner";
-import { Copy, Check, HeartHandshake, QrCode, ArrowLeft } from "lucide-react";
+import { Copy, Check, HeartHandshake, QrCode } from "lucide-react";
 import { gerarPixBrCode } from "@/lib/pixBrCode";
 import { DOACAO, doacaoConfigurada } from "@/features/doacao/configDoacao";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -11,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PaginaPublica } from "@/components/PaginaPublica";
 
 const brl = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -70,16 +70,8 @@ export function DoacaoPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-6 p-4 md:p-8">
-      <div>
-        <Button asChild variant="ghost" size="sm">
-          <Link to="/">
-            <ArrowLeft className="size-4" />
-            Voltar ao site
-          </Link>
-        </Button>
-      </div>
-
+    <PaginaPublica larguraMax="max-w-2xl">
+      <div className="mx-auto w-full max-w-2xl space-y-6 p-4 md:p-8">
       <header className="space-y-2 text-center">
         <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/15 text-primary">
           <HeartHandshake className="size-7" />
@@ -208,6 +200,7 @@ export function DoacaoPage() {
       <p className="text-center text-xs text-muted-foreground">
         Precisa de recibo de doação? Fale com a administração do instituto.
       </p>
-    </div>
+      </div>
+    </PaginaPublica>
   );
 }

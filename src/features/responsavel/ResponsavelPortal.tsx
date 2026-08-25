@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -10,7 +9,6 @@ import {
   Megaphone,
   CheckCircle2,
   XCircle,
-  ArrowLeft,
   Camera,
   MessageSquarePlus,
   CloudOff,
@@ -56,6 +54,7 @@ import { faixaInfo } from "@/features/alunos/faixa";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { LogoLockup } from "@/components/Logo";
+import { PaginaPublica } from "@/components/PaginaPublica";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -321,19 +320,11 @@ export function ResponsavelPortal() {
 
   if (!painel) {
     return (
-      <div className="relative flex min-h-svh items-center justify-center bg-background p-4">
-        <Link
-          to="/"
-          className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Voltar ao início
-        </Link>
-
+      <PaginaPublica larguraMax="max-w-lg">
+      <div className="flex items-center justify-center p-4 py-12">
         <div className="w-full max-w-sm">
-          <div className="mb-8 flex flex-col items-center gap-3 text-center">
-            <LogoLockup className="h-20" />
-            <p className="text-sm text-muted-foreground">
+          <div className="mb-8 text-center">
+            <p className="text-sm font-medium text-muted-foreground">
               Portal do Responsável
             </p>
           </div>
@@ -393,6 +384,7 @@ export function ResponsavelPortal() {
           </div>
         </div>
       </div>
+      </PaginaPublica>
     );
   }
 

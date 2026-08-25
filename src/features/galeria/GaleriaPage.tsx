@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowLeft,
-  LogIn,
   Camera,
   CalendarDays,
   X,
@@ -13,40 +11,19 @@ import type { Foto } from "@/features/site/conteudoSite";
 import { SITE } from "@/features/site/conteudoSite";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
+import { PaginaPublica } from "@/components/PaginaPublica";
 
 // Galeria pública de fotos por evento. Conteúdo curado (conteudoGaleria.ts),
 // sem API. Um lightbox simples amplia a foto clicada.
 export function GaleriaPage() {
   useDocumentTitle(`Galeria de fotos — ${SITE.nome}`);
-  const anoAtual = new Date().getFullYear();
   const temFotos = totalFotosGaleria() > 0;
 
   // Foto ampliada no lightbox (null = fechado).
   const [ampliada, setAmpliada] = useState<Foto | null>(null);
 
   return (
-    <div className="min-h-svh bg-background text-foreground">
-      {/* Topo */}
-      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
-        <Link to="/" className="inline-flex items-center gap-2">
-          <img src="/logo.png" alt={SITE.nome} className="h-10 w-auto md:h-12" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/">
-              <ArrowLeft className="size-4" />
-              Voltar ao site
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/login">
-              <LogIn className="size-4" />
-              Acesso da equipe
-            </Link>
-          </Button>
-        </div>
-      </header>
-
+    <PaginaPublica>
       {/* Título */}
       <section className="mx-auto max-w-5xl px-4 pb-8 pt-4">
         <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight md:text-4xl">
@@ -128,17 +105,6 @@ export function GaleriaPage() {
         </div>
       </section>
 
-      {/* Rodapé */}
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-8 text-xs text-muted-foreground">
-          <span>© {anoAtual} {SITE.nome}</span>
-          <div className="flex items-center gap-x-6">
-            <Link to="/" className="hover:text-foreground">Site</Link>
-            <Link to="/transparencia" className="hover:text-foreground">Transparência</Link>
-          </div>
-        </div>
-      </footer>
-
       {/* Lightbox */}
       {ampliada && (
         <div
@@ -170,6 +136,6 @@ export function GaleriaPage() {
           </figure>
         </div>
       )}
-    </div>
+    </PaginaPublica>
   );
 }
