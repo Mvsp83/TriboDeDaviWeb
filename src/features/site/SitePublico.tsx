@@ -2,9 +2,6 @@ import { Link } from "react-router-dom";
 import {
   HeartHandshake,
   LogIn,
-  Mail,
-  AtSign,
-  MessageCircle,
   ClipboardList,
   ArrowRight,
   Users,
@@ -13,7 +10,7 @@ import {
   Receipt,
   FileText,
 } from "lucide-react";
-import { SITE, temContato, temInformacoes } from "@/features/site/conteudoSite";
+import { SITE, temInformacoes } from "@/features/site/conteudoSite";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { SobreApp } from "@/components/SobreApp";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -83,7 +80,7 @@ function Numero({ valor, rotulo }: { valor: number; rotulo: string }) {
 // Site público do instituto: apresenta o projeto, recebe doações e dá acesso
 // ao portal. É a página que qualquer pessoa vê ao abrir o endereço.
 export function SitePublico() {
-  const { contato, numeros, historia, fotos, prestacaoContas } = SITE;
+  const { numeros, historia, fotos, prestacaoContas } = SITE;
   const anoAtual = new Date().getFullYear();
   useDocumentTitle(`${SITE.nome} — Jiu-jitsu gratuito para crianças`);
 
@@ -348,64 +345,20 @@ export function SitePublico() {
         </div>
       </section>
 
-      {/* Rodapé */}
+      {/* Rodapé: só a linha e os dizeres. */}
       <footer className="border-t border-border">
-        <div className="mx-auto max-w-5xl px-4 py-10">
-          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-            <div>
-              <p className="text-base font-semibold">{SITE.nome}</p>
-              {contato.cidade && (
-                <p className="mt-1 text-sm text-muted-foreground">{contato.cidade}</p>
-              )}
-            </div>
-
-            {temContato() && (
-              <div className="flex flex-col gap-2 text-sm">
-                {contato.whatsapp && (
-                  <a
-                    className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-                    href={`https://wa.me/55${contato.whatsapp}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="size-4" /> WhatsApp
-                  </a>
-                )}
-                {contato.email && (
-                  <a
-                    className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-                    href={`mailto:${contato.email}`}
-                  >
-                    <Mail className="size-4" /> {contato.email}
-                  </a>
-                )}
-                {contato.instagram && (
-                  <a
-                    className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-                    href={`https://instagram.com/${contato.instagram}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <AtSign className="size-4" /> @{contato.instagram}
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border pt-6 text-xs text-muted-foreground">
-            <span>
-              © {anoAtual} {SITE.nome}
-            </span>
-            <SobreApp className="font-medium transition-colors hover:text-foreground" />
-            <div className="flex items-center gap-x-6">
-              <Link to="/responsavel" className="hover:text-foreground">
-                Área do Responsável
-              </Link>
-              <Link to="/login" className="hover:text-foreground">
-                Acesso da equipe
-              </Link>
-            </div>
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 text-xs text-muted-foreground">
+          <span>
+            © {anoAtual} {SITE.nome}
+          </span>
+          <SobreApp className="font-medium transition-colors hover:text-foreground" />
+          <div className="flex items-center gap-x-6">
+            <Link to="/responsavel" className="hover:text-foreground">
+              Área do Responsável
+            </Link>
+            <Link to="/login" className="hover:text-foreground">
+              Acesso da equipe
+            </Link>
           </div>
         </div>
       </footer>
