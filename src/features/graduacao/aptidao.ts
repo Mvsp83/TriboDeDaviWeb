@@ -53,7 +53,9 @@ export function avaliarAptidao(
 ): ResultadoAptidao | null {
   if (!params) return null;
   const temCriterio =
-    params.aulasMinimas > 0 || params.mesesMinimos > 0 || params.semAdvertencias;
+    params.aulasMinimas > 0 ||
+    params.mesesMinimos > 0 ||
+    params.maxAdvertencias != null;
   if (!temCriterio) return null;
 
   const faltam: string[] = [];
@@ -69,8 +71,13 @@ export function avaliarAptidao(
     }
   }
 
-  if (params.semAdvertencias && stats.advertenciasDesdeUltima > 0) {
-    faltam.push(`${stats.advertenciasDesdeUltima} advertência(s)`);
+  if (
+    params.maxAdvertencias != null &&
+    stats.advertenciasDesdeUltima > params.maxAdvertencias
+  ) {
+    faltam.push(
+      `${stats.advertenciasDesdeUltima} advertência(s) (máx ${params.maxAdvertencias})`,
+    );
   }
 
   return { apto: faltam.length === 0, faltam, exame: exameIndicado(stats.faixa) };

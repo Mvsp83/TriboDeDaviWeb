@@ -18,13 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export function ParametrosGraduacaoPage() {
   const { data: cfg } = useConfigGraduacao();
@@ -37,7 +30,7 @@ export function ParametrosGraduacaoPage() {
         faixaBase: valor,
         aulasMinimas: p?.aulasMinimas ?? 0,
         mesesMinimos: p?.mesesMinimos ?? 0,
-        semAdvertencias: p?.semAdvertencias ?? false,
+        maxAdvertencias: p?.maxAdvertencias ?? null,
       };
     }),
   );
@@ -45,7 +38,7 @@ export function ParametrosGraduacaoPage() {
   function atualizar(
     faixaBase: number,
     campo: keyof ParametrosFaixa,
-    valor: number | boolean,
+    valor: number | null,
   ) {
     setLinhas((ls) =>
       ls.map((l) => (l.faixaBase === faixaBase ? { ...l, [campo]: valor } : l)),
@@ -72,8 +65,12 @@ export function ParametrosGraduacaoPage() {
           <span className="font-medium text-foreground">
             desde a última graduação
           </span>{" "}
-          (ou desde a primeira presença, se ainda não graduou). Valor{" "}
-          <span className="font-medium text-foreground">0</span> = não exige.
+          (ou desde a primeira presença, se ainda não graduou). Em aulas e tempo,{" "}
+          <span className="font-medium text-foreground">0</span> = não exige. Em{" "}
+          <span className="font-medium text-foreground">máx. advertências</span>,
+          deixe vazio para não exigir e{" "}
+          <span className="font-medium text-foreground">0</span> para não permitir
+          nenhuma.
         </p>
       </div>
 
@@ -92,7 +89,7 @@ export function ParametrosGraduacaoPage() {
                 <TableHead>Faixa</TableHead>
                 <TableHead className="w-40">Aulas mínimas</TableHead>
                 <TableHead className="w-40">Tempo mínimo (meses)</TableHead>
-                <TableHead className="w-44">Sem advertências</TableHead>
+                <TableHead className="w-44">Máx. advertências</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -137,20 +134,20 @@ export function ParametrosGraduacaoPage() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Select
-                        value={l.semAdvertencias ? "1" : "0"}
-                        onValueChange={(v) =>
-                          atualizar(l.faixaBase, "semAdvertencias", v === "1")
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0">Não exige</SelectItem>
-                          <SelectItem value="1">Exige</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Input
+                        type="number"
+                        min={0}
+                        placeholder="não exige"
+                        value={l.maxAdvertencias ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          atualizar(
+                            l.faixaBase,
+                            "maxAdvertencias",
+                            v === "" ? null : Math.max(0, Number(v) || 0),
+                          );
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 );

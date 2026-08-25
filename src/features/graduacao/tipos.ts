@@ -153,7 +153,9 @@ export interface ParametrosFaixa {
   faixaBase: number; // espelha faixa.ts (0=Branca ... 40=Preta)
   aulasMinimas: number; // presenças mínimas (0 = não exige)
   mesesMinimos: number; // tempo mínimo na faixa em meses (0 = não exige)
-  semAdvertencias: boolean; // true = não pode ter advertência no período
+  // Máximo de advertências permitidas no período. null = não exige;
+  // 0 = nenhuma permitida (estrito); N = permite até N. Acima disso, não apto.
+  maxAdvertencias: number | null;
 }
 
 // Toda a configuração de graduação — uma unidade persistida (localStorage hoje,
