@@ -1,11 +1,12 @@
 import { useRef, useState, type ReactNode } from "react";
-import { Upload, Download, Trash2, Loader2, FileText } from "lucide-react";
+import { Upload, Download, Trash2, Loader2, FileText, Eye } from "lucide-react";
 import { toast } from "sonner";
 import {
   useDocumentos,
   useUploadDocumento,
   useExcluirDocumento,
   baixarDocumento,
+  obterDocumentoBlobUrl,
 } from "@/features/administrativo/documentosApi";
 import { ApiError } from "@/lib/api";
 import { dataBR } from "@/lib/format";
@@ -14,6 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -54,6 +61,35 @@ export function DocumentosContabeisPage({
   const inputRef = useRef<HTMLInputElement>(null);
   const [baixandoId, setBaixandoId] = useState<string | null>(null);
   const [paraExcluir, setParaExcluir] = useState<DocumentoArquivo | null>(null);
+  // Prévia inline (sem baixar): guarda o object URL do blob e o doc aberto.
+  const [preview, setPreview] = useState<
+    { doc: DocumentoArquivo; url: string; tipo: string } | null
+  >(null);
+  const [abrindoId, setAbrindoId] = useState<string | null>(null);
+
+  async function onVisualizar(doc: DocumentoArquivo) {
+    setAbrindoId(doc.id);
+    try {
+      const { url, tipo } = await obterDocumentoBlobUrl(doc.id);
+      setPreview({ doc, url, tipo });
+    } catch {
+      toast.error("Não foi possível abrir o documento.");
+    } finally {
+      setAbrindoId(null);
+    }
+  }
+
+  function fecharPreview() {
+    if (preview) URL.revokeObjectURL(preview.url);
+    setPreview(null);
+  }
+
+  // Só PDF e imagem renderizam bem embutidos; os demais tipos caem no download.
+  const previewSuportado =
+    preview != null &&
+    (preview.tipo === "application/pdf" ||
+      preview.doc.nome.toLowerCase().endsWith(".pdf") ||
+      preview.tipo.startsWith("image/"));
 
   function abrirSeletor() {
     inputRef.current?.click();
@@ -170,6 +206,19 @@ export function DocumentosContabeisPage({
                       <Button
                         variant="ghost"
                         size="icon"
+                        title="Visualizar"
+                        onClick={() => onVisualizar(doc)}
+                        disabled={abrindoId === doc.id}
+                      >
+                        {abrindoId === doc.id ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         title="Baixar"
                         onClick={() => onBaixar(doc)}
                         disabled={baixandoId === doc.id}
@@ -196,6 +245,41 @@ export function DocumentosContabeisPage({
           )}
         </CardContent>
       </Card>
+
+      {/* Prévia inline do documento (sem baixar) */}
+      <Dialog open={preview !== null} onOpenChange={(v) => !v && fecharPreview()}>
+        <DialogContent className="max-h-[92svh] max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="truncate pr-6">{preview?.doc.nome}</DialogTitle>
+          </DialogHeader>
+          {preview && previewSuportado ? (
+            <iframe
+              src={preview.url}
+              title={preview.doc.nome}
+              className="h-[75vh] w-full rounded-md border border-border bg-white"
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-10 text-center text-sm text-muted-foreground">
+              <FileText className="size-8" />
+              <p>
+                Este tipo de arquivo não abre na prévia. Baixe para visualizar no
+                aplicativo apropriado.
+              </p>
+              {preview && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    onBaixar(preview.doc);
+                    fecharPreview();
+                  }}
+                >
+                  <Download className="size-4" /> Baixar
+                </Button>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
         aberto={paraExcluir !== null}

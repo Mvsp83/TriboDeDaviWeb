@@ -48,6 +48,18 @@ export function useExcluirDocumento(categoria: CategoriaDocumento) {
   });
 }
 
+// Obtém o documento como object URL (blob) para visualizar sem baixar. Quem
+// chama deve revogar a URL (URL.revokeObjectURL) ao fechar a prévia.
+export async function obterDocumentoBlobUrl(
+  fileId: string,
+): Promise<{ url: string; tipo: string }> {
+  const { data } = await http.get<Blob>(
+    ApiRotas.documentoContabilDownload(fileId),
+    { responseType: "blob" },
+  );
+  return { url: URL.createObjectURL(data), tipo: data.type };
+}
+
 // Download binário: baixa como blob e dispara o save no navegador.
 export async function baixarDocumento(fileId: string, nome: string) {
   const { data } = await http.get<Blob>(
