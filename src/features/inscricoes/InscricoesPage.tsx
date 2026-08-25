@@ -116,6 +116,20 @@ function DetalheInscricao({
   const familiar = parse<Partial<RespostasFamiliar>>(inscricao.respostasFamiliarJson, {});
   const simsNoParq = PARQ.filter((p) => saude.parq?.[p.id] === true);
 
+  // Ficha de adulto: campos e respostas próprios (guardados no JSON de saúde).
+  const adulto = inscricao.publico === 1;
+  const saudeAny = saude as Record<string, unknown>;
+  const simNao = (v: unknown) => (v === true ? "Sim" : v === false ? "Não" : "—");
+  const EXTRAS_ADULTO: { k: string; r: string }[] = [
+    { k: "possuiKimono", r: "Possui kimono" },
+    { k: "parenteCardiaco", r: "Parente com problema cardíaco" },
+    { k: "restricaoMedica", r: "Restrição médica à atividade" },
+    { k: "gravida", r: "Grávida" },
+    { k: "fumante", r: "Fumante" },
+    { k: "alcool", r: "Ingere álcool" },
+    { k: "depressao", r: "Episódio de depressão" },
+  ];
+
   const pendente = inscricao.status === StatusInscricao.Pendente;
   const faixa = faixaInfo(inscricao.faixa);
   const anos = idade(inscricao.dataNascimento);
@@ -157,6 +171,11 @@ function DetalheInscricao({
           <DialogDescription>
             Enviada em {dataBR(inscricao.dataEnvio)} · {STATUS_LABEL[inscricao.status]}
           </DialogDescription>
+          {adulto && (
+            <Badge variant="outline" className="self-start">
+              Ficha de adulto
+            </Badge>
+          )}
         </DialogHeader>
 
         <Button
@@ -209,23 +228,31 @@ function DetalheInscricao({
             <Linha rotulo="Faixa" valor={faixa.nome} />
             <Linha rotulo="Peso" valor={inscricao.peso ? `${inscricao.peso} kg` : null} />
             <Linha rotulo="Altura" valor={inscricao.altura ? `${inscricao.altura} m` : null} />
-            <Linha rotulo="Escola" valor={inscricao.escola} />
-            <Linha rotulo="Série" valor={inscricao.serie} />
-            <Linha rotulo="Período" valor={inscricao.periodo} />
-            <Linha
-              rotulo="Já era aluno"
-              valor={inscricao.jaEraAluno ? `Sim${inscricao.turmaAnterior ? ` (turma ${inscricao.turmaAnterior})` : ""}` : "Não"}
-            />
+            {!adulto && (
+              <>
+                <Linha rotulo="Escola" valor={inscricao.escola} />
+                <Linha rotulo="Série" valor={inscricao.serie} />
+                <Linha rotulo="Período" valor={inscricao.periodo} />
+                <Linha
+                  rotulo="Já era aluno"
+                  valor={inscricao.jaEraAluno ? `Sim${inscricao.turmaAnterior ? ` (turma ${inscricao.turmaAnterior})` : ""}` : "Não"}
+                />
+              </>
+            )}
           </Secao>
 
-          <Secao titulo="Responsável">
-            <Linha rotulo="Nome" valor={inscricao.nomeResponsavel} />
-            <Linha
-              rotulo="Parentesco"
-              valor={inscricao.parentescoOutro || PARENTESCOS[inscricao.parentesco] || "-"}
-            />
-            <Linha rotulo="RG" valor={inscricao.rgResponsavel} />
-            <Linha rotulo="CPF" valor={inscricao.cpfResponsavel} />
+          <Secao titulo={adulto ? "Contato" : "Responsável"}>
+            {!adulto && (
+              <>
+                <Linha rotulo="Nome" valor={inscricao.nomeResponsavel} />
+                <Linha
+                  rotulo="Parentesco"
+                  valor={inscricao.parentescoOutro || PARENTESCOS[inscricao.parentesco] || "-"}
+                />
+                <Linha rotulo="RG" valor={inscricao.rgResponsavel} />
+                <Linha rotulo="CPF" valor={inscricao.cpfResponsavel} />
+              </>
+            )}
             <Linha rotulo="WhatsApp" valor={inscricao.whatsApp} />
             <Linha rotulo="Telefone 2" valor={inscricao.telefone2} />
             <Linha
@@ -240,6 +267,14 @@ function DetalheInscricao({
             />
           </Secao>
         </div>
+
+        {adulto && (
+          <Secao titulo="Saúde (adulto)">
+            {EXTRAS_ADULTO.map((e) => (
+              <Linha key={e.k} rotulo={e.r} valor={simNao(saudeAny[e.k])} />
+            ))}
+          </Secao>
+        )}
 
         <Secao titulo="Questionário de aptidão (Lei 16.331/2014)">
           <ul className="space-y-1">
@@ -569,6 +604,7 @@ export function InscricoesPage() {
                       <CircleAlert className="size-3" /> Saúde
                     </Badge>
                   )}
+                  {i.publico === 1 && <Badge variant="outline">Adulto</Badge>}
                   {i.jaEraAluno && <Badge variant="outline">Rematrícula</Badge>}
                 </div>
                 <p className="truncate text-sm text-muted-foreground">

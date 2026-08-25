@@ -294,7 +294,6 @@ export function MatriculaPage() {
   const erroDaEtapa = useMemo((): string | null => {
     if (etapa === 0) {
       if (!poloId) return "Selecione o polo onde o aluno vai treinar.";
-      if (jaEraAluno === undefined) return "Informe se já era aluno do projeto.";
     }
     if (etapa === 1) {
       if (!nome.trim()) return "Informe o nome do aluno.";
@@ -326,7 +325,7 @@ export function MatriculaPage() {
     }
     return null;
   }, [
-    etapa, poloId, jaEraAluno, nome, dataNascimento, escola, serie, periodo,
+    etapa, poloId, nome, dataNascimento, escola, serie, periodo,
     parentesco, nomeResponsavel, whatsApp, rua, numero, bairro, saude,
     precisaTermoResponsabilidade, aceitouTermo, aceitouComodato, aceitouLgpd, assinatura,
   ]);
@@ -563,24 +562,6 @@ export function MatriculaPage() {
                 </Select>
               </Campo>
 
-              <Campo label={`Já era aluno do projeto em ${ano - 1}?`} obrigatorio>
-                <SimNao valor={jaEraAluno} onChange={setJaEraAluno} />
-              </Campo>
-
-              {jaEraAluno && (
-                <Campo label="Em qual turma?">
-                  <Select value={turmaAnterior} onValueChange={setTurmaAnterior}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Turma" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">Turma 1</SelectItem>
-                      <SelectItem value="2">Turma 2</SelectItem>
-                      <SelectItem value="3">Turma 3</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Campo>
-              )}
             </>
           )}
 

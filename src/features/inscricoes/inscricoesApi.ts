@@ -18,6 +18,8 @@ export const STATUS_LABEL: Record<number, string> = {
 export interface Inscricao {
   id: number;
   ano: number;
+  // 0 = criança/adolescente, 1 = adulto.
+  publico?: number;
   poloId: number;
   poloNome?: string | null;
   turma?: number | null;
