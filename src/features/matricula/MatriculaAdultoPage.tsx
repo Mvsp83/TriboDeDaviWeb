@@ -37,6 +37,7 @@ import {
   TERMO_LGPD,
   PRAZO_FILIACAO,
 } from "@/features/matricula/termos";
+import { PaginaPublica } from "@/components/PaginaPublica";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -298,6 +299,7 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
   if (enviada) {
     const linkPortal = `${window.location.origin}/responsavel`;
     return (
+      <PaginaPublica larguraMax="max-w-2xl">
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <PartyPopper className="mx-auto size-12 text-primary" />
         <h1 className="mt-4 text-2xl font-bold">Inscrição enviada!</h1>
@@ -336,10 +338,12 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
           <Button onClick={() => navigate("/")}>Voltar ao início</Button>
         </div>
       </div>
+      </PaginaPublica>
     );
   }
 
   return (
+    <PaginaPublica larguraMax="max-w-2xl">
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="mb-4 text-center">
         <div className="text-sm font-semibold uppercase tracking-wide text-primary">
@@ -533,5 +537,6 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
         )}
       </div>
     </div>
+    </PaginaPublica>
   );
 }

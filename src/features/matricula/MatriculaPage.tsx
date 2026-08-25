@@ -45,6 +45,7 @@ import {
   TERMO_LGPD,
   PRAZO_FILIACAO,
 } from "@/features/matricula/termos";
+import { PaginaPublica } from "@/components/PaginaPublica";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -410,7 +411,8 @@ export function MatriculaPage() {
     }
 
     return (
-      <div className="mx-auto flex min-h-svh max-w-lg flex-col items-center justify-center gap-4 p-6 text-center">
+      <PaginaPublica larguraMax="max-w-2xl">
+      <div className="mx-auto flex max-w-lg flex-col items-center justify-center gap-4 p-6 py-16 text-center">
         <div className="flex size-16 items-center justify-center rounded-2xl bg-success/15 text-success">
           <PartyPopper className="size-8" />
         </div>
@@ -456,14 +458,15 @@ export function MatriculaPage() {
           <Link to="/">Voltar ao início</Link>
         </Button>
       </div>
+      </PaginaPublica>
     );
   }
 
   return (
+    <PaginaPublica larguraMax="max-w-2xl">
     <div className="mx-auto w-full max-w-2xl p-4 md:p-8">
       <header className="mb-6">
-        <img src="/logo.png" alt="Instituto Tribo de Davi" className="h-10 w-auto" />
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight">
+        <h1 className="text-2xl font-semibold tracking-tight">
           Ficha de inscrição {ano}
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -995,5 +998,6 @@ export function MatriculaPage() {
         )}
       </div>
     </div>
+    </PaginaPublica>
   );
 }
