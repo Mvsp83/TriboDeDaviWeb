@@ -110,40 +110,43 @@ export function SitePublico() {
       <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
         <img src="/logo.png" alt={SITE.nome} className="h-[7.5rem] w-auto md:h-36" />
 
-        <nav className="order-3 flex w-full flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground md:order-2 md:w-auto">
-          {secoes.map((s) => (
-            <a key={s.id} href={`#${s.id}`} className="transition-colors hover:text-foreground">
-              {s.label}
-            </a>
-          ))}
-          <Link to="/galeria" className="transition-colors hover:text-foreground">
-            Galeria
-          </Link>
-          {temInformacoes() && (
-            <Link to="/informacoes" className="transition-colors hover:text-foreground">
-              Informações
+        {/* Menu e acessos no mesmo grupo, alinhados à direita e na mesma linha. */}
+        <div className="flex flex-1 flex-wrap items-center justify-end gap-x-5 gap-y-2">
+          <nav className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted-foreground">
+            {secoes.map((s) => (
+              <a key={s.id} href={`#${s.id}`} className="transition-colors hover:text-foreground">
+                {s.label}
+              </a>
+            ))}
+            <Link to="/galeria" className="transition-colors hover:text-foreground">
+              Galeria
             </Link>
-          )}
-          <Link to="/transparencia" className="transition-colors hover:text-foreground">
-            Transparência
-          </Link>
-        </nav>
+            {temInformacoes() && (
+              <Link to="/informacoes" className="transition-colors hover:text-foreground">
+                Informações
+              </Link>
+            )}
+            <Link to="/transparencia" className="transition-colors hover:text-foreground">
+              Transparência
+            </Link>
+          </nav>
 
-        <div className="order-2 flex items-center gap-2 md:order-3">
-          {/* Famílias: acompanham o aluno com código + nascimento. */}
-          <Button asChild size="sm">
-            <Link to="/responsavel">
-              <Users className="size-4" />
-              Área do Responsável
-            </Link>
-          </Button>
-          {/* Equipe: login com senha (admin/professor/supervisor). */}
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/login">
-              <LogIn className="size-4" />
-              Acesso da equipe
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Famílias: acompanham o aluno com código + nascimento. */}
+            <Button asChild size="sm">
+              <Link to="/responsavel">
+                <Users className="size-4" />
+                Área do Responsável
+              </Link>
+            </Button>
+            {/* Equipe: login com senha (admin/professor/supervisor). */}
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/login">
+                <LogIn className="size-4" />
+                Acesso da equipe
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
