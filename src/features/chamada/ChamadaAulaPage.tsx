@@ -17,6 +17,7 @@ import {
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas } from "@/features/aulas/aulasApi";
 import { useAlunos } from "@/features/alunos/alunosApi";
+import { ehAlunoAdulto } from "@/features/alunos/publico";
 import { usePolos } from "@/features/polos/polosApi";
 import {
   useAtualizarPresenca,
@@ -259,6 +260,7 @@ function ChamadaPendente({
               faixa={a.faixa}
               presente={false}
               editavel={false}
+              adulto={ehAlunoAdulto(a)}
             />
           ))}
         </ListaAlunos>
@@ -295,6 +297,7 @@ function ChamadaPendente({
             faixa={a.faixa}
             presente={!!marcadas[a.id]}
             editavel
+            adulto={ehAlunoAdulto(a)}
             onToggle={() =>
               setMarcadas((m) => ({ ...m, [a.id]: !m[a.id] }))
             }
@@ -374,8 +377,19 @@ function ChamadaSalva({
   aula: Aula;
   podeEditar: boolean;
 }) {
+  const { sessao } = useAuth();
   const { data: presencas, isLoading } = usePresencasDaAula(aula.id);
   const atualizar = useAtualizarPresenca();
+  // Presença não guarda nascimento; para o selo "Adulto" na aula já salva,
+  // cruzamos com a lista de alunos (id -> é adulto).
+  const { data: alunos } = useAlunos(sessao?.isAdministrador ?? false);
+  const adultoPorId = useMemo(() => {
+    const s = new Set<number>();
+    (alunos ?? []).forEach((a) => {
+      if (ehAlunoAdulto(a)) s.add(a.id);
+    });
+    return s;
+  }, [alunos]);
   // Espelho otimista: mostra o novo valor enquanto o PUT roda.
   const [override, setOverride] = useState<Record<number, boolean>>({});
   const [salvandoId, setSalvandoId] = useState<number | null>(null);
@@ -445,6 +459,7 @@ function ChamadaSalva({
             presente={valorAtual(p)}
             editavel={podeEditar}
             salvando={salvandoId === p.id}
+            adulto={adultoPorId.has(p.alunoId)}
             onToggle={() => alternar(p)}
           />
         ))}
@@ -476,6 +491,7 @@ function LinhaAluno({
   presente,
   editavel,
   salvando = false,
+  adulto = false,
   onToggle,
   onOcorrencia,
 }: {
@@ -484,6 +500,7 @@ function LinhaAluno({
   presente: boolean;
   editavel: boolean;
   salvando?: boolean;
+  adulto?: boolean;
   onToggle?: () => void;
   onOcorrencia?: () => void;
 }) {
@@ -499,6 +516,11 @@ function LinhaAluno({
             style={{ backgroundColor: info.cor, color: info.texto }}
           >
             {info.nome}
+          </span>
+        )}
+        {adulto && (
+          <span className="shrink-0 rounded-md bg-sky-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-sky-600">
+            Adulto
           </span>
         )}
       </div>

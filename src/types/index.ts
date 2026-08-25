@@ -30,6 +30,9 @@ export interface Aluno {
   // Autorização de uso de imagem/voz (LGPD): true = autoriza, false = não,
   // null/undefined = não informado.
   autorizaImagem?: boolean | null;
+  // Marca de público da ficha: true = inscrito como adulto. Ausente/false nos
+  // cadastros antigos — nesse caso a idade (18+) é usada como critério.
+  ehAdulto?: boolean;
 }
 
 export interface Polo {

@@ -29,6 +29,7 @@ import { OcorrenciasDialog } from "@/features/ocorrencias/OcorrenciasDialog";
 import { imprimirCodigos } from "@/features/responsavel/imprimirCodigos";
 import { imprimirSemImagem } from "@/features/alunos/imprimirSemImagem";
 import { faixaInfo } from "@/features/alunos/faixa";
+import { ehAlunoAdulto } from "@/features/alunos/publico";
 import { imprimirCarteirinhas } from "@/features/carteirinha/carteirinhaPdf";
 import { ApiError } from "@/lib/api";
 import { useTableSort, type SortValue } from "@/lib/useTableSort";
@@ -87,6 +88,7 @@ export function AlunosPage() {
   const [filtroPolo, setFiltroPolo] = useState("");
   const [filtroTurma, setFiltroTurma] = useState("");
   const [filtroSemImagem, setFiltroSemImagem] = useState(false);
+  const [filtroPublico, setFiltroPublico] = useState<"todos" | "adultos" | "criancas">("todos");
 
   const [dialogAberto, setDialogAberto] = useState(false);
   const [alunoEdicao, setAlunoEdicao] = useState<Aluno | null>(null);
@@ -113,9 +115,11 @@ export function AlunosPage() {
       if (filtroTurma && String(a.turma) !== filtroTurma) return false;
       // "Sem autorização de imagem" = tudo que não for explicitamente Sim.
       if (filtroSemImagem && a.autorizaImagem === true) return false;
+      if (filtroPublico === "adultos" && !ehAlunoAdulto(a)) return false;
+      if (filtroPublico === "criancas" && ehAlunoAdulto(a)) return false;
       return true;
     });
-  }, [alunos, filtroNome, filtroPolo, filtroTurma, filtroSemImagem, nomePorPolo]);
+  }, [alunos, filtroNome, filtroPolo, filtroTurma, filtroSemImagem, filtroPublico, nomePorPolo]);
 
   const acessar = useCallback(
     (a: Aluno, key: string): SortValue => {
@@ -299,6 +303,24 @@ export function AlunosPage() {
           />
         </CardContent>
         <div className="flex flex-wrap items-center gap-2 border-t border-border p-4">
+          <div className="flex items-center gap-1">
+            {(
+              [
+                ["todos", "Todos"],
+                ["adultos", "Adultos"],
+                ["criancas", "Crianças"],
+              ] as const
+            ).map(([v, l]) => (
+              <Button
+                key={v}
+                variant={filtroPublico === v ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFiltroPublico(v)}
+              >
+                {l}
+              </Button>
+            ))}
+          </div>
           <Button
             variant={filtroSemImagem ? "default" : "outline"}
             size="sm"
@@ -379,6 +401,14 @@ export function AlunosPage() {
                             className="ml-1.5 inline size-4 align-text-bottom text-destructive"
                             aria-label="Sem autorização de imagem"
                           />
+                        </span>
+                      )}
+                      {ehAlunoAdulto(a) && (
+                        <span
+                          title="Inscrito como adulto (ou 18+)"
+                          className="ml-1.5 inline-flex items-center rounded-md bg-sky-500/15 px-1.5 py-0.5 align-middle text-[11px] font-semibold text-sky-600"
+                        >
+                          Adulto
                         </span>
                       )}
                     </TableCell>
