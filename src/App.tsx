@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -208,9 +208,21 @@ const PlanilhaFinanceiraPage = lazy(() =>
   })),
 );
 
+// Ao trocar de rota, volta o scroll para o topo. Sem isto, abrir uma página
+// (ex.: Transparência) herda a posição de rolagem da página anterior e cai no
+// meio/fim. Mudanças só de âncora (#) não alteram o pathname, então não afetam.
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 export default function App() {
   return (
     <Suspense fallback={<CarregandoTela />}>
+    <ScrollToTop />
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       {/* Públicas: divulgadas fora do sistema, não exigem login. */}

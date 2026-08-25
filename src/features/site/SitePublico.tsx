@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { SITE, temContato, temInformacoes } from "@/features/site/conteudoSite";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
+import { SobreApp } from "@/components/SobreApp";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 
@@ -90,10 +91,10 @@ export function SitePublico() {
     Boolean(prestacaoContas.texto) || prestacaoContas.documentos.length > 0;
 
   // Links de navegação — só aparecem para seções que têm conteúdo.
+  // "Prestação de contas" saiu do menu: o assunto vive em Transparência.
   const secoes = [
     { id: "historia", label: "História", on: historia.length > 0 },
     { id: "fotos", label: "Fotos", on: true },
-    { id: "prestacao", label: "Prestação de contas", on: temPrestacao },
   ].filter((s) => s.on);
 
   return (
@@ -352,9 +353,9 @@ export function SitePublico() {
         <div className="mx-auto max-w-5xl px-4 py-10">
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div>
-              <img src="/logo.png" alt={SITE.nome} className="h-10 w-auto" />
+              <p className="text-base font-semibold">{SITE.nome}</p>
               {contato.cidade && (
-                <p className="mt-3 text-sm text-muted-foreground">{contato.cidade}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{contato.cidade}</p>
               )}
             </div>
 
@@ -396,15 +397,7 @@ export function SitePublico() {
             <span>
               © {anoAtual} {SITE.nome}
             </span>
-            <span>
-              Desenvolvido por{" "}
-              <a
-                href="mailto:marcusviniciussp.dev@gmail.com"
-                className="font-medium hover:text-foreground"
-              >
-                eMeVe ©
-              </a>
-            </span>
+            <SobreApp className="font-medium transition-colors hover:text-foreground" />
             <div className="flex items-center gap-x-6">
               <Link to="/responsavel" className="hover:text-foreground">
                 Área do Responsável
