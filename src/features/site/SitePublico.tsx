@@ -49,12 +49,12 @@ function FaixaBelt({
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div
-        className="relative h-7 w-full overflow-hidden rounded-[4px] shadow-md ring-1 ring-black/25"
+        className="relative h-6 w-full overflow-hidden rounded-[3px] shadow-md ring-1 ring-black/25"
         style={{ background: relevo(cor) }}
       >
         {/* Friso com os 4 graus */}
         <div
-          className="absolute inset-y-0 right-2 flex w-[30%] items-center justify-evenly px-1.5"
+          className="absolute inset-y-0 right-1.5 flex w-[30%] items-center justify-evenly px-1"
           style={{ background: relevo(ponta) }}
         >
           {[0, 1, 2, 3].map((i) => (
@@ -180,7 +180,7 @@ export function SitePublico() {
             <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Da faixa branca à preta
             </p>
-            <div className="grid max-w-xl grid-cols-3 gap-x-4 gap-y-3 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-x-1.5">
               {FAIXAS.map((f) => (
                 <FaixaBelt key={f.nome} nome={f.nome} cor={f.cor} ponta={f.ponta} />
               ))}
