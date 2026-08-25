@@ -346,6 +346,7 @@ export function MatriculaPage() {
     }
     try {
       const res = await enviar.mutateAsync({
+        publico: 0, // ficha infantil/adolescente
         poloId: poloId!,
         turma: null, // definida pela equipe na revisão
         jaEraAluno: !!jaEraAluno,

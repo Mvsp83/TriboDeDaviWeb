@@ -18,6 +18,9 @@ export function usePolosPublicos() {
 }
 
 export interface EnvioInscricao {
+  // Público da ficha: 0 = criança/adolescente, 1 = adulto. Decide quais campos
+  // e perguntas a ficha traz; o backend guarda para separar os cadastros.
+  publico: number;
   poloId: number;
   turma: number | null;
   jaEraAluno: boolean;
