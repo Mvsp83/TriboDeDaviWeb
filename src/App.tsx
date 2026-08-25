@@ -303,8 +303,9 @@ export default function App() {
             />
           </Route>
 
-          {/* Programa de Graduação: admin OU professor com permissão */}
-          <Route element={<ProtectedRoute graduacao />}>
+          {/* Programa de Graduação: exige o módulo "graduacao" (admin OU
+              professor com permissão, via fallback de compatibilidade). */}
+          <Route element={<ProtectedRoute modulo="graduacao" />}>
             <Route path="graduacao/programas" element={<ProgramasGraduacaoPage />} />
             <Route
               path="graduacao/programas/editor/:faixaBase"

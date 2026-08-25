@@ -36,6 +36,7 @@ import {
   FileSpreadsheet,
   type LucideIcon,
 } from "lucide-react";
+import type { ModuloId } from "@/config/modulos";
 
 // A navegação é uma árvore: folhas levam a uma rota; ramos apenas agrupam e
 // abrem/fecham. adminOnly esconde o nó de contas que não são Administrador.
@@ -44,15 +45,16 @@ export interface NavLeaf {
   href: string;
   icon: LucideIcon;
   adminOnly?: boolean;
-  // Só admin OU professor com permissão de Programa de Graduação.
-  graduacao?: boolean;
+  // Só aparece se a conta contratou este módulo. Sem `modulo` = base (core),
+  // sempre visível. Ortogonal a `adminOnly` (papel do usuário).
+  modulo?: ModuloId;
 }
 
 export interface NavBranch {
   label: string;
   icon: LucideIcon;
   adminOnly?: boolean;
-  graduacao?: boolean;
+  modulo?: ModuloId;
   children: NavNode[];
 }
 
@@ -116,7 +118,7 @@ export const navGroups: NavGroup[] = [
       {
         label: "Programas de Graduação",
         icon: ListChecks,
-        graduacao: true,
+        modulo: "graduacao",
         children: [
           { label: "Programas", href: "/graduacao/programas", icon: GraduationCap },
           { label: "Posições", href: "/graduacao/posicoes", icon: BookOpen },
@@ -124,13 +126,23 @@ export const navGroups: NavGroup[] = [
         ],
       },
       { label: "Relatórios", href: "/relatorios", icon: FileBarChart },
-      { label: "Relatório de Impacto", href: "/impacto", icon: TrendingUp },
+      {
+        label: "Relatório de Impacto",
+        href: "/impacto",
+        icon: TrendingUp,
+        modulo: "captacao",
+      },
     ],
   },
   {
     titulo: "Administrativo",
     nodes: [
-      { label: "Calendário", href: "/calendario", icon: CalendarRange },
+      {
+        label: "Calendário",
+        href: "/calendario",
+        icon: CalendarRange,
+        modulo: "relacionamento",
+      },
       {
         label: "Modelos de Documentos",
         href: "/documentos",
@@ -142,23 +154,27 @@ export const navGroups: NavGroup[] = [
         href: "/documentos-oficiais",
         icon: FileSignature,
         adminOnly: true,
+        modulo: "financeiro",
       },
       {
         label: "Patrimônio",
         href: "/patrimonio",
         icon: Boxes,
         adminOnly: true,
+        modulo: "financeiro",
       },
       {
         label: "Doações",
         href: "/doacoes",
         icon: HeartHandshake,
         adminOnly: true,
+        modulo: "captacao",
       },
       {
         label: "Contabilidade",
         icon: Calculator,
         adminOnly: true,
+        modulo: "financeiro",
         children: [
           {
             label: "DRE",
@@ -181,6 +197,7 @@ export const navGroups: NavGroup[] = [
         label: "Financeiro",
         icon: Wallet,
         adminOnly: true,
+        modulo: "financeiro",
         children: [
           {
             label: "Extratos",
@@ -204,7 +221,13 @@ export const navGroups: NavGroup[] = [
   {
     titulo: "Configurações",
     nodes: [
-      { label: "Avisos", href: "/avisos", icon: Megaphone, adminOnly: true },
+      {
+        label: "Avisos",
+        href: "/avisos",
+        icon: Megaphone,
+        adminOnly: true,
+        modulo: "relacionamento",
+      },
       { label: "Usuários", href: "/usuarios", icon: UserCog, adminOnly: true },
       { label: "Auditoria", href: "/auditoria", icon: ShieldCheck, adminOnly: true },
       {
@@ -236,18 +259,21 @@ export function coletarFolhas(nodes: NavNode[]): NavLeaf[] {
   );
 }
 
-// Remove nós restritos a admin (e os de graduação sem a permissão); um ramo
+// Contexto de visibilidade: papel do usuário (admin) e módulos que a conta
+// contratou. As duas dimensões são independentes e ambas precisam passar.
+export interface CtxNav {
+  admin: boolean;
+  modulos: ModuloId[];
+}
+
+// Esconde nós restritos a admin e nós de módulos não contratados; um ramo
 // some quando fica sem filhos visíveis.
-export function filtrarPorPapel(
-  nodes: NavNode[],
-  admin: boolean,
-  permiteGraduacao = false,
-): NavNode[] {
+export function filtrarPorPapel(nodes: NavNode[], ctx: CtxNav): NavNode[] {
   return nodes.flatMap<NavNode>((n) => {
-    if (n.adminOnly && !admin) return [];
-    if (n.graduacao && !(admin || permiteGraduacao)) return [];
+    if (n.adminOnly && !ctx.admin) return [];
+    if (n.modulo && !ctx.modulos.includes(n.modulo)) return [];
     if (isBranch(n)) {
-      const filhos = filtrarPorPapel(n.children, admin, permiteGraduacao);
+      const filhos = filtrarPorPapel(n.children, ctx);
       return filhos.length > 0 ? [{ ...n, children: filhos }] : [];
     }
     return [n];
