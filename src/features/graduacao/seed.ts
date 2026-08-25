@@ -503,4 +503,6 @@ export const CONFIG_DEFAULT: ConfigGraduacao = {
   posicoes: POSICOES_SEED,
   golpesRestritos: GOLPES_SEED,
   programas: PROGRAMAS_SEED,
+  // Parâmetros de aptidão começam vazios: o admin define na tela Parâmetros.
+  parametros: [],
 };

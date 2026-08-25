@@ -13,6 +13,7 @@ import {
   X,
   QrCode,
   MessageSquare,
+  Award,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas } from "@/features/aulas/aulasApi";
@@ -25,6 +26,7 @@ import {
   type MarcaChamada,
 } from "@/features/chamada/chamadaApi";
 import { faixaInfo } from "@/features/alunos/faixa";
+import { useMapaAptidao } from "@/features/graduacao/aptidao";
 import { chamadaPendenteDaAula } from "@/lib/offlineQueue";
 import { dataBR, horaCurta } from "@/lib/format";
 import type { Aluno, Aula, Presenca } from "@/types";
@@ -155,6 +157,7 @@ function ChamadaPendente({
   const navigate = useNavigate();
   const { data: alunos, isLoading } = useAlunos(admin);
   const salvar = useSalvarChamada();
+  const { mapa: aptidao } = useMapaAptidao();
   const [marcadas, setMarcadas] = useState<Record<number, boolean>>({});
   const [confirmando, setConfirmando] = useState(false);
   const [alunoOcorrencias, setAlunoOcorrencias] = useState<{ id: number; nome: string } | null>(null);
@@ -230,6 +233,7 @@ function ChamadaPendente({
               nome={m.nomeAluno}
               presente={m.estaPresente}
               editavel={false}
+              apto={aptidao.get(m.alunoId)?.exame}
             />
           ))}
         </ListaAlunos>
@@ -259,6 +263,7 @@ function ChamadaPendente({
               faixa={a.faixa}
               presente={false}
               editavel={false}
+              apto={aptidao.get(a.id)?.exame}
             />
           ))}
         </ListaAlunos>
@@ -295,6 +300,7 @@ function ChamadaPendente({
             faixa={a.faixa}
             presente={!!marcadas[a.id]}
             editavel
+            apto={aptidao.get(a.id)?.exame}
             onToggle={() =>
               setMarcadas((m) => ({ ...m, [a.id]: !m[a.id] }))
             }
@@ -376,6 +382,7 @@ function ChamadaSalva({
 }) {
   const { data: presencas, isLoading } = usePresencasDaAula(aula.id);
   const atualizar = useAtualizarPresenca();
+  const { mapa: aptidao } = useMapaAptidao();
   // Espelho otimista: mostra o novo valor enquanto o PUT roda.
   const [override, setOverride] = useState<Record<number, boolean>>({});
   const [salvandoId, setSalvandoId] = useState<number | null>(null);
@@ -445,6 +452,7 @@ function ChamadaSalva({
             presente={valorAtual(p)}
             editavel={podeEditar}
             salvando={salvandoId === p.id}
+            apto={aptidao.get(p.alunoId)?.exame}
             onToggle={() => alternar(p)}
           />
         ))}
@@ -476,6 +484,7 @@ function LinhaAluno({
   presente,
   editavel,
   salvando = false,
+  apto,
   onToggle,
   onOcorrencia,
 }: {
@@ -484,6 +493,7 @@ function LinhaAluno({
   presente: boolean;
   editavel: boolean;
   salvando?: boolean;
+  apto?: string; // rótulo do exame quando apto; ausente = não sinaliza
   onToggle?: () => void;
   onOcorrencia?: () => void;
 }) {
@@ -499,6 +509,14 @@ function LinhaAluno({
             style={{ backgroundColor: info.cor, color: info.texto }}
           >
             {info.nome}
+          </span>
+        )}
+        {apto && (
+          <span
+            title={`Apto ao exame — ${apto}`}
+            className="inline-flex shrink-0 items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-600"
+          >
+            <Award className="size-3.5" /> Apto
           </span>
         )}
       </div>

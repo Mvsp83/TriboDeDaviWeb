@@ -145,6 +145,17 @@ export interface ProgramaFaixa {
   graus: Grau[];
 }
 
+// Parâmetros de aptidão ao exame, por cor de faixa. Quando o aluno atinge
+// TODOS os que estiverem ativos (valor > 0 / marcado), o sistema o sinaliza
+// como apto no cadastro e na chamada. Contagens são "desde a última graduação"
+// (ou desde a primeira presença, se nunca graduou).
+export interface ParametrosFaixa {
+  faixaBase: number; // espelha faixa.ts (0=Branca ... 40=Preta)
+  aulasMinimas: number; // presenças mínimas (0 = não exige)
+  mesesMinimos: number; // tempo mínimo na faixa em meses (0 = não exige)
+  semAdvertencias: boolean; // true = não pode ter advertência no período
+}
+
 // Toda a configuração de graduação — uma unidade persistida (localStorage hoje,
 // futura /api/ConfiguracaoGraduacao).
 export interface ConfigGraduacao {
@@ -152,6 +163,9 @@ export interface ConfigGraduacao {
   posicoes: Posicao[];
   golpesRestritos: GolpeRestrito[];
   programas: ProgramaFaixa[];
+  // Parâmetros de aptidão por faixa. Vazio = nenhum critério configurado
+  // (ninguém é sinalizado até o admin definir).
+  parametros: ParametrosFaixa[];
 }
 
 // Gera um id novo. crypto.randomUUID existe em todos os navegadores-alvo.

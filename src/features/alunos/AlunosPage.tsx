@@ -12,6 +12,7 @@ import {
   KeyRound,
   Printer,
   CameraOff,
+  Award,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -29,6 +30,7 @@ import { OcorrenciasDialog } from "@/features/ocorrencias/OcorrenciasDialog";
 import { imprimirCodigos } from "@/features/responsavel/imprimirCodigos";
 import { imprimirSemImagem } from "@/features/alunos/imprimirSemImagem";
 import { faixaInfo } from "@/features/alunos/faixa";
+import { useMapaAptidao } from "@/features/graduacao/aptidao";
 import { imprimirCarteirinhas } from "@/features/carteirinha/carteirinhaPdf";
 import { ApiError } from "@/lib/api";
 import { useTableSort, type SortValue } from "@/lib/useTableSort";
@@ -78,6 +80,7 @@ export function AlunosPage() {
 
   const { data: alunos, isLoading, isError } = useAlunos(admin);
   const { data: polos } = usePolos();
+  const { mapa: aptidao } = useMapaAptidao();
   const excluir = useExcluirAluno();
   const exportar = useExportarDadosAluno();
   const anonimizar = useAnonimizarAluno();
@@ -379,6 +382,14 @@ export function AlunosPage() {
                             className="ml-1.5 inline size-4 align-text-bottom text-destructive"
                             aria-label="Sem autorização de imagem"
                           />
+                        </span>
+                      )}
+                      {aptidao.get(a.id) && (
+                        <span
+                          title={`Apto ao exame — ${aptidao.get(a.id)!.exame}`}
+                          className="ml-1.5 inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 align-middle text-[11px] font-semibold text-emerald-600"
+                        >
+                          <Award className="size-3.5" /> Apto
                         </span>
                       )}
                     </TableCell>

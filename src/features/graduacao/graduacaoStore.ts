@@ -94,6 +94,8 @@ function mesclar(bruto: Partial<ConfigGraduacao> | null): ConfigGraduacao {
     posicoes: posicoes.length > 0 ? posicoes : CONFIG_DEFAULT.posicoes,
     golpesRestritos: golpes.length > 0 ? golpes : CONFIG_DEFAULT.golpesRestritos,
     programas: programas.length > 0 ? programas : CONFIG_DEFAULT.programas,
+    // Parâmetros são do usuário; ausentes em configs antigas = lista vazia.
+    parametros: bruto.parametros ?? [],
   };
 }
 
