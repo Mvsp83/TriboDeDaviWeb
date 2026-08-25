@@ -10,6 +10,7 @@ import {
   Wallet,
   TrendingUp,
   UserPlus,
+  FileBarChart,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import { dataBR, formatarTelefone } from "@/lib/format";
@@ -27,6 +28,10 @@ import {
   type Doador,
   type Doacao,
 } from "@/features/doadores/doacoesApi";
+import {
+  exportarDoacoesPdf,
+  exportarDoadoresPdf,
+} from "@/features/doadores/doacoesRelatorioPdf";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { IdRef } from "@/components/IdRef";
@@ -461,6 +466,19 @@ export function DoacoesPage() {
             </div>
           )}
           <div className="ml-auto flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                const ok =
+                  aba === "doacoes"
+                    ? exportarDoacoesPdf(doacoes ?? [], Number(ano), resumo)
+                    : exportarDoadoresPdf(doadores ?? []);
+                if (!ok) toast.error("Permita pop-ups para o relatório.");
+              }}
+            >
+              <FileBarChart className="size-4" />
+              Relatório
+            </Button>
             <Button
               variant="outline"
               onClick={() => {
