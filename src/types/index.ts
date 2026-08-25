@@ -225,7 +225,7 @@ export interface Aviso {
   id: number;
   titulo?: string | null;
   mensagem: string;
-  publicoAlvo: number; // 0=Todos, 1=Professores, 2=Supervisores
+  publicoAlvo: number; // 0=Todos, 1=Professores, 2=Supervisores, 3=Administradores
   dataCriacao: string;
   criadoPor?: string | null;
   ativo: boolean;
@@ -235,6 +235,7 @@ export const PUBLICO_AVISO_LABEL: Record<number, string> = {
   0: "Todos",
   1: "Professores",
   2: "Supervisores",
+  3: "Administradores",
 };
 
 export interface BemPatrimonial {
