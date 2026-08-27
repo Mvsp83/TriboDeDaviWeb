@@ -53,9 +53,11 @@ function SelectContent({
       >
         <SelectPrimitive.Viewport
           className={cn(
-            "p-1",
+            // Rola dentro do próprio viewport: listas longas (ex.: catálogo de
+            // posições) ganham barra de rolagem em vez de transbordar a tela.
+            "max-h-[20rem] overflow-y-auto p-1",
             position === "popper" &&
-              "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
+              "w-full min-w-[var(--radix-select-trigger-width)]",
           )}
         >
           {children}
