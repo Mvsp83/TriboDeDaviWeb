@@ -217,6 +217,21 @@ const PlanilhaFinanceiraPage = lazy(() =>
     default: m.PlanilhaFinanceiraPage,
   })),
 );
+const PlanosMensalidadePage = lazy(() =>
+  import("@/features/mensalidades/PlanosMensalidadePage").then((m) => ({
+    default: m.PlanosMensalidadePage,
+  })),
+);
+const MatriculasFinanceirasPage = lazy(() =>
+  import("@/features/mensalidades/MatriculasFinanceirasPage").then((m) => ({
+    default: m.MatriculasFinanceirasPage,
+  })),
+);
+const CobrancasPage = lazy(() =>
+  import("@/features/mensalidades/CobrancasPage").then((m) => ({
+    default: m.CobrancasPage,
+  })),
+);
 
 // Ao trocar de rota, volta o scroll para o topo. Sem isto, abrir uma página
 // (ex.: Transparência) herda a posição de rolagem da página anterior e cai no
@@ -338,6 +353,20 @@ export default function App() {
               <Route
                 path="administrativo/financeiro/contas/planilha"
                 element={<PlanilhaFinanceiraPage />}
+              />
+
+              {/* Administrativo → Financeiro → Mensalidades */}
+              <Route
+                path="administrativo/financeiro/mensalidades/planos"
+                element={<PlanosMensalidadePage />}
+              />
+              <Route
+                path="administrativo/financeiro/mensalidades/matriculas"
+                element={<MatriculasFinanceirasPage />}
+              />
+              <Route
+                path="administrativo/financeiro/mensalidades/cobrancas"
+                element={<CobrancasPage />}
               />
             </Route>
           </Route>

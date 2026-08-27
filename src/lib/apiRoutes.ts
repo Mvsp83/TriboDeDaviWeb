@@ -116,6 +116,22 @@ export const ApiRotas = {
   finTransferencia: "/api/Financeiro/transferencias",
   finImportar: "/api/Financeiro/importar",
 
+  // Mensalidades (gestão de cobranças) — backend a implementar em
+  // /api/Mensalidades. DTOs esperados documentados em features/mensalidades/tipos.ts.
+  mensPlanos: "/api/Mensalidades/planos",
+  mensPlanoSalvar: "/api/Mensalidades/planos/salvar",
+  mensPlanoExcluir: (id: number) => `/api/Mensalidades/planos/${id}`,
+  mensMatriculas: "/api/Mensalidades/matriculas",
+  mensMatriculaSalvar: "/api/Mensalidades/matriculas/salvar",
+  mensMatriculaExcluir: (id: number) => `/api/Mensalidades/matriculas/${id}`,
+  // Cobranças de uma competência ("yyyy-MM").
+  mensCobrancas: (competencia: string) =>
+    `/api/Mensalidades/cobrancas?competencia=${competencia}`,
+  mensCobrancaGerar: "/api/Mensalidades/cobrancas/gerar",
+  mensCobrancaBaixar: "/api/Mensalidades/cobrancas/baixar",
+  mensCobrancaSalvar: "/api/Mensalidades/cobrancas/salvar",
+  mensCobrancaExcluir: (id: number) => `/api/Mensalidades/cobrancas/${id}`,
+
   // Inscrição: os dois primeiros são públicos (site, sem login).
   inscricaoPolos: "/api/Inscricao/polos",
   inscricaoEnviar: "/api/Inscricao/enviar",

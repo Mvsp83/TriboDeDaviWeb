@@ -32,6 +32,7 @@ import {
   Calculator,
   Scale,
   Wallet,
+  CircleDollarSign,
   Receipt,
   HeartHandshake,
   TrendingUp,
@@ -217,6 +218,29 @@ export const navGroups: NavGroup[] = [
             label: "Planilha Financeira",
             href: "/administrativo/financeiro/contas/planilha",
             icon: FileSpreadsheet,
+          },
+        ],
+      },
+      {
+        label: "Mensalidades",
+        icon: CircleDollarSign,
+        adminOnly: true,
+        modulo: "financeiro",
+        children: [
+          {
+            label: "Planos",
+            href: "/administrativo/financeiro/mensalidades/planos",
+            icon: CircleDollarSign,
+          },
+          {
+            label: "Matrículas",
+            href: "/administrativo/financeiro/mensalidades/matriculas",
+            icon: Users,
+          },
+          {
+            label: "Cobranças",
+            href: "/administrativo/financeiro/mensalidades/cobrancas",
+            icon: Receipt,
           },
         ],
       },
