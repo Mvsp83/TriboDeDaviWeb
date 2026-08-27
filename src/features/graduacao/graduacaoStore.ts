@@ -45,6 +45,8 @@ function normalizarParametro(
     aulasMinimas: p.aulasMinimas ?? 0,
     mesesMinimos: p.mesesMinimos ?? 0,
     maxAdvertencias,
+    // Preserva a idade mínima (undefined = usa o padrão IBJJF em regras.ts).
+    idadeMinima: p.idadeMinima,
   };
 }
 

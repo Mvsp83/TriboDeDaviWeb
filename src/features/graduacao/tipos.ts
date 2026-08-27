@@ -156,6 +156,10 @@ export interface ParametrosFaixa {
   // Máximo de advertências permitidas no período. null = não exige;
   // 0 = nenhuma permitida (estrito); N = permite até N. Acima disso, não apto.
   maxAdvertencias: number | null;
+  // Idade mínima (regra IBJJF Art. 2: ano corrente − ano de nascimento) para
+  // graduar a esta cor de faixa. Bloqueia o registro se não cumprida.
+  // undefined = usa o padrão IBJJF (ver regras.ts); 0 = qualquer idade.
+  idadeMinima?: number;
 }
 
 // Toda a configuração de graduação — uma unidade persistida (localStorage hoje,

@@ -1,0 +1,1 @@
+Coloque aqui o poster oficial das faixas como 'poster.webp' (ou .png/.jpg — ajuste POSTER_SRC em RegrasGraduacaoPage.tsx).

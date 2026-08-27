@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Award, GraduationCap, Loader2, Printer, Trash2 } from "lucide-react";
+import { Award, GraduationCap, Loader2, Printer, Trash2, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAlunos } from "@/features/alunos/alunosApi";
 import { usePolos } from "@/features/polos/polosApi";
+import { useConfigGraduacao } from "@/features/graduacao/graduacaoApi";
+import { checarIdadeGraduacao } from "@/features/graduacao/regras";
 import { faixaInfo, OPCOES_FAIXA_BASE, mudouDeCor } from "@/features/alunos/faixa";
 import { ApiError } from "@/lib/api";
 import { dataBR } from "@/lib/format";
@@ -71,7 +73,9 @@ function RegistrarDialog({
   const admin = sessao?.isAdministrador ?? false;
   const { data: alunos } = useAlunos(admin);
   const { data: polos } = usePolos();
+  const { data: cfg } = useConfigGraduacao();
   const registrar = useRegistrarGraduacao();
+  const parametros = cfg?.parametros;
 
   const [poloId, setPoloId] = useState<string>(
     sessao?.poloId != null ? String(sessao.poloId) : "",
@@ -95,6 +99,16 @@ function RegistrarDialog({
   const novaFaixaDe = (faixaAtual: number) =>
     modo === "grau" ? Math.min(faixaAtual + 1, 40) : Number(faixaAlvo);
 
+  // Idade mínima (IBJJF): bloqueia graduar para a faixa se o aluno não cumpre.
+  const idadeOk = (a: { faixa: number; dataNascimento: string | null }) => {
+    const nova = novaFaixaDe(a.faixa);
+    if (nova <= a.faixa) return true; // sem mudança não precisa checar
+    return checarIdadeGraduacao(nova, a.dataNascimento, parametros).ok;
+  };
+  // Elegível = a faixa muda E cumpre a idade mínima.
+  const elegivel = (a: { faixa: number; dataNascimento: string | null }) =>
+    novaFaixaDe(a.faixa) > a.faixa && idadeOk(a);
+
   const alternar = (id: number) =>
     setSelecionados((s) => {
       const n = new Set(s);
@@ -113,9 +127,20 @@ function RegistrarDialog({
       return;
     }
 
-    const lista = candidatos
-      .filter((a) => selecionados.has(a.id))
-      .map((a) => ({ alunoId: a.id, faixaNova: novaFaixaDe(a.faixa) }));
+    const selecionadosCandidatos = candidatos.filter((a) => selecionados.has(a.id));
+    // Trava de segurança: mesmo que algo escape da UI, não gradua quem não
+    // cumpre a idade mínima (bloqueio total, conforme regra da IBJJF).
+    const bloqueados = selecionadosCandidatos.filter((a) => !elegivel(a));
+    if (bloqueados.length > 0) {
+      const nomes = bloqueados.map((a) => a.nome).join(", ");
+      toast.error(`Idade mínima não cumprida: ${nomes}. Ajuste a seleção.`);
+      return;
+    }
+
+    const lista = selecionadosCandidatos.map((a) => ({
+      alunoId: a.id,
+      faixaNova: novaFaixaDe(a.faixa),
+    }));
 
     try {
       const r = await registrar.mutateAsync({ data, observacao, alunos: lista });
@@ -223,7 +248,11 @@ function RegistrarDialog({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setSelecionados(new Set(candidatos.map((a) => a.id)))}
+              onClick={() =>
+                setSelecionados(
+                  new Set(candidatos.filter(elegivel).map((a) => a.id)),
+                )
+              }
             >
               Todos
             </Button>
@@ -238,11 +267,18 @@ function RegistrarDialog({
             const nova = novaFaixaDe(a.faixa);
             const marcado = selecionados.has(a.id);
             const semMudanca = nova <= a.faixa;
+            const checagem = semMudanca
+              ? null
+              : checarIdadeGraduacao(nova, a.dataNascimento, parametros);
+            const bloqueadoIdade = checagem != null && !checagem.ok;
+            const desabilitado = semMudanca || bloqueadoIdade;
             return (
               <li key={a.id}>
                 <label
-                  className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 ${
-                    semMudanca ? "border-dashed border-border opacity-60" : "border-border"
+                  className={`flex items-center gap-2.5 rounded-md border px-3 py-2 ${
+                    desabilitado
+                      ? "cursor-not-allowed border-dashed border-border opacity-60"
+                      : "cursor-pointer border-border"
                   }`}
                 >
                   <input
@@ -250,7 +286,7 @@ function RegistrarDialog({
                     className="size-4 accent-primary"
                     checked={marcado}
                     onChange={() => alternar(a.id)}
-                    disabled={semMudanca}
+                    disabled={desabilitado}
                   />
                   <span className="min-w-0 flex-1 truncate text-sm">{a.nome}</span>
                   <ChipFaixa faixa={a.faixa} />
@@ -262,6 +298,15 @@ function RegistrarDialog({
                   )}
                   {semMudanca && (
                     <span className="text-xs text-muted-foreground">já está nessa faixa</span>
+                  )}
+                  {bloqueadoIdade && (
+                    <span
+                      className="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-500"
+                      title={`Idade mínima ${checagem!.idadeMinima} anos para ${checagem!.faixaNome}. Aluno tem ${checagem!.idadeAluno ?? "?"} (ano corrente − ano de nascimento).`}
+                    >
+                      <AlertTriangle className="size-3.5" />
+                      idade mín. {checagem!.idadeMinima}
+                    </span>
                   )}
                 </label>
               </li>

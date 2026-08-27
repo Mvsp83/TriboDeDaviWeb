@@ -6,6 +6,7 @@ import {
   useSalvarParametros,
 } from "@/features/graduacao/graduacaoApi";
 import type { ParametrosFaixa } from "@/features/graduacao/tipos";
+import { IDADE_MINIMA_PADRAO } from "@/features/graduacao/regras";
 import { OPCOES_FAIXA_BASE, faixaInfo } from "@/features/alunos/faixa";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,8 @@ export function ParametrosGraduacaoPage() {
         aulasMinimas: p?.aulasMinimas ?? 0,
         mesesMinimos: p?.mesesMinimos ?? 0,
         maxAdvertencias: p?.maxAdvertencias ?? null,
+        // Pré-preenche com o padrão IBJJF quando ainda não configurado.
+        idadeMinima: p?.idadeMinima ?? IDADE_MINIMA_PADRAO[valor] ?? 0,
       };
     }),
   );
@@ -70,7 +73,12 @@ export function ParametrosGraduacaoPage() {
           <span className="font-medium text-foreground">máx. advertências</span>,
           deixe vazio para não exigir e{" "}
           <span className="font-medium text-foreground">0</span> para não permitir
-          nenhuma.
+          nenhuma. A{" "}
+          <span className="font-medium text-foreground">idade mínima</span> (regra IBJJF:
+          ano corrente − ano de nascimento){" "}
+          <span className="font-medium text-foreground">bloqueia</span> a graduação à
+          faixa quando não cumprida; deixe{" "}
+          <span className="font-medium text-foreground">0</span> para qualquer idade.
         </p>
       </div>
 
@@ -87,6 +95,7 @@ export function ParametrosGraduacaoPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Faixa</TableHead>
+                <TableHead className="w-36">Idade mínima</TableHead>
                 <TableHead className="w-40">Aulas mínimas</TableHead>
                 <TableHead className="w-40">Tempo mínimo (meses)</TableHead>
                 <TableHead className="w-44">Máx. advertências</TableHead>
@@ -104,6 +113,21 @@ export function ParametrosGraduacaoPage() {
                       >
                         {info.nome}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        min={0}
+                        placeholder="qualquer"
+                        value={l.idadeMinima ?? ""}
+                        onChange={(e) =>
+                          atualizar(
+                            l.faixaBase,
+                            "idadeMinima",
+                            e.target.value === "" ? 0 : Math.max(0, Number(e.target.value) || 0),
+                          )
+                        }
+                      />
                     </TableCell>
                     <TableCell>
                       <Input

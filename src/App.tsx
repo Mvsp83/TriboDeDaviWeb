@@ -176,6 +176,11 @@ const GolpesRestritosPage = lazy(() =>
     default: m.GolpesRestritosPage,
   })),
 );
+const RegrasGraduacaoPage = lazy(() =>
+  import("@/features/graduacao/RegrasGraduacaoPage").then((m) => ({
+    default: m.RegrasGraduacaoPage,
+  })),
+);
 const ParametrosGraduacaoPage = lazy(() =>
   import("@/features/graduacao/ParametrosGraduacaoPage").then((m) => ({
     default: m.ParametrosGraduacaoPage,
@@ -348,6 +353,7 @@ export default function App() {
             <Route path="graduacao/posicoes" element={<PosicoesPage />} />
             <Route path="graduacao/golpes" element={<GolpesRestritosPage />} />
             <Route path="graduacao/parametros" element={<ParametrosGraduacaoPage />} />
+            <Route path="graduacao/regras" element={<RegrasGraduacaoPage />} />
           </Route>
         </Route>
       </Route>
