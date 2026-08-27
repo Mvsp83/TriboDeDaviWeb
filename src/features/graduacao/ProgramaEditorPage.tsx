@@ -13,6 +13,7 @@ import {
   Users,
   AlertTriangle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { faixaInfo } from "@/features/alunos/faixa";
 import { useConfigGraduacao, useSalvarPrograma } from "./graduacaoApi";
 import { imprimirApostilaFaixa } from "./apostilaHtml";
@@ -92,6 +93,59 @@ function EscopoIdade({
   );
 }
 
+// Abas de escopo por idade: "Todas as idades" + uma aba por faixa etária, e uma
+// aba "＋" para criar. Deixa claro (e a um clique) qual faixa etária está sendo
+// editada — os itens novos entram na aba selecionada.
+function AbasEscopo({
+  value,
+  bandas,
+  onChange,
+  onAdd,
+}: {
+  value: string;
+  bandas: FaixaEtaria[];
+  onChange: (id: string) => void;
+  onAdd: () => void;
+}) {
+  const abas = [
+    { id: "todas", label: "Todas as idades" },
+    ...bandas.map((b) => ({ id: b.id, label: b.label?.trim() || "Sem nome" })),
+  ];
+  return (
+    <div className="flex flex-wrap items-center gap-1.5" role="tablist">
+      {abas.map((a) => {
+        const ativo = value === a.id;
+        return (
+          <button
+            key={a.id}
+            type="button"
+            role="tab"
+            aria-selected={ativo}
+            onClick={() => onChange(a.id)}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+              ativo
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border text-muted-foreground hover:bg-secondary",
+            )}
+          >
+            {a.label}
+          </button>
+        );
+      })}
+      <button
+        type="button"
+        onClick={onAdd}
+        title="Adicionar faixa etária"
+        className="flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-xs text-muted-foreground hover:bg-secondary"
+      >
+        <Plus className="size-3.5" />
+        Faixa etária
+      </button>
+    </div>
+  );
+}
+
 export function ProgramaEditorPage() {
   const { faixaBase: faixaParam } = useParams();
   const faixaBase = Number(faixaParam);
@@ -119,11 +173,18 @@ export function ProgramaEditorPage() {
     const encontrado = cfg?.programas.find((p) => p.faixaBase === faixaBase) ?? null;
     setProg(encontrado ? structuredClone(encontrado) : null);
     setSujo(false);
-    setFiltroIdade("todas");
   }, [cfg, faixaBase]);
+
+  // A faixa etária em edição só volta para "Todas" ao trocar de FAIXA (cor).
+  // Salvar troca a referência de `cfg`, mas o escopo escolhido tem de continuar
+  // o mesmo — só muda se o usuário selecionar outra aba.
+  useEffect(() => {
+    setFiltroIdade("todas");
+  }, [faixaBase]);
 
   const bandas = prog?.faixasEtarias ?? [];
   const escopoNovo = filtroIdade === "todas" ? null : filtroIdade;
+  const bandaAtiva = bandas.find((b) => b.id === filtroIdade) ?? null;
 
   function marcar(next: ProgramaFaixa) {
     setProg(next);
@@ -144,13 +205,13 @@ export function ProgramaEditorPage() {
   // ---- faixas etárias ----
   function addFaixaEtaria() {
     if (!prog) return;
+    const id = novoId();
     marcar({
       ...prog,
-      faixasEtarias: [
-        ...prog.faixasEtarias,
-        { id: novoId(), label: "Nova faixa etária" },
-      ],
+      faixasEtarias: [...prog.faixasEtarias, { id, label: "Nova faixa etária" }],
     });
+    // Já entra editando a faixa recém-criada.
+    setFiltroIdade(id);
   }
   function patchFaixaEtaria(id: string, patch: Partial<FaixaEtaria>) {
     if (!prog) return;
@@ -329,83 +390,73 @@ export function ProgramaEditorPage() {
           {/* Faixas etárias + filtro */}
           <Card>
             <CardContent className="space-y-3 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <Users className="size-4 text-muted-foreground" />
-                  Faixas etárias desta cor
-                </div>
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs text-muted-foreground">Editando para</Label>
-                  <Select value={filtroIdade} onValueChange={setFiltroIdade}>
-                    <SelectTrigger className="h-8 w-auto gap-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todas">Todas as idades</SelectItem>
-                      {bandas.map((b) => (
-                        <SelectItem key={b.id} value={b.id}>
-                          {b.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Users className="size-4 text-muted-foreground" />
+                Faixa etária em edição
               </div>
 
-              <div className="space-y-2">
-                {bandas.length === 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Nenhuma faixa etária. Sem elas, o conteúdo vale para todas as
-                    idades. Adicione uma para diferenciar por idade.
-                  </p>
-                )}
-                {bandas.map((b) => (
-                  <div key={b.id} className="flex flex-wrap items-center gap-2">
-                    <Input
-                      className="h-8 w-44"
-                      value={b.label}
-                      placeholder="ex: 4 a 5 anos"
-                      onChange={(e) => patchFaixaEtaria(b.id, { label: e.target.value })}
-                    />
-                    <Input
-                      className="h-8 w-20"
-                      type="number"
-                      value={b.idadeMin ?? ""}
-                      placeholder="mín"
-                      onChange={(e) =>
-                        patchFaixaEtaria(b.id, {
-                          idadeMin: e.target.value ? Number(e.target.value) : undefined,
-                        })
-                      }
-                    />
-                    <span className="text-muted-foreground">–</span>
-                    <Input
-                      className="h-8 w-20"
-                      type="number"
-                      value={b.idadeMax ?? ""}
-                      placeholder="máx"
-                      onChange={(e) =>
-                        patchFaixaEtaria(b.id, {
-                          idadeMax: e.target.value ? Number(e.target.value) : undefined,
-                        })
-                      }
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 text-muted-foreground hover:text-destructive"
-                      title="Remover faixa etária"
-                      onClick={() => removerFaixaEtaria(b.id)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button variant="outline" size="sm" className="h-8" onClick={addFaixaEtaria}>
-                  <Plus className="size-3.5" />
-                  Adicionar faixa etária
-                </Button>
-              </div>
+              <AbasEscopo
+                value={filtroIdade}
+                bandas={bandas}
+                onChange={setFiltroIdade}
+                onAdd={addFaixaEtaria}
+              />
+
+              {/* Editor contextual: mostra só a faixa etária selecionada. */}
+              {filtroIdade === "todas" ? (
+                <p className="text-xs text-muted-foreground">
+                  O conteúdo abaixo vale para{" "}
+                  <span className="font-medium text-foreground">todas as idades</span>. Crie uma
+                  faixa etária (aba{" "}
+                  <span className="font-medium text-foreground">＋ Faixa etária</span>) para dar
+                  variações por idade — os itens específicos dela aparecem só quando ela estiver
+                  selecionada.
+                </p>
+              ) : bandaAtiva ? (
+                <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-secondary/30 px-3 py-2">
+                  <Label className="text-xs text-muted-foreground">Nome e idade:</Label>
+                  <Input
+                    className="h-8 w-44"
+                    value={bandaAtiva.label}
+                    placeholder="ex: 4 a 5 anos"
+                    onChange={(e) => patchFaixaEtaria(bandaAtiva.id, { label: e.target.value })}
+                  />
+                  <Input
+                    className="h-8 w-20"
+                    type="number"
+                    value={bandaAtiva.idadeMin ?? ""}
+                    placeholder="mín"
+                    onChange={(e) =>
+                      patchFaixaEtaria(bandaAtiva.id, {
+                        idadeMin: e.target.value ? Number(e.target.value) : undefined,
+                      })
+                    }
+                  />
+                  <span className="text-muted-foreground">–</span>
+                  <Input
+                    className="h-8 w-20"
+                    type="number"
+                    value={bandaAtiva.idadeMax ?? ""}
+                    placeholder="máx"
+                    onChange={(e) =>
+                      patchFaixaEtaria(bandaAtiva.id, {
+                        idadeMax: e.target.value ? Number(e.target.value) : undefined,
+                      })
+                    }
+                  />
+                  <span className="text-xs text-muted-foreground">anos</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-auto h-8 text-muted-foreground hover:text-destructive"
+                    title="Remover faixa etária"
+                    onClick={() => removerFaixaEtaria(bandaAtiva.id)}
+                  >
+                    <Trash2 className="size-4" />
+                    Remover
+                  </Button>
+                </div>
+              ) : null}
             </CardContent>
           </Card>
 
