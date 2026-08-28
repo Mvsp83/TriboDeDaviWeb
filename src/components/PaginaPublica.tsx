@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import { SobreApp } from "@/components/SobreApp";
@@ -17,13 +17,20 @@ export function PaginaPublica({
   larguraMax?: string;
 }) {
   const navigate = useNavigate();
-  const location = useLocation();
   const anoAtual = new Date().getFullYear();
 
-  // Volta para a página anterior; se não houver histórico interno (link direto
-  // ou recarga), cai na home.
-  const voltar = () =>
-    location.key !== "default" ? navigate(-1) : navigate("/");
+  // Volta para a página anterior; se não houver histórico interno (link direto,
+  // recarga ou redirecionamento), cai na home. Usa o índice do histórico do
+  // React Router (idx) — critério confiável: idx === 0 = primeira entrada, então
+  // navigate(-1) seria um no-op e vamos para a home.
+  const voltar = () => {
+    const idx =
+      (typeof window !== "undefined" &&
+        (window.history.state as { idx?: number } | null)?.idx) ||
+      0;
+    if (idx > 0) navigate(-1);
+    else navigate("/");
+  };
 
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
