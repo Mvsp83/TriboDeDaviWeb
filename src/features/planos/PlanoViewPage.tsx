@@ -9,6 +9,7 @@ import { AulaTimeline } from "@/features/planos/AulaTimeline";
 import { blocoCor } from "@/features/planos/blocoCores";
 import { exportarPlanoPdf } from "@/features/planos/planoImpressao";
 import { dataBR } from "@/lib/format";
+import { urlSegura } from "@/lib/utils";
 import {
   STATUS_PLANO_LABEL,
   TIPO_BLOCO_LABEL,
@@ -209,9 +210,9 @@ function AtividadeLinha({ atividade }: { atividade: Atividade | undefined }) {
         {atividade.descricao && (
           <span className="text-muted-foreground"> — {atividade.descricao}</span>
         )}
-        {atividade.videoUrl && (
+        {urlSegura(atividade.videoUrl) && (
           <a
-            href={atividade.videoUrl}
+            href={urlSegura(atividade.videoUrl)}
             target="_blank"
             rel="noreferrer"
             className="ml-2 inline-flex items-center gap-1 text-primary hover:underline"

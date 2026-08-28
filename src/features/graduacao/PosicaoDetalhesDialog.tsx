@@ -1,5 +1,6 @@
 import { PlayCircle, Pencil, ShieldAlert } from "lucide-react";
 import { extrairVideoId, urlEmbed } from "@/lib/youtube";
+import { urlSegura } from "@/lib/utils";
 import { faixaInfo } from "@/features/alunos/faixa";
 import { CATEGORIA_LABEL, type Posicao } from "./tipos";
 import { useConfigGraduacao } from "./graduacaoApi";
@@ -119,9 +120,9 @@ export function PosicaoDetalhesDialog({
             <Campo titulo="Descrição" valor={posicao.descricao} />
             <Campo titulo="Transcrição do vídeo" valor={posicao.transcricao} />
 
-            {posicao.videoUrl && (
+            {urlSegura(posicao.videoUrl) && (
               <a
-                href={posicao.videoUrl}
+                href={urlSegura(posicao.videoUrl)}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-primary hover:underline"

@@ -1,5 +1,6 @@
 import { PlayCircle } from "lucide-react";
 import { TIPO_BLOCO_LABEL, type Atividade } from "@/types";
+import { urlSegura } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -57,11 +58,11 @@ export function AtividadeDetalhesDialog({
               valor={atividade.referenciaBiblica}
             />
 
-            {atividade.videoUrl && (
+            {urlSegura(atividade.videoUrl) && (
               <div>
                 <p className="mb-1 font-medium text-foreground">Vídeo</p>
                 <a
-                  href={atividade.videoUrl}
+                  href={urlSegura(atividade.videoUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 text-primary hover:underline"

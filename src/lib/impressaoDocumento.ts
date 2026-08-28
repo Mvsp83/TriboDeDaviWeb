@@ -12,10 +12,15 @@ import {
 } from "@/lib/documentoPadrao";
 
 export function esc(v: string | null | undefined): string {
+  // Escapa também aspas: o resultado é interpolado tanto em texto quanto em
+  // atributos (ex.: alt="Foto de ${esc(nome)}"). Sem escapar " e ', um nome
+  // com aspas quebraria o atributo e permitiria injetar handlers (onerror=…).
   return String(v ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 export interface OpcoesDocumento {

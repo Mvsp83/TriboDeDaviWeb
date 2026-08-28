@@ -18,7 +18,12 @@ import {
   logout as logoutRequest,
 } from "@/features/auth/authApi";
 import { sessaoDoToken } from "@/features/auth/session";
+import { queryClient } from "@/lib/queryClient";
 import type { Sessao } from "@/types";
+
+// Mesma chave usada pelo persister em main.tsx: o snapshot offline do cache
+// (alunos, presenças, fotos) mora aqui no localStorage.
+const CHAVE_CACHE_PERSISTIDO = "tribo-query-cache";
 
 interface AuthContextValue {
   sessao: Sessao | null;
@@ -62,6 +67,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refresh = getRefreshToken();
     if (refresh) void logoutRequest(refresh).catch(() => {});
     clearToken();
+    // Descarta os dados do usuário que sai — em dispositivo compartilhado
+    // (tablet no tatame), o próximo a entrar não pode ver alunos/presenças da
+    // sessão anterior. Limpa o cache em memória e o snapshot no localStorage.
+    queryClient.clear();
+    try {
+      localStorage.removeItem(CHAVE_CACHE_PERSISTIDO);
+    } catch {
+      // localStorage indisponível (modo privado/quota): nada a fazer.
+    }
     setSessao(null);
   }, []);
 

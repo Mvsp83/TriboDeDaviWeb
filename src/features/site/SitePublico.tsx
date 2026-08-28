@@ -14,6 +14,7 @@ import { SITE, temInformacoes } from "@/features/site/conteudoSite";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { SobreApp } from "@/components/SobreApp";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import { urlSegura } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 // Faixas do jiu-jitsu infantil, com cores mais vivas para o herói do site.
@@ -298,7 +299,7 @@ export function SitePublico() {
                 {prestacaoContas.documentos.map((d, i) => (
                   <li key={i}>
                     <a
-                      href={d.url}
+                      href={urlSegura(d.url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
