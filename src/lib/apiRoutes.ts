@@ -145,6 +145,12 @@ export const ApiRotas = {
   fotosTreinoDefinirConfigPolo: (poloId: number, requerAutorizacao: boolean) =>
     `/api/FotosTreino/config-polos/${poloId}?requerAutorizacao=${requerAutorizacao}`,
 
+  // Foto do aluno (base64 no GET; upload multipart no POST).
+  alunoFoto: (id: number) => `/api/Aluno/${id}/foto`,
+  alunoConfigFoto: "/api/Aluno/config-foto",
+  // Upload público da foto na ficha de inscrição.
+  inscricaoFoto: "/api/Inscricao/foto",
+
   // Galeria de vídeos (YouTube). Listagem pública; salvar/excluir só admin.
   videosGaleria: "/api/VideosGaleria",
   videoGaleriaSalvar: "/api/VideosGaleria/salvar",

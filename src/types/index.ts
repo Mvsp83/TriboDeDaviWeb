@@ -35,6 +35,9 @@ export interface Aluno {
   // Marca de público da ficha: true = inscrito como adulto. Ausente/false nos
   // cadastros antigos — nesse caso a idade (18+) é usada como critério.
   ehAdulto?: boolean;
+  // Somente-leitura: indica se o aluno tem foto (o binário vem de
+  // /api/Aluno/{id}/foto). Gerida por endpoints próprios, fora da ficha.
+  temFoto?: boolean;
 }
 
 export interface Polo {

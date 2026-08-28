@@ -166,6 +166,11 @@ const SincronizacaoPage = lazy(() =>
 const DocumentosPage = lazy(() =>
   import("@/features/documentos/DocumentosPage").then((m) => ({ default: m.DocumentosPage })),
 );
+const ConfigFotoAlunoPage = lazy(() =>
+  import("@/features/configuracoes/ConfigFotoAlunoPage").then((m) => ({
+    default: m.ConfigFotoAlunoPage,
+  })),
+);
 const PadraoDocumentosPage = lazy(() =>
   import("@/features/configuracoes/PadraoDocumentosPage").then((m) => ({
     default: m.PadraoDocumentosPage,
@@ -319,6 +324,7 @@ export default function App() {
             <Route path="sincronizacao" element={<SincronizacaoPage />} />
             <Route path="documentos" element={<DocumentosPage />} />
             <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
+            <Route path="config-foto-aluno" element={<ConfigFotoAlunoPage />} />
 
             {/* Relacionamento */}
             <Route element={<ProtectedRoute modulo="relacionamento" />}>

@@ -62,6 +62,8 @@ export interface EnvioInscricao {
   aceitouLgpd: boolean;
   nomeAssinatura: string;
   versaoTermos: string;
+  // Foto (opcional) já enviada ao servidor; id do arquivo devolvido pelo upload.
+  fotoArquivoId?: string;
 }
 
 // Dados de um aluno já cadastrado, para pré-preencher a rematrícula.

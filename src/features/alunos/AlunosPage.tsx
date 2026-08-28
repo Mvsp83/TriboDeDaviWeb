@@ -33,7 +33,9 @@ import { faixaInfo } from "@/features/alunos/faixa";
 import { useMapaAptidao } from "@/features/graduacao/aptidao";
 import { ehAlunoAdulto } from "@/features/alunos/publico";
 import { imprimirCarteirinhas } from "@/features/carteirinha/carteirinhaPdf";
-import { ApiError } from "@/lib/api";
+import { ApiError, apiGet } from "@/lib/api";
+import { ApiRotas } from "@/lib/apiRoutes";
+import type { ConfigFotoAluno } from "@/features/alunos/fotoAlunoApi";
 import { useTableSort, type SortValue } from "@/lib/useTableSort";
 import { SortableHead } from "@/components/SortableHead";
 import type { Aluno } from "@/types";
@@ -41,6 +43,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { IdRef } from "@/components/IdRef";
+import { AlunoAvatar } from "@/features/alunos/AlunoAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -163,8 +166,19 @@ export function AlunosPage() {
   }
 
   async function gerarCarteirinha(aluno: Aluno) {
+    // Inclui a foto se a config global permitir e o aluno tiver foto.
+    let fotoDataUri: string | undefined;
+    try {
+      const cfg = await apiGet<ConfigFotoAluno>(ApiRotas.alunoConfigFoto);
+      if (cfg.mostrarNaCarteirinha && aluno.temFoto) {
+        const r = await apiGet<{ dataUri: string }>(ApiRotas.alunoFoto(aluno.id));
+        fotoDataUri = r.dataUri;
+      }
+    } catch {
+      // Sem foto disponível: segue com a carteirinha sem imagem.
+    }
     const ok = await imprimirCarteirinhas([
-      { aluno, nomePolo: nomePorPolo.get(aluno.poloId) ?? "-" },
+      { aluno, nomePolo: nomePorPolo.get(aluno.poloId) ?? "-", fotoDataUri },
     ]);
     if (!ok) toast.error("Permita pop-ups para gerar a carteirinha.");
   }
@@ -396,6 +410,15 @@ export function AlunosPage() {
                 sorted.map((a) => (
                   <TableRow key={a.id}>
                     <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <AlunoAvatar
+                          alunoId={a.id}
+                          nome={a.nome}
+                          temFoto={a.temFoto ?? false}
+                          size={32}
+                          ampliavel
+                        />
+                        <span>
                       <IdRef id={a.id} />
                       {a.nome}
                       {a.autorizaImagem !== true && (
@@ -422,6 +445,8 @@ export function AlunosPage() {
                           Adulto
                         </span>
                       )}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <FaixaBadge faixa={a.faixa} />

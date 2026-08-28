@@ -416,6 +416,13 @@ export function ResponsavelPortal() {
         {/* Aluno */}
         <Card>
           <CardContent className="flex flex-wrap items-center gap-3 p-5">
+            {aluno.fotoDataUri && (
+              <img
+                src={aluno.fotoDataUri}
+                alt={aluno.nome}
+                className="size-14 shrink-0 rounded-full border border-border object-cover"
+              />
+            )}
             <div className="flex-1">
               <h1 className="text-xl font-semibold">{aluno.nome}</h1>
               <p className="text-sm text-muted-foreground">

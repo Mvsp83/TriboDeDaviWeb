@@ -19,6 +19,8 @@ import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas } from "@/features/aulas/aulasApi";
 import { useAlunos } from "@/features/alunos/alunosApi";
 import { ehAlunoAdulto } from "@/features/alunos/publico";
+import { AlunoAvatar } from "@/features/alunos/AlunoAvatar";
+import { useConfigFotoAluno } from "@/features/alunos/fotoAlunoApi";
 import { usePolos } from "@/features/polos/polosApi";
 import {
   useAtualizarPresenca,
@@ -266,6 +268,8 @@ function ChamadaPendente({
               editavel={false}
               apto={aptidao.get(a.id)?.exame}
               adulto={ehAlunoAdulto(a)}
+              alunoId={a.id}
+              temFoto={a.temFoto ?? false}
             />
           ))}
         </ListaAlunos>
@@ -304,6 +308,8 @@ function ChamadaPendente({
             editavel
             apto={aptidao.get(a.id)?.exame}
             adulto={ehAlunoAdulto(a)}
+            alunoId={a.id}
+            temFoto={a.temFoto ?? false}
             onToggle={() =>
               setMarcadas((m) => ({ ...m, [a.id]: !m[a.id] }))
             }
@@ -501,6 +507,8 @@ function LinhaAluno({
   salvando = false,
   apto,
   adulto = false,
+  alunoId,
+  temFoto = false,
   onToggle,
   onOcorrencia,
 }: {
@@ -511,14 +519,21 @@ function LinhaAluno({
   salvando?: boolean;
   apto?: string; // rótulo do exame quando apto; ausente = não sinaliza
   adulto?: boolean;
+  alunoId?: number;
+  temFoto?: boolean;
   onToggle?: () => void;
   onOcorrencia?: () => void;
 }) {
   const info = faixa != null ? faixaInfo(faixa) : null;
+  const { data: cfgFoto } = useConfigFotoAluno();
+  const mostrarFoto = (cfgFoto?.mostrarNaChamada ?? false) && temFoto && alunoId != null;
 
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3">
       <div className="flex min-w-0 items-center gap-2">
+        {mostrarFoto && (
+          <AlunoAvatar alunoId={alunoId ?? null} nome={nome} temFoto={temFoto} size={32} ampliavel />
+        )}
         <span className="truncate font-medium">{nome}</span>
         {info && (
           <span

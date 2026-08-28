@@ -5,6 +5,8 @@ import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSalvarAluno } from "@/features/alunos/alunosApi";
+import { useConfigFotoAluno } from "@/features/alunos/fotoAlunoApi";
+import { FotoAlunoCadastro } from "@/features/alunos/FotoAlunoCadastro";
 import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
 import { ApiError } from "@/lib/api";
 import { formatarTelefone } from "@/lib/format";
@@ -85,6 +87,7 @@ export function AlunoFormDialog({
   poloPadrao,
 }: Props) {
   const salvar = useSalvarAluno();
+  const { data: cfgFoto } = useConfigFotoAluno();
   const editando = aluno !== null;
 
   const {
@@ -203,6 +206,14 @@ export function AlunoFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {cfgFoto?.mostrarNoCadastro && (
+            <FotoAlunoCadastro
+              alunoId={aluno?.id ?? null}
+              nome={aluno?.nome ?? ""}
+              temFoto={aluno?.temFoto ?? false}
+            />
+          )}
+
           <Secao titulo="Dados pessoais">
             <Campo className="sm:col-span-2" label="Nome *" erro={errors.nome?.message}>
               <Input {...register("nome")} />

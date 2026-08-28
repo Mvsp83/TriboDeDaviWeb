@@ -12,6 +12,8 @@ import type { Aluno } from "@/types";
 interface DadosCarteirinha {
   aluno: Aluno;
   nomePolo: string;
+  // Foto do aluno em data URI (opcional) — incluída conforme a config global.
+  fotoDataUri?: string | null;
 }
 
 // Gera as carteirinhas (uma ou várias) numa folha só, em cartões lado a lado.
@@ -22,12 +24,15 @@ export async function imprimirCarteirinhas(itens: DadosCarteirinha[]): Promise<b
   // O QR de cada aluno é gerado como data URL — assim o PDF é autocontido e
   // não depende de rede na hora de imprimir.
   const cartoes = await Promise.all(
-    itens.map(async ({ aluno, nomePolo }) => {
+    itens.map(async ({ aluno, nomePolo, fotoDataUri }) => {
       const qr = await QRCode.toDataURL(tokenDoAluno(aluno.id), {
         width: 240,
         margin: 1,
       });
       const faixa = faixaInfo(aluno.faixa);
+      const fotoHtml = fotoDataUri
+        ? `<img class="foto" src="${fotoDataUri}" alt="Foto de ${esc(aluno.nome)}" />`
+        : "";
       return `
 <div class="cartao">
   <div class="cab">
@@ -37,7 +42,7 @@ export async function imprimirCarteirinhas(itens: DadosCarteirinha[]): Promise<b
   <div class="corpo">
     <img class="qr" src="${qr}" alt="QR de ${esc(aluno.nome)}" />
     <div class="dados">
-      <div class="nome">${esc(aluno.nome)}</div>
+      <div class="nome-linha">${fotoHtml}<span class="nome">${esc(aluno.nome)}</span></div>
       <div class="linha"><span>Faixa</span> <b><span class="fx" style="background:${faixa.cor}"></span>${esc(faixa.nome)}</b></div>
       <div class="linha"><span>Polo</span> <b>${esc(nomePolo)}</b></div>
       <div class="linha"><span>Turma</span> <b>${esc(String(aluno.turma))}</b></div>
@@ -65,7 +70,9 @@ export async function imprimirCarteirinhas(itens: DadosCarteirinha[]): Promise<b
   .cartao .corpo { display: flex; gap: 5mm; align-items: center; }
   .cartao .qr { width: 30mm; height: 30mm; }
   .cartao .dados { min-width: 0; }
-  .cartao .nome { font-size: 14px; font-weight: 700; margin-bottom: 2mm; }
+  .cartao .nome-linha { display: flex; align-items: center; gap: 3mm; margin-bottom: 2mm; }
+  .cartao .foto { width: 14mm; height: 14mm; border-radius: 50%; object-fit: cover; border: 1px solid #ccc; }
+  .cartao .nome { font-size: 14px; font-weight: 700; }
   .cartao .linha { font-size: 11px; color: #555; margin-bottom: 1mm; }
   .cartao .linha b { color: #111; display: inline-flex; align-items: center; gap: 4px; }
   .cartao .fx { width: 22px; height: 10px; border: 1px solid #333; border-radius: 2px; display: inline-block; }

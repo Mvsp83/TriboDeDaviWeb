@@ -294,6 +294,12 @@ export const navGroups: NavGroup[] = [
         adminOnly: true,
       },
       {
+        label: "Foto do Aluno",
+        href: "/config-foto-aluno",
+        icon: Camera,
+        adminOnly: true,
+      },
+      {
         label: "Importação",
         href: "/importacao",
         icon: Upload,

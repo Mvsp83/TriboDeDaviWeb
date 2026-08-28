@@ -78,6 +78,8 @@ export interface PainelResponsavel {
     turma: number;
     autorizaImagem: boolean | null;
     autorizaImagemEm: string | null;
+    // Foto do aluno em data URI (base64), quando a config permite. null = sem foto.
+    fotoDataUri: string | null;
   };
   frequencia: {
     totalAulas: number;

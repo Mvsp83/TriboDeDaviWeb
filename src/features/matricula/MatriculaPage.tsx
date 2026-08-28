@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
   ArrowLeft,
   ArrowRight,
+  Camera,
   Check,
   CircleAlert,
   Loader2,
@@ -22,6 +23,8 @@ import {
   type DadosPreMatricula,
 } from "@/features/matricula/matriculaApi";
 import { BAIRROS } from "@/features/matricula/bairros";
+import { comprimirImagem } from "@/features/fotosTreino/fotosTreinoApi";
+import { enviarFotoInscricao } from "@/features/alunos/fotoAlunoApi";
 import { formatarTelefone } from "@/lib/format";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import {
@@ -218,6 +221,33 @@ export function MatriculaPage() {
   const [aceitouImagem, setAceitouImagem] = useState(false);
   const [aceitouComodato, setAceitouComodato] = useState(false);
   const [aceitouLgpd, setAceitouLgpd] = useState(false);
+
+  // Foto (opcional) da ficha: enviada ao servidor e referenciada por id.
+  const fotoRef = useRef<HTMLInputElement>(null);
+  const [fotoInscricaoId, setFotoInscricaoId] = useState<string | null>(null);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
+
+  async function escolherFoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (fotoRef.current) fotoRef.current.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.warning("Selecione uma imagem.");
+      return;
+    }
+    setEnviandoFoto(true);
+    try {
+      const blob = await comprimirImagem(file, 512, 0.85);
+      const id = await enviarFotoInscricao(blob);
+      setFotoInscricaoId(id);
+      setFotoPreview(URL.createObjectURL(blob));
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Erro ao enviar a foto.");
+    } finally {
+      setEnviandoFoto(false);
+    }
+  }
   const [assinatura, setAssinatura] = useState("");
 
   // Rematrícula: busca por CPF do responsável + nascimento para trazer os dados.
@@ -384,6 +414,7 @@ export function MatriculaPage() {
         aceitouLgpd,
         nomeAssinatura: assinatura.trim(),
         versaoTermos: VERSAO_TERMOS,
+        fotoArquivoId: fotoInscricaoId ?? undefined,
       });
       setCodigoGerado(res.codigoResponsavel);
       setEnviada(true);
@@ -943,6 +974,61 @@ export function MatriculaPage() {
                 Autorizo o uso de imagem e voz.{" "}
                 <span className="text-muted-foreground">(opcional)</span>
               </Marcavel>
+
+              <div className="rounded-lg border border-border p-3">
+                <p className="text-sm font-medium">Foto do aluno (opcional)</p>
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Ajuda a equipe a reconhecer o aluno. Pode tirar agora ou depois no polo.
+                </p>
+                <div className="flex items-center gap-3">
+                  {fotoPreview ? (
+                    <img
+                      src={fotoPreview}
+                      alt="Prévia"
+                      className="size-16 rounded-full border border-border object-cover"
+                    />
+                  ) : (
+                    <span className="flex size-16 items-center justify-center rounded-full border border-dashed border-border text-muted-foreground">
+                      <Camera className="size-5" />
+                    </span>
+                  )}
+                  <input
+                    ref={fotoRef}
+                    type="file"
+                    accept="image/*"
+                    capture="user"
+                    className="hidden"
+                    onChange={escolherFoto}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fotoRef.current?.click()}
+                    disabled={enviandoFoto}
+                  >
+                    {enviandoFoto ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Camera className="size-4" />
+                    )}
+                    {fotoInscricaoId ? "Trocar foto" : "Tirar/escolher foto"}
+                  </Button>
+                  {fotoInscricaoId && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setFotoInscricaoId(null);
+                        setFotoPreview(null);
+                      }}
+                    >
+                      Remover
+                    </Button>
+                  )}
+                </div>
+              </div>
 
               <BlocoTermo titulo="Tratamento de dados (LGPD)" texto={TERMO_LGPD} />
               <Marcavel marcado={aceitouLgpd} onToggle={() => setAceitouLgpd(!aceitouLgpd)}>
