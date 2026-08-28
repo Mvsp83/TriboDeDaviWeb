@@ -100,6 +100,21 @@ const PatrimonioPage = lazy(() =>
 const AvisosPage = lazy(() =>
   import("@/features/avisos/AvisosPage").then((m) => ({ default: m.AvisosPage })),
 );
+const PostarFotoTreinoPage = lazy(() =>
+  import("@/features/fotosTreino/PostarFotoTreinoPage").then((m) => ({
+    default: m.PostarFotoTreinoPage,
+  })),
+);
+const ModeracaoFotosPage = lazy(() =>
+  import("@/features/fotosTreino/ModeracaoFotosPage").then((m) => ({
+    default: m.ModeracaoFotosPage,
+  })),
+);
+const VideosGaleriaPage = lazy(() =>
+  import("@/features/galeria/VideosGaleriaPage").then((m) => ({
+    default: m.VideosGaleriaPage,
+  })),
+);
 const DocumentosOficiaisPage = lazy(() =>
   import("@/features/documentosOficiais/DocumentosOficiaisPage").then((m) => ({
     default: m.DocumentosOficiaisPage,
@@ -278,6 +293,9 @@ export default function App() {
           {/* Relacionamento */}
           <Route element={<ProtectedRoute modulo="relacionamento" />}>
             <Route path="calendario" element={<CalendarioPage />} />
+            <Route path="fotos-treino/postar" element={<PostarFotoTreinoPage />} />
+            <Route path="fotos-treino/moderacao" element={<ModeracaoFotosPage />} />
+            <Route path="galeria/videos" element={<VideosGaleriaPage />} />
           </Route>
           <Route path="planos-de-aula" element={<PlanosDeAulaPage />} />
           <Route path="planos-de-aula/ver/:id" element={<PlanoViewPage />} />

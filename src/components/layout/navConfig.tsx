@@ -4,6 +4,8 @@ import {
   MapPin,
   CalendarDays,
   CalendarRange,
+  Camera,
+  Video,
   ClipboardCheck,
   ClipboardList,
   ClipboardPaste,
@@ -116,6 +118,33 @@ export const navGroups: NavGroup[] = [
           { label: "Frequência", href: "/frequencia", icon: BarChart3 },
           { label: "Graduações", href: "/graduacoes", icon: Award },
           { label: "Aniversariantes", href: "/aniversariantes", icon: Cake },
+        ],
+      },
+      {
+        label: "Fotos do Treino",
+        icon: Camera,
+        modulo: "relacionamento",
+        children: [
+          {
+            label: "Postar foto",
+            href: "/fotos-treino/postar",
+            icon: Camera,
+            modulo: "relacionamento",
+          },
+          {
+            label: "Moderar fotos",
+            href: "/fotos-treino/moderacao",
+            icon: ShieldCheck,
+            adminOnly: true,
+            modulo: "relacionamento",
+          },
+          {
+            label: "Vídeos da galeria",
+            href: "/galeria/videos",
+            icon: Video,
+            adminOnly: true,
+            modulo: "relacionamento",
+          },
         ],
       },
       {

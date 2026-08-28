@@ -132,6 +132,24 @@ export const ApiRotas = {
   mensCobrancaSalvar: "/api/Mensalidades/cobrancas/salvar",
   mensCobrancaExcluir: (id: number) => `/api/Mensalidades/cobrancas/${id}`,
 
+  // Fotos de treino (álbum público). upload é multipart; publicas é anônimo.
+  fotosTreinoUpload: "/api/FotosTreino/upload",
+  fotosTreino: "/api/FotosTreino",
+  fotosTreinoPublicar: (id: number, publicada: boolean) =>
+    `/api/FotosTreino/${id}/publicar?publicada=${publicada}`,
+  fotosTreinoExcluir: (id: number) => `/api/FotosTreino/${id}`,
+  fotosTreinoPublicas: "/api/FotosTreino/publicas",
+  fotoTreinoPrevia: (id: number) => `/api/FotosTreino/${id}/previa`,
+  fotoTreinoArquivo: (id: number) => `/api/FotosTreino/${id}/arquivo`,
+  fotosTreinoConfigPolos: "/api/FotosTreino/config-polos",
+  fotosTreinoDefinirConfigPolo: (poloId: number, requerAutorizacao: boolean) =>
+    `/api/FotosTreino/config-polos/${poloId}?requerAutorizacao=${requerAutorizacao}`,
+
+  // Galeria de vídeos (YouTube). Listagem pública; salvar/excluir só admin.
+  videosGaleria: "/api/VideosGaleria",
+  videoGaleriaSalvar: "/api/VideosGaleria/salvar",
+  videoGaleriaExcluir: (id: number) => `/api/VideosGaleria/${id}`,
+
   // Inscrição: os dois primeiros são públicos (site, sem login).
   inscricaoPolos: "/api/Inscricao/polos",
   inscricaoEnviar: "/api/Inscricao/enviar",
