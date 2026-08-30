@@ -40,50 +40,58 @@ function BotaoComprar({
 }) {
   const [tam, setTam] = useState(tamanhos[0] ?? "");
   const [cor, setCor] = useState(cores[0] ?? "");
+  const [qtd, setQtd] = useState(1);
 
   const msg =
     `Olá! Tenho interesse no produto: ${produto.nome} (${moeda(produto.preco)})` +
     (tam ? `, tamanho ${tam}` : "") +
     (cor ? `, cor ${cor}` : "") +
+    `, quantidade ${qtd}` +
     ".";
   const href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
-  const selectClass =
-    "flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm";
+  const campoClass =
+    "rounded-md border border-border bg-background px-2 py-1 text-sm";
 
   return (
     <div className="mt-2 space-y-2">
-      {(tamanhos.length > 0 || cores.length > 0) && (
-        <div className="flex gap-2">
-          {tamanhos.length > 0 && (
-            <select
-              value={tam}
-              onChange={(e) => setTam(e.target.value)}
-              className={selectClass}
-              aria-label="Tamanho"
-            >
-              {tamanhos.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          )}
-          {cores.length > 0 && (
-            <select
-              value={cor}
-              onChange={(e) => setCor(e.target.value)}
-              className={selectClass}
-              aria-label="Cor"
-            >
-              {cores.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-      )}
+      <div className="flex gap-2">
+        {tamanhos.length > 0 && (
+          <select
+            value={tam}
+            onChange={(e) => setTam(e.target.value)}
+            className={`flex-1 ${campoClass}`}
+            aria-label="Tamanho"
+          >
+            {tamanhos.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        )}
+        {cores.length > 0 && (
+          <select
+            value={cor}
+            onChange={(e) => setCor(e.target.value)}
+            className={`flex-1 ${campoClass}`}
+            aria-label="Cor"
+          >
+            {cores.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        )}
+        <input
+          type="number"
+          min={1}
+          value={qtd}
+          onChange={(e) => setQtd(Math.max(1, Number(e.target.value) || 1))}
+          className={`w-16 ${campoClass}`}
+          aria-label="Quantidade"
+        />
+      </div>
       <Button asChild size="sm" className="w-full">
         <a href={href} target="_blank" rel="noopener noreferrer">
           <MessageCircle className="size-4" />
