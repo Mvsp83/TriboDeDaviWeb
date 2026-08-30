@@ -120,6 +120,12 @@ export function SitePublico() {
             <Link to="/galeria" className="transition-colors hover:text-foreground">
               Galeria
             </Link>
+            <Link
+              to="/loja"
+              className="transition-colors hover:text-foreground"
+            >
+              Loja
+            </Link>
             {temInformacoes() && (
               <Link to="/informacoes" className="transition-colors hover:text-foreground">
                 Informações

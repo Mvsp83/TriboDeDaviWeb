@@ -18,6 +18,7 @@ import {
   Boxes,
   Megaphone,
   MessagesSquare,
+  ShoppingBag,
   UserCog,
   ShieldCheck,
   Upload,
@@ -290,6 +291,7 @@ export const navGroups: NavGroup[] = [
         adminOnly: true,
         modulo: "relacionamento",
       },
+      { label: "Loja (produtos)", href: "/produtos", icon: ShoppingBag, adminOnly: true },
       { label: "Usuários", href: "/usuarios", icon: UserCog, adminOnly: true },
       { label: "Auditoria", href: "/auditoria", icon: ShieldCheck, adminOnly: true },
       {

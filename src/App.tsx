@@ -105,6 +105,14 @@ const SolicitacoesPage = lazy(() =>
     default: m.SolicitacoesPage,
   })),
 );
+const LojaPage = lazy(() =>
+  import("@/features/loja/LojaPage").then((m) => ({ default: m.LojaPage })),
+);
+const ProdutosPage = lazy(() =>
+  import("@/features/loja/ProdutosPage").then((m) => ({
+    default: m.ProdutosPage,
+  })),
+);
 const PostarFotoTreinoPage = lazy(() =>
   import("@/features/fotosTreino/PostarFotoTreinoPage").then((m) => ({
     default: m.PostarFotoTreinoPage,
@@ -281,6 +289,7 @@ export default function App() {
       <Route path="/doar" element={<DoacaoPage />} />
       <Route path="/transparencia" element={<TransparenciaPage />} />
       <Route path="/galeria" element={<GaleriaPage />} />
+      <Route path="/loja" element={<LojaPage />} />
       <Route path="/informacoes" element={<InformacoesPage />} />
       <Route path="/matricula" element={<InscricaoPage />} />
       <Route path="/responsavel" element={<ResponsavelPortal />} />
@@ -326,6 +335,7 @@ export default function App() {
           {/* Áreas restritas a Administrador */}
           <Route element={<ProtectedRoute adminOnly />}>
             <Route path="polos" element={<PolosPage />} />
+            <Route path="produtos" element={<ProdutosPage />} />
             <Route path="usuarios" element={<UsuariosPage />} />
             <Route path="importacao" element={<ImportacaoPage />} />
             <Route path="sincronizacao" element={<SincronizacaoPage />} />

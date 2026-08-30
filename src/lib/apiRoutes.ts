@@ -241,6 +241,13 @@ export const ApiRotas = {
   documentoContabilExcluir: (fileId: string) =>
     `/api/DocumentoContabil/excluir/${fileId}`,
 
+  // Loja virtual. vitrine/foto são públicas; o resto é admin.
+  produtoVitrine: "/api/Produto/vitrine",
+  produtos: "/api/Produto",
+  produto: (id: number) => `/api/Produto/${id}`,
+  produtoFotoUpload: "/api/Produto/foto",
+  produtoFoto: (id: number) => `/api/Produto/${id}/foto`,
+
   // Solicitações internas (professor <-> administração). GET lista, POST cria.
   solicitacoes: "/api/SolicitacaoInterna",
   solicitacaoContador: "/api/SolicitacaoInterna/contador",
