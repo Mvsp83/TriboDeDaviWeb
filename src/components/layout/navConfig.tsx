@@ -17,6 +17,7 @@ import {
   FileSignature,
   Boxes,
   Megaphone,
+  MessagesSquare,
   UserCog,
   ShieldCheck,
   Upload,
@@ -77,7 +78,11 @@ export interface NavGroup {
 // Espelha o menu do portal, agora com submenus dentro de "Operacional".
 export const navGroups: NavGroup[] = [
   {
-    nodes: [{ label: "Dashboard", href: "/painel", icon: LayoutDashboard }],
+    nodes: [
+      { label: "Dashboard", href: "/painel", icon: LayoutDashboard },
+      // Operacional, disponível a professores e admin (sem gate de módulo).
+      { label: "Solicitações", href: "/solicitacoes", icon: MessagesSquare },
+    ],
   },
   {
     titulo: "Operacional",

@@ -3,9 +3,12 @@ import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
 import { ApiRotas } from "@/lib/apiRoutes";
 import type { Usuario } from "@/types";
 
-export function useUsuarios() {
+// `habilitado` permite adiar a busca (o endpoint é admin-only; telas que só
+// listam usuários para o admin passam a permissão para não disparar 401).
+export function useUsuarios(habilitado = true) {
   return useQuery({
     queryKey: ["usuarios"],
+    enabled: habilitado,
     queryFn: () => apiGet<Usuario[]>(ApiRotas.usuariosGetAll),
   });
 }

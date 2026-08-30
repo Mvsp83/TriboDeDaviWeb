@@ -239,4 +239,12 @@ export const ApiRotas = {
     `/api/DocumentoContabil/download/${fileId}`,
   documentoContabilExcluir: (fileId: string) =>
     `/api/DocumentoContabil/excluir/${fileId}`,
+
+  // Solicitações internas (professor <-> administração). GET lista, POST cria.
+  solicitacoes: "/api/SolicitacaoInterna",
+  solicitacaoContador: "/api/SolicitacaoInterna/contador",
+  solicitacao: (id: number) => `/api/SolicitacaoInterna/${id}`,
+  solicitacaoResponder: (id: number) =>
+    `/api/SolicitacaoInterna/${id}/responder`,
+  solicitacaoStatus: (id: number) => `/api/SolicitacaoInterna/${id}/status`,
 } as const;

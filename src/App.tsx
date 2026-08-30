@@ -100,6 +100,11 @@ const PatrimonioPage = lazy(() =>
 const AvisosPage = lazy(() =>
   import("@/features/avisos/AvisosPage").then((m) => ({ default: m.AvisosPage })),
 );
+const SolicitacoesPage = lazy(() =>
+  import("@/features/solicitacoes/SolicitacoesPage").then((m) => ({
+    default: m.SolicitacoesPage,
+  })),
+);
 const PostarFotoTreinoPage = lazy(() =>
   import("@/features/fotosTreino/PostarFotoTreinoPage").then((m) => ({
     default: m.PostarFotoTreinoPage,
@@ -286,6 +291,8 @@ export default function App() {
           <Route path="alunos" element={<AlunosPage />} />
           <Route path="inscricoes" element={<InscricoesPage />} />
           <Route path="graduacoes" element={<GraduacoesPage />} />
+          {/* Solicitações internas (operacional — professor e admin) */}
+          <Route path="solicitacoes" element={<SolicitacoesPage />} />
           {/* Captação & Impacto */}
           <Route element={<ProtectedRoute modulo="captacao" />}>
             <Route path="impacto" element={<ImpactoPage />} />
