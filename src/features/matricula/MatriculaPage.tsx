@@ -25,6 +25,7 @@ import {
 import { BAIRROS } from "@/features/matricula/bairros";
 import { comprimirImagem } from "@/features/fotosTreino/fotosTreinoApi";
 import { enviarFotoInscricao } from "@/features/alunos/fotoAlunoApi";
+import { ORIENTACAO_FOTO } from "@/features/matricula/FotoInscricao";
 import { formatarTelefone } from "@/lib/format";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import {
@@ -978,7 +979,7 @@ export function MatriculaPage() {
               <div className="rounded-lg border border-border p-3">
                 <p className="text-sm font-medium">Foto do aluno (opcional)</p>
                 <p className="mb-2 text-xs text-muted-foreground">
-                  Ajuda a equipe a reconhecer o aluno. Pode tirar agora ou depois no polo.
+                  {ORIENTACAO_FOTO}
                 </p>
                 <div className="flex items-center gap-3">
                   {fotoPreview ? (

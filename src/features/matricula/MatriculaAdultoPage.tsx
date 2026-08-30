@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import { usePolosPublicos, useEnviarInscricao } from "@/features/matricula/matriculaApi";
+import { FotoInscricao } from "@/features/matricula/FotoInscricao";
 import { formatarTelefone } from "@/lib/format";
 import {
   PARQ,
@@ -172,6 +173,7 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
   const [aceitouComodato, setAceitouComodato] = useState(false);
   const [aceitouLgpd, setAceitouLgpd] = useState(false);
   const [assinatura, setAssinatura] = useState("");
+  const [fotoInscricaoId, setFotoInscricaoId] = useState<string | null>(null);
 
   const [enviada, setEnviada] = useState(false);
   const [codigoGerado, setCodigoGerado] = useState("");
@@ -284,6 +286,7 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
         aceitouLgpd,
         nomeAssinatura: assinatura.trim(),
         versaoTermos: VERSAO_TERMOS,
+        fotoArquivoId: fotoInscricaoId ?? undefined,
       });
       setCodigoGerado(res.codigoResponsavel);
       setEnviada(true);
@@ -508,6 +511,7 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
               <Campo label="Assinatura (nome completo)" obrigatorio>
                 <Input value={assinatura} onChange={(e) => setAssinatura(e.target.value)} />
               </Campo>
+              <FotoInscricao onChange={setFotoInscricaoId} />
             </>
           )}
         </CardContent>
