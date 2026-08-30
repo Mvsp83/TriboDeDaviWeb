@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ShoppingBag,
   CreditCard,
@@ -41,6 +41,18 @@ function BotaoComprar({
   const [tam, setTam] = useState(tamanhos[0] ?? "");
   const [cor, setCor] = useState(cores[0] ?? "");
   const [qtd, setQtd] = useState(1);
+
+  // Estoque da combinação escolhida (tamanho + cor). 0 = indisponível.
+  const norm = (s: string) => (s ?? "").trim();
+  const estoqueCombo = (produto.variacoes ?? [])
+    .filter((v) => norm(v.tamanho) === tam && norm(v.cor) === cor)
+    .reduce((s, v) => s + Math.max(0, v.quantidade || 0), 0);
+  const indisponivel = estoqueCombo === 0;
+
+  // Ao trocar de combinação, mantém a quantidade dentro do estoque disponível.
+  useEffect(() => {
+    setQtd((q) => Math.min(Math.max(1, q), Math.max(1, estoqueCombo)));
+  }, [estoqueCombo]);
 
   const msg =
     `Olá! Tenho interesse no produto: ${produto.nome} (${moeda(produto.preco)})` +
@@ -86,18 +98,41 @@ function BotaoComprar({
         <input
           type="number"
           min={1}
+          max={estoqueCombo || undefined}
           value={qtd}
-          onChange={(e) => setQtd(Math.max(1, Number(e.target.value) || 1))}
-          className={`w-16 ${campoClass}`}
+          disabled={indisponivel}
+          onChange={(e) =>
+            setQtd(
+              Math.min(
+                Math.max(1, Number(e.target.value) || 1),
+                Math.max(1, estoqueCombo),
+              ),
+            )
+          }
+          className={`w-16 ${campoClass} disabled:opacity-50`}
           aria-label="Quantidade"
         />
       </div>
-      <Button asChild size="sm" className="w-full">
-        <a href={href} target="_blank" rel="noopener noreferrer">
+
+      <p className="text-xs text-muted-foreground">
+        {indisponivel
+          ? "Combinação indisponível no momento."
+          : `${estoqueCombo} em estoque`}
+      </p>
+
+      {indisponivel ? (
+        <Button size="sm" className="w-full" disabled>
           <MessageCircle className="size-4" />
-          Comprar via WhatsApp
-        </a>
-      </Button>
+          Indisponível
+        </Button>
+      ) : (
+        <Button asChild size="sm" className="w-full">
+          <a href={href} target="_blank" rel="noopener noreferrer">
+            <MessageCircle className="size-4" />
+            Comprar via WhatsApp
+          </a>
+        </Button>
+      )}
     </div>
   );
 }
