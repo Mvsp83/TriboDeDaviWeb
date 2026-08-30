@@ -18,6 +18,7 @@ function montarBody(polo: Partial<Polo>, incluirId: boolean) {
     endereco: polo.endereco ?? "",
     bairro: polo.bairro ?? "",
     cidade: polo.cidade ?? "",
+    limiteAlunos: polo.limiteAlunos ?? 0,
     horarios: (polo.horarios ?? []).map((h) => ({
       turma: h.turma,
       diaSemana: h.diaSemana,

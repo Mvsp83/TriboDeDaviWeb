@@ -5,6 +5,8 @@ import { ApiRotas } from "@/lib/apiRoutes";
 export interface PoloPublico {
   id: number;
   nome: string;
+  // Sem vaga no momento — o formulário bloqueia a escolha.
+  lotado?: boolean;
 }
 
 // Polos para o formulário público: a lista vem sem autenticação e traz apenas

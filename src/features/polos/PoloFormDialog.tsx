@@ -73,6 +73,7 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
   const salvar = useSalvarPolo();
   const editando = polo !== null;
   const [horarios, setHorarios] = useState<HorarioTurma[]>([]);
+  const [limiteAlunos, setLimiteAlunos] = useState("0");
 
   function atualizarHorario(i: number, campo: keyof HorarioTurma, valor: string | number) {
     setHorarios((atual) =>
@@ -104,6 +105,7 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
         : VAZIO,
     );
     setHorarios(polo?.horarios ? polo.horarios.map((h) => ({ ...h })) : []);
+    setLimiteAlunos(String(polo?.limiteAlunos ?? 0));
   }, [aberto, polo, reset]);
 
   async function onSubmit(values: FormValues) {
@@ -115,6 +117,7 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
       await salvar.mutateAsync({
         id: polo?.id,
         ...values,
+        limiteAlunos: Math.max(0, Number(limiteAlunos) || 0),
         horarios: horariosValidos,
       });
       toast.success(editando ? "Polo atualizado." : "Polo criado.");
@@ -154,6 +157,19 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
             <div>
               <Label className="mb-1.5">Bairro</Label>
               <Input {...register("bairro")} />
+            </div>
+            <div className="sm:col-span-2">
+              <Label className="mb-1.5">Limite de alunos (0 = sem limite)</Label>
+              <Input
+                type="number"
+                min={0}
+                value={limiteAlunos}
+                onChange={(e) => setLimiteAlunos(e.target.value)}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Ao atingir o limite, novas inscrições para este polo são
+                bloqueadas até liberar vaga.
+              </p>
             </div>
             <div className="sm:col-span-2">
               <Label className="mb-1.5">Endereço</Label>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2, MapPin } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, MapPin, Users } from "lucide-react";
 import { toast } from "sonner";
 import { usePolos, useExcluirPolo } from "@/features/polos/polosApi";
 import { PoloFormDialog } from "@/features/polos/PoloFormDialog";
@@ -8,6 +8,7 @@ import type { HorarioTurma, Polo } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
@@ -153,6 +154,19 @@ export function PolosPage() {
               </div>
 
               <div className="space-y-1 text-sm text-muted-foreground">
+                <p className="flex flex-wrap items-center gap-2">
+                  <Users className="size-3.5 text-primary" />
+                  {(polo.limiteAlunos ?? 0) > 0 ? (
+                    <>
+                      {polo.alunosAtivos ?? 0} / {polo.limiteAlunos} alunos
+                      {(polo.alunosAtivos ?? 0) >= (polo.limiteAlunos ?? 0) && (
+                        <Badge variant="warning">Lotado</Badge>
+                      )}
+                    </>
+                  ) : (
+                    <>{polo.alunosAtivos ?? 0} alunos ativos · sem limite</>
+                  )}
+                </p>
                 {(polo.endereco || polo.bairro) && (
                   <p>
                     {[polo.endereco, polo.bairro].filter(Boolean).join(", ")}

@@ -113,6 +113,11 @@ const ProdutosPage = lazy(() =>
     default: m.ProdutosPage,
   })),
 );
+const MatriculasAnoPage = lazy(() =>
+  import("@/features/matriculasAno/MatriculasAnoPage").then((m) => ({
+    default: m.MatriculasAnoPage,
+  })),
+);
 const PostarFotoTreinoPage = lazy(() =>
   import("@/features/fotosTreino/PostarFotoTreinoPage").then((m) => ({
     default: m.PostarFotoTreinoPage,
@@ -335,6 +340,7 @@ export default function App() {
           {/* Áreas restritas a Administrador */}
           <Route element={<ProtectedRoute adminOnly />}>
             <Route path="polos" element={<PolosPage />} />
+            <Route path="matriculas-ano" element={<MatriculasAnoPage />} />
             <Route path="produtos" element={<ProdutosPage />} />
             <Route path="usuarios" element={<UsuariosPage />} />
             <Route path="importacao" element={<ImportacaoPage />} />

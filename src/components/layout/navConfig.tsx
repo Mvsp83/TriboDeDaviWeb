@@ -19,6 +19,7 @@ import {
   Megaphone,
   MessagesSquare,
   ShoppingBag,
+  UserCheck,
   UserCog,
   ShieldCheck,
   Upload,
@@ -95,6 +96,12 @@ export const navGroups: NavGroup[] = [
           { label: "Alunos", href: "/alunos", icon: Users },
           { label: "Inscrições", href: "/inscricoes", icon: ClipboardList },
           { label: "Polos", href: "/polos", icon: MapPin, adminOnly: true },
+          {
+            label: "Alunos do ano",
+            href: "/matriculas-ano",
+            icon: UserCheck,
+            adminOnly: true,
+          },
         ],
       },
       {

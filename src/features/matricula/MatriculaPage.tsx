@@ -589,8 +589,13 @@ export function MatriculaPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {(polos ?? []).map((p) => (
-                      <SelectItem key={p.id} value={String(p.id)}>
+                      <SelectItem
+                        key={p.id}
+                        value={String(p.id)}
+                        disabled={p.lotado}
+                      >
                         {p.nome}
+                        {p.lotado ? " — sem vagas" : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

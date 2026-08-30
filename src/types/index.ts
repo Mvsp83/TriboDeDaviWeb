@@ -58,6 +58,10 @@ export interface Polo {
   endereco?: string | null;
   bairro?: string | null;
   cidade?: string | null;
+  // Limite de alunos ativos no ano (0 = sem limite).
+  limiteAlunos?: number;
+  // Só leitura: matrículas ativas do ano corrente (vem do GetAll).
+  alunosAtivos?: number;
   horarios?: HorarioTurma[];
 }
 
