@@ -71,6 +71,19 @@ export interface Atleta {
   anotacoes: AnotacaoAtleta[];
   metas: MetaAtleta[];
   lesoes: Lesao[];
+  // Agregados (listagem + resumo).
+  medalhasOuro: number;
+  medalhasPrata: number;
+  medalhasBronze: number;
+  totalCompeticoes: number;
+  lesoesAtivas: number;
+  lesaoAtivaMaisAntiga?: string | null;
+  metasAtencao: number;
+  ultimosIndicadores: IndicadorAvaliacao[];
+  // Frequência (só no detalhe).
+  frequenciaTotal: number;
+  frequenciaPresentes: number;
+  frequenciaPercentual: number;
 }
 
 export const STATUS_ATLETA: Record<number, string> = {

@@ -1,7 +1,14 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Trophy, ChevronRight, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Trophy,
+  ChevronRight,
+  Trash2,
+  AlertTriangle,
+  BarChart3,
+} from "lucide-react";
 import { toApiError } from "@/lib/api";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { useAlunos } from "@/features/alunos/alunosApi";
@@ -109,11 +116,41 @@ export function AtletasPage() {
             {isLoading ? "Carregando…" : `${atletas.length} atleta(s)`}
           </p>
         </div>
-        <Button onClick={() => setNovo(true)}>
-          <Plus className="size-4" />
-          Adicionar atleta
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link to="/atletas/comparativo">
+              <BarChart3 className="size-4" />
+              Comparativo
+            </Link>
+          </Button>
+          <Button onClick={() => setNovo(true)}>
+            <Plus className="size-4" />
+            Adicionar atleta
+          </Button>
+        </div>
       </div>
+
+      {/* Alertas */}
+      {atletas.some((a) => a.lesoesAtivas > 0 || a.metasAtencao > 0) && (
+        <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">
+          <p className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-warning">
+            <AlertTriangle className="size-4" /> Atenção
+          </p>
+          <ul className="space-y-0.5 text-sm text-muted-foreground">
+            {atletas
+              .filter((a) => a.lesoesAtivas > 0 || a.metasAtencao > 0)
+              .map((a) => (
+                <li key={a.id}>
+                  <Link to={`/atletas/${a.id}`} className="hover:text-foreground">
+                    <strong className="text-foreground">{a.alunoNome}</strong>
+                    {a.lesoesAtivas > 0 && ` · ${a.lesoesAtivas} lesão(ões) ativa(s)`}
+                    {a.metasAtencao > 0 && ` · ${a.metasAtencao} meta(s) com prazo próximo`}
+                  </Link>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
 
       {!isLoading && atletas.length === 0 ? (
         <Card>
@@ -137,7 +174,14 @@ export function AtletasPage() {
                       {STATUS_ATLETA[a.status]}
                     </Badge>
                     <span>{a.poloNome}</span>
-                    {a.categoriaPeso && <span>· {a.categoriaPeso}</span>}
+                    {a.totalCompeticoes > 0 && (
+                      <span>
+                        🥇{a.medalhasOuro} 🥈{a.medalhasPrata} 🥉{a.medalhasBronze}
+                      </span>
+                    )}
+                    {(a.lesoesAtivas > 0 || a.metasAtencao > 0) && (
+                      <AlertTriangle className="size-3.5 text-warning" />
+                    )}
                   </div>
                 </Link>
                 <Button

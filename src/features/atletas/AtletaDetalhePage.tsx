@@ -690,17 +690,43 @@ function Resumo({ atleta }: { atleta: Atleta }) {
   const ultimaComp = atleta.competicoes[0];
   const ultimaAval = [...atleta.avaliacoes].reverse()[0];
 
+  const diasLesao = atleta.lesaoAtivaMaisAntiga
+    ? Math.floor(
+        (Date.now() - new Date(atleta.lesaoAtivaMaisAntiga).getTime()) /
+          86400000,
+      )
+    : 0;
+
   return (
     <div className="space-y-4">
+      {(lesoesAtivas > 0 || atleta.metasAtencao > 0) && (
+        <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
+          <p className="mb-1 flex items-center gap-1.5 font-medium text-warning">
+            <HeartPulse className="size-4" /> Atenção
+          </p>
+          <ul className="space-y-0.5 text-muted-foreground">
+            {lesoesAtivas > 0 && (
+              <li>
+                {lesoesAtivas} lesão(ões) ativa(s)
+                {diasLesao > 0 ? ` — a mais antiga há ${diasLesao} dia(s)` : ""}.
+              </li>
+            )}
+            {atleta.metasAtencao > 0 && (
+              <li>{atleta.metasAtencao} meta(s) com prazo vencido ou próximo.</li>
+            )}
+          </ul>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Estatistica rotulo="🥇 Ouro" valor={ouro} />
         <Estatistica rotulo="🥈 Prata" valor={prata} />
         <Estatistica rotulo="🥉 Bronze" valor={bronze} />
         <Estatistica rotulo="Competições" valor={atleta.competicoes.length} />
+        <Estatistica rotulo="Frequência" valor={`${atleta.frequenciaPercentual}%`} />
         <Estatistica rotulo="Metas abertas" valor={metasAbertas} />
         <Estatistica rotulo="Lesões ativas" valor={lesoesAtivas} />
         <Estatistica rotulo="Avaliações" valor={atleta.avaliacoes.length} />
-        <Estatistica rotulo="Anotações" valor={atleta.anotacoes.length} />
       </div>
 
       {ultimaAval && (

@@ -126,6 +126,11 @@ const AtletaDetalhePage = lazy(() =>
     default: m.AtletaDetalhePage,
   })),
 );
+const AtletaComparativoPage = lazy(() =>
+  import("@/features/atletas/AtletaComparativoPage").then((m) => ({
+    default: m.AtletaComparativoPage,
+  })),
+);
 const PostarFotoTreinoPage = lazy(() =>
   import("@/features/fotosTreino/PostarFotoTreinoPage").then((m) => ({
     default: m.PostarFotoTreinoPage,
@@ -317,6 +322,7 @@ export default function App() {
           <Route path="solicitacoes" element={<SolicitacoesPage />} />
           {/* Atletas de alto rendimento (equipe) */}
           <Route path="atletas" element={<AtletasPage />} />
+          <Route path="atletas/comparativo" element={<AtletaComparativoPage />} />
           <Route path="atletas/:id" element={<AtletaDetalhePage />} />
           {/* Captação & Impacto */}
           <Route element={<ProtectedRoute modulo="captacao" />}>
