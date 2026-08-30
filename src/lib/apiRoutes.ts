@@ -264,6 +264,10 @@ export const ApiRotas = {
   atletaMetaStatus: (id: number, status: number) =>
     `/api/Atleta/metas/${id}/status?status=${status}`,
   atletaMetaExcluir: (id: number) => `/api/Atleta/metas/${id}`,
+  atletaLesoes: (id: number) => `/api/Atleta/${id}/lesoes`,
+  atletaLesaoRecuperada: (id: number, recuperado: boolean) =>
+    `/api/Atleta/lesoes/${id}/recuperada?recuperado=${recuperado}`,
+  atletaLesaoExcluir: (id: number) => `/api/Atleta/lesoes/${id}`,
 
   // Solicitações internas (professor <-> administração). GET lista, POST cria.
   solicitacoes: "/api/SolicitacaoInterna",

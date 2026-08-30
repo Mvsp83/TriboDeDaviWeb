@@ -10,6 +10,9 @@ import {
   LineChart,
   NotebookPen,
   Target,
+  HeartPulse,
+  LayoutDashboard,
+  FileText,
 } from "lucide-react";
 import { toApiError } from "@/lib/api";
 import { dataBR } from "@/lib/format";
@@ -40,11 +43,17 @@ import {
   useAdicionarMeta,
   useAlterarStatusMeta,
   useRemoverMeta,
+  useAdicionarLesao,
+  useMarcarLesaoRecuperada,
+  useRemoverLesao,
   STATUS_ATLETA,
   STATUS_META,
+  GRAVIDADE_LESAO,
   type Atleta,
   type IndicadorAvaliacao,
+  type Lesao,
 } from "@/features/atletas/atletasApi";
+import { imprimirDossie } from "@/features/atletas/dossiePdf";
 
 const hoje = () => new Date().toISOString().slice(0, 10);
 
@@ -549,13 +558,202 @@ function Metas({ atleta }: { atleta: Atleta }) {
   );
 }
 
+// ── Lesões / saúde ───────────────────────────────────────────────────────────
+function Lesoes({ atleta }: { atleta: Atleta }) {
+  const adicionar = useAdicionarLesao(atleta.id);
+  const marcar = useMarcarLesaoRecuperada(atleta.id);
+  const remover = useRemoverLesao(atleta.id);
+  const [form, setForm] = useState({
+    data: hoje(),
+    descricao: "",
+    local: "",
+    gravidade: 0,
+    dataRetorno: "",
+    observacao: "",
+  });
+
+  async function onSalvar() {
+    if (!form.descricao.trim()) {
+      toast.warning("Descreva a lesão.");
+      return;
+    }
+    try {
+      await adicionar.mutateAsync({
+        ...form,
+        descricao: form.descricao.trim(),
+        dataRetorno: form.dataRetorno || null,
+        recuperado: false,
+      } as Partial<Lesao>);
+      toast.success("Lesão registrada.");
+      setForm({ data: hoje(), descricao: "", local: "", gravidade: 0, dataRetorno: "", observacao: "" });
+    } catch (e) {
+      toast.error(toApiError(e).message);
+    }
+  }
+
+  const gravidadeVariant = (g: number) =>
+    g === 2 ? "destructive" : g === 1 ? "warning" : "secondary";
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <p className="text-sm font-medium">Nova lesão</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div>
+              <Label className="mb-1 text-xs">Data</Label>
+              <Input type="date" value={form.data} onChange={(e) => setForm((f) => ({ ...f, data: e.target.value }))} />
+            </div>
+            <div>
+              <Label className="mb-1 text-xs">Local (região)</Label>
+              <Input value={form.local} onChange={(e) => setForm((f) => ({ ...f, local: e.target.value }))} placeholder="Joelho, ombro…" />
+            </div>
+            <div className="sm:col-span-2">
+              <Label className="mb-1 text-xs">Descrição</Label>
+              <Input value={form.descricao} onChange={(e) => setForm((f) => ({ ...f, descricao: e.target.value }))} />
+            </div>
+            <div>
+              <Label className="mb-1 text-xs">Gravidade</Label>
+              <Select value={String(form.gravidade)} onValueChange={(v) => setForm((f) => ({ ...f, gravidade: Number(v) }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(GRAVIDADE_LESAO).map(([v, l]) => (
+                    <SelectItem key={v} value={v}>
+                      {l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="mb-1 text-xs">Retorno previsto (opcional)</Label>
+              <Input type="date" value={form.dataRetorno} onChange={(e) => setForm((f) => ({ ...f, dataRetorno: e.target.value }))} />
+            </div>
+          </div>
+          <Textarea rows={2} value={form.observacao} onChange={(e) => setForm((f) => ({ ...f, observacao: e.target.value }))} placeholder="Observação (opcional)" />
+          <Button onClick={onSalvar} disabled={adicionar.isPending} size="sm">
+            Registrar lesão
+          </Button>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-2">
+        {atleta.lesoes.map((l) => (
+          <div key={l.id} className="rounded-lg border border-border bg-card p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-medium">{l.descricao}</span>
+              {l.local && <span className="text-xs text-muted-foreground">({l.local})</span>}
+              <Badge variant={gravidadeVariant(l.gravidade)}>{GRAVIDADE_LESAO[l.gravidade]}</Badge>
+              <Badge variant={l.recuperado ? "success" : "warning"}>
+                {l.recuperado ? "Recuperado" : "Em tratamento"}
+              </Badge>
+              <span className="ml-auto text-xs text-muted-foreground">{dataBR(l.data)}</span>
+            </div>
+            {l.observacao && <p className="mt-1 text-xs text-muted-foreground">{l.observacao}</p>}
+            <div className="mt-2 flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => marcar.mutate({ id: l.id, recuperado: !l.recuperado })}
+              >
+                {l.recuperado ? "Reabrir" : "Marcar recuperado"}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => remover.mutate(l.id)}>
+                <Trash2 className="size-4 text-destructive" />
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Resumo (painel) ──────────────────────────────────────────────────────────
+function Estatistica({ rotulo, valor }: { rotulo: string; valor: string | number }) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-3 text-center">
+      <div className="text-xl font-bold text-primary">{valor}</div>
+      <div className="text-xs text-muted-foreground">{rotulo}</div>
+    </div>
+  );
+}
+
+function Resumo({ atleta }: { atleta: Atleta }) {
+  const ouro = atleta.competicoes.filter((c) => c.colocacao === 1).length;
+  const prata = atleta.competicoes.filter((c) => c.colocacao === 2).length;
+  const bronze = atleta.competicoes.filter((c) => c.colocacao === 3).length;
+  const metasAbertas = atleta.metas.filter((m) => m.status === 0).length;
+  const lesoesAtivas = atleta.lesoes.filter((l) => !l.recuperado).length;
+  const ultimaComp = atleta.competicoes[0];
+  const ultimaAval = [...atleta.avaliacoes].reverse()[0];
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <Estatistica rotulo="🥇 Ouro" valor={ouro} />
+        <Estatistica rotulo="🥈 Prata" valor={prata} />
+        <Estatistica rotulo="🥉 Bronze" valor={bronze} />
+        <Estatistica rotulo="Competições" valor={atleta.competicoes.length} />
+        <Estatistica rotulo="Metas abertas" valor={metasAbertas} />
+        <Estatistica rotulo="Lesões ativas" valor={lesoesAtivas} />
+        <Estatistica rotulo="Avaliações" valor={atleta.avaliacoes.length} />
+        <Estatistica rotulo="Anotações" valor={atleta.anotacoes.length} />
+      </div>
+
+      {ultimaAval && (
+        <Card>
+          <CardContent className="p-4">
+            <p className="mb-2 text-sm font-medium">
+              Última avaliação · {dataBR(ultimaAval.data)}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {ultimaAval.indicadores.map((i) => (
+                <Badge key={i.id} variant="outline">
+                  {i.nome}: {i.valor}
+                  {i.unidade ? ` ${i.unidade}` : ""}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {ultimaComp && (
+        <Card>
+          <CardContent className="p-4 text-sm">
+            <p className="mb-1 font-medium">Última competição</p>
+            <p className="text-muted-foreground">
+              {ultimaComp.evento} · {dataBR(ultimaComp.data)}
+              {ultimaComp.colocacao > 0 ? ` · ${ultimaComp.colocacao}º lugar` : ""}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {atleta.objetivo && (
+        <Card>
+          <CardContent className="p-4 text-sm">
+            <p className="mb-1 font-medium">Objetivo</p>
+            <p className="text-muted-foreground">{atleta.objetivo}</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 // ── Página ───────────────────────────────────────────────────────────────────
 const ABAS = [
+  { id: "resumo", label: "Resumo", icon: LayoutDashboard },
   { id: "perfil", label: "Perfil", icon: Trophy },
   { id: "indices", label: "Índices", icon: LineChart },
   { id: "competicoes", label: "Competições", icon: Medal },
   { id: "diario", label: "Diário", icon: NotebookPen },
   { id: "metas", label: "Metas", icon: Target },
+  { id: "lesoes", label: "Lesões", icon: HeartPulse },
 ] as const;
 
 export function AtletaDetalhePage() {
@@ -563,7 +761,7 @@ export function AtletaDetalhePage() {
   const id = Number(params.id);
   const { data: atleta, isLoading } = useAtleta(Number.isNaN(id) ? null : id);
   useDocumentTitle(atleta ? `Atleta — ${atleta.alunoNome}` : "Atleta");
-  const [aba, setAba] = useState<(typeof ABAS)[number]["id"]>("perfil");
+  const [aba, setAba] = useState<(typeof ABAS)[number]["id"]>("resumo");
 
   if (isLoading || !atleta) {
     return (
@@ -593,6 +791,18 @@ export function AtletaDetalhePage() {
         <Badge variant={atleta.status === 0 ? "success" : atleta.status === 1 ? "warning" : "secondary"}>
           {STATUS_ATLETA[atleta.status]}
         </Badge>
+        <Button
+          variant="outline"
+          size="sm"
+          className="ml-auto"
+          onClick={() => {
+            if (!imprimirDossie(atleta))
+              toast.error("Não foi possível abrir a impressão (pop-up bloqueado?).");
+          }}
+        >
+          <FileText className="size-4" />
+          Dossiê (PDF)
+        </Button>
       </div>
 
       {/* Abas */}
@@ -617,11 +827,13 @@ export function AtletaDetalhePage() {
       </div>
 
       <div className="pt-1">
+        {aba === "resumo" && <Resumo atleta={atleta} />}
         {aba === "perfil" && <Perfil atleta={atleta} />}
         {aba === "indices" && <Indices atleta={atleta} />}
         {aba === "competicoes" && <Competicoes atleta={atleta} />}
         {aba === "diario" && <Diario atleta={atleta} />}
         {aba === "metas" && <Metas atleta={atleta} />}
+        {aba === "lesoes" && <Lesoes atleta={atleta} />}
       </div>
     </div>
   );

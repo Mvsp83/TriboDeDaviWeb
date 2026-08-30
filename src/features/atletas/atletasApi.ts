@@ -44,6 +44,17 @@ export interface MetaAtleta {
   status: number;
   dataConclusao?: string | null;
 }
+export interface Lesao {
+  id: number;
+  atletaId: number;
+  data: string;
+  descricao: string;
+  local: string;
+  gravidade: number;
+  dataRetorno?: string | null;
+  recuperado: boolean;
+  observacao: string;
+}
 export interface Atleta {
   id: number;
   alunoId: number;
@@ -59,6 +70,7 @@ export interface Atleta {
   competicoes: Competicao[];
   anotacoes: AnotacaoAtleta[];
   metas: MetaAtleta[];
+  lesoes: Lesao[];
 }
 
 export const STATUS_ATLETA: Record<number, string> = {
@@ -70,6 +82,11 @@ export const STATUS_META: Record<number, string> = {
   0: "Aberta",
   1: "Concluída",
   2: "Cancelada",
+};
+export const GRAVIDADE_LESAO: Record<number, string> = {
+  0: "Leve",
+  1: "Moderada",
+  2: "Grave",
 };
 
 // ── Hooks ────────────────────────────────────────────────────────────────────
@@ -172,6 +189,25 @@ export function useAlterarStatusMeta(atletaId: number) {
 export function useRemoverMeta(atletaId: number) {
   return useAtletaMutation(
     (id: number) => apiDelete(ApiRotas.atletaMetaExcluir(id)),
+    atletaId,
+  );
+}
+export function useAdicionarLesao(atletaId: number) {
+  return useAtletaMutation(
+    (dto: Partial<Lesao>) => apiPost(ApiRotas.atletaLesoes(atletaId), dto),
+    atletaId,
+  );
+}
+export function useMarcarLesaoRecuperada(atletaId: number) {
+  return useAtletaMutation(
+    ({ id, recuperado }: { id: number; recuperado: boolean }) =>
+      apiPost(ApiRotas.atletaLesaoRecuperada(id, recuperado)),
+    atletaId,
+  );
+}
+export function useRemoverLesao(atletaId: number) {
+  return useAtletaMutation(
+    (id: number) => apiDelete(ApiRotas.atletaLesaoExcluir(id)),
     atletaId,
   );
 }
