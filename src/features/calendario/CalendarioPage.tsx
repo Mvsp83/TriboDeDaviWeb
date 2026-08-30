@@ -65,6 +65,8 @@ export function CalendarioPage() {
   const [ano, setAno] = useState(anoCorrente);
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [filtroPolo, setFiltroPolo] = useState<string>("todos");
+  // Qual calendário está sendo visto: o do instituto (público) ou o interno.
+  const [visao, setVisao] = useState<"instituto" | "interno">("instituto");
 
   const { data: eventos, isLoading } = useEventosCalendario(ano);
   const { data: anosComEventos } = useAnosCalendario();
@@ -113,13 +115,14 @@ export function CalendarioPage() {
 
   const filtrados = useMemo(() => {
     return (eventos ?? [])
+      .filter((e) => (visao === "interno" ? e.interno === true : !e.interno))
       .filter((e) => filtroTipo === "todos" || e.tipo === Number(filtroTipo))
       .filter(
         (e) =>
           filtroPolo === "todos" ||
           (filtroPolo === "geral" ? e.poloId == null : e.poloId === Number(filtroPolo)),
       );
-  }, [eventos, filtroTipo, filtroPolo]);
+  }, [eventos, visao, filtroTipo, filtroPolo]);
 
   // Agrupa por mês (usa o MM da string ISO, sem depender de fuso).
   const porMes = useMemo(() => {
@@ -234,6 +237,30 @@ export function CalendarioPage() {
           </div>
         )}
       </div>
+
+      {/* Alternador de calendário: instituto (todos) x interno (só a equipe) */}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant={visao === "instituto" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setVisao("instituto")}
+        >
+          Calendário do Instituto
+        </Button>
+        <Button
+          variant={visao === "interno" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setVisao("interno")}
+        >
+          Interno (Jiu-Jítsu)
+        </Button>
+      </div>
+      {visao === "interno" && (
+        <p className="text-xs text-muted-foreground">
+          Eventos internos da equipe — não aparecem para os responsáveis nem no
+          site.
+        </p>
+      )}
 
       {/* Filtros */}
       <Card>
@@ -374,6 +401,7 @@ export function CalendarioPage() {
         evento={emEdicao}
         anoAtual={ano}
         polos={polos ?? []}
+        internoPadrao={visao === "interno"}
       />
 
       {/* Copiar ano */}

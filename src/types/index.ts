@@ -222,6 +222,8 @@ export interface EventoCalendario {
   tipo: number;
   descricao?: string | null;
   poloId?: number | null;
+  // true = calendário interno (só a equipe vê); false = calendário do instituto.
+  interno?: boolean;
   notificar: boolean;
   emailsNotificacao?: string | null; // vários emails separados por , ou ;
   diasAntecedencia: number; // 0 = no dia do evento

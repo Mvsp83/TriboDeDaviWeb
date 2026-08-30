@@ -39,6 +39,7 @@ function montarBody(evento: Partial<EventoCalendario>) {
     tipo: evento.tipo ?? 8,
     descricao: evento.descricao ?? "",
     poloId: evento.poloId ?? null,
+    interno: evento.interno ?? false,
     notificar: evento.notificar ?? false,
     emailsNotificacao: evento.emailsNotificacao ?? "",
     diasAntecedencia: evento.diasAntecedencia ?? 0,

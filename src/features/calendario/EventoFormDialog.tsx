@@ -33,6 +33,8 @@ interface Props {
   evento: EventoCalendario | null;
   anoAtual: number;
   polos: Polo[];
+  // Valor inicial de "interno" ao criar um evento (segue o calendário aberto).
+  internoPadrao?: boolean;
 }
 
 export function EventoFormDialog({
@@ -41,6 +43,7 @@ export function EventoFormDialog({
   evento,
   anoAtual,
   polos,
+  internoPadrao = false,
 }: Props) {
   const salvar = useSalvarEvento();
   const editando = evento !== null;
@@ -51,6 +54,7 @@ export function EventoFormDialog({
   const [tipo, setTipo] = useState("8");
   const [polo, setPolo] = useState<string>(TODOS_POLOS);
   const [descricao, setDescricao] = useState("");
+  const [interno, setInterno] = useState(false);
   const [notificar, setNotificar] = useState(false);
   const [emails, setEmails] = useState("");
   const [diasAntecedencia, setDiasAntecedencia] = useState("0");
@@ -64,10 +68,11 @@ export function EventoFormDialog({
     setTipo(String(evento?.tipo ?? 8));
     setPolo(evento?.poloId ? String(evento.poloId) : TODOS_POLOS);
     setDescricao(evento?.descricao ?? "");
+    setInterno(evento?.interno ?? internoPadrao);
     setNotificar(evento?.notificar ?? false);
     setEmails(evento?.emailsNotificacao ?? "");
     setDiasAntecedencia(String(evento?.diasAntecedencia ?? 0));
-  }, [aberto, evento, anoAtual]);
+  }, [aberto, evento, anoAtual, internoPadrao]);
 
   async function onSalvar() {
     if (!data) {
@@ -87,6 +92,7 @@ export function EventoFormDialog({
         tipo: Number(tipo),
         descricao: descricao.trim(),
         poloId: polo === TODOS_POLOS ? null : Number(polo),
+        interno,
         notificar,
         emailsNotificacao: notificar ? emails.trim() : "",
         diasAntecedencia: Number(diasAntecedencia) || 0,
@@ -178,6 +184,22 @@ export function EventoFormDialog({
               rows={3}
             />
           </div>
+
+          {/* Calendário interno */}
+          <label className="flex items-start gap-2.5 rounded-md border border-border p-3 text-sm font-medium">
+            <input
+              type="checkbox"
+              checked={interno}
+              onChange={(e) => setInterno(e.target.checked)}
+              className="mt-0.5 size-4 accent-primary"
+            />
+            <span>
+              Calendário interno (Jiu-Jítsu)
+              <span className="block text-xs font-normal text-muted-foreground">
+                Só a equipe vê — não aparece para os responsáveis.
+              </span>
+            </span>
+          </label>
 
           {/* Notificação por email */}
           <div className="space-y-3 rounded-md border border-border p-3">
