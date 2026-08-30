@@ -163,6 +163,7 @@ export const ApiRotas = {
     `/api/Inscricao/fila?ano=${ano}${status != null ? `&status=${status}` : ""}`,
   inscricaoPendentes: "/api/Inscricao/pendentes/total",
   inscricaoObter: (id: number) => `/api/Inscricao/${id}`,
+  inscricaoFotoRevisao: (id: number) => `/api/Inscricao/${id}/foto`,
   inscricaoAprovar: (id: number) => `/api/Inscricao/${id}/aprovar`,
   inscricaoRecusar: (id: number) => `/api/Inscricao/${id}/recusar`,
   matriculasDoAno: (ano: number) => `/api/Inscricao/matriculas/${ano}`,

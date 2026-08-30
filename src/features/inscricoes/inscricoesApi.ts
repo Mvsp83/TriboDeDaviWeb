@@ -25,6 +25,8 @@ export interface Inscricao {
   turma?: number | null;
   jaEraAluno: boolean;
   turmaAnterior?: number | null;
+  // Id da foto enviada na ficha (quando houver) — o revisor pode conferir.
+  fotoArquivoId?: string | null;
 
   nome: string;
   dataNascimento: string;
@@ -94,6 +96,21 @@ export interface Revisao {
   poloId: number;
   turma: number;
   observacao: string;
+  // Quando true, a foto da ficha é descartada (não vai para o aluno).
+  descartarFoto?: boolean;
+}
+
+// Foto da inscrição (data URI) para o revisor conferir. Só busca quando há foto.
+export function useInscricaoFoto(id: number, temFoto: boolean) {
+  return useQuery({
+    queryKey: ["inscricao-foto", id],
+    enabled: temFoto,
+    staleTime: 5 * 60_000,
+    queryFn: () =>
+      apiGet<{ dataUri: string }>(ApiRotas.inscricaoFotoRevisao(id)).then(
+        (r) => r.dataUri,
+      ),
+  });
 }
 
 export function useAprovarInscricao() {

@@ -26,6 +26,7 @@ import {
   useAprovarInscricao,
   useRecusarInscricao,
   useMatricularAno,
+  useInscricaoFoto,
   STATUS_LABEL,
   StatusInscricao,
   type Inscricao,
@@ -111,6 +112,9 @@ function DetalheInscricao({
   const [turma, setTurma] = useState(String(inscricao.turma ?? inscricao.turmaAnterior ?? 1));
   const [observacao, setObservacao] = useState("");
   const [confirmandoRecusa, setConfirmandoRecusa] = useState(false);
+  const [descartarFoto, setDescartarFoto] = useState(false);
+  const temFoto = Boolean(inscricao.fotoArquivoId);
+  const fotoInscricao = useInscricaoFoto(inscricao.id, temFoto);
 
   const saude = parse<Partial<RespostasSaude>>(inscricao.respostasSaudeJson, {});
   const familiar = parse<Partial<RespostasFamiliar>>(inscricao.respostasFamiliarJson, {});
@@ -138,7 +142,12 @@ function DetalheInscricao({
     try {
       await aprovar.mutateAsync({
         id: inscricao.id,
-        revisao: { poloId: Number(poloId), turma: Number(turma), observacao },
+        revisao: {
+          poloId: Number(poloId),
+          turma: Number(turma),
+          observacao,
+          descartarFoto: temFoto && descartarFoto,
+        },
       });
       toast.success("Inscrição aprovada e aluno matriculado!");
       onFechar();
@@ -387,6 +396,44 @@ function DetalheInscricao({
                   onChange={(e) => setObservacao(e.target.value)}
                 />
               </div>
+
+              {temFoto && (
+                <div className="mt-3 rounded-lg border border-border p-3">
+                  <p className="mb-2 text-sm font-medium">
+                    Foto enviada na ficha
+                  </p>
+                  <div className="flex items-start gap-3">
+                    {fotoInscricao.data ? (
+                      <img
+                        src={fotoInscricao.data}
+                        alt="Foto da inscrição"
+                        className={`size-20 rounded-lg border border-border object-cover ${
+                          descartarFoto ? "opacity-40 grayscale" : ""
+                        }`}
+                      />
+                    ) : (
+                      <div className="flex size-20 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
+                        {fotoInscricao.isLoading ? "…" : "sem prévia"}
+                      </div>
+                    )}
+                    <div className="flex-1 text-xs text-muted-foreground">
+                      <p>
+                        Deve ser apenas o rosto, em ambiente claro. Se estiver
+                        fora do padrão, marque para descartar — a foto não vai
+                        para o cadastro do aluno.
+                      </p>
+                      <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm font-medium text-foreground">
+                        <input
+                          type="checkbox"
+                          checked={descartarFoto}
+                          onChange={(e) => setDescartarFoto(e.target.checked)}
+                        />
+                        Descartar foto (fora das diretrizes)
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <DialogFooter className="sm:justify-between">
