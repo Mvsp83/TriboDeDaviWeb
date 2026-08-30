@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   HeartHandshake,
@@ -9,12 +10,16 @@ import {
   FileText,
   Building2,
   ShieldCheck,
+  Landmark,
 } from "lucide-react";
 import {
   TRANSPARENCIA,
   temIdentificacao,
   temImpacto,
   temFinanceiro,
+  temGovernanca,
+  temPoliticas,
+  type DocumentoPublico,
 } from "@/features/transparencia/conteudoTransparencia";
 import { SITE } from "@/features/site/conteudoSite";
 import { moeda } from "@/lib/format";
@@ -74,13 +79,31 @@ function Distribuicao({
 // para onde vão os recursos, voltada a doadores, parceiros e editais. Não usa
 // dados ao vivo — o conteúdo é curado em conteudoTransparencia.ts.
 export function TransparenciaPage() {
-  const { intro, identificacao, impacto, financeiro, documentos } = TRANSPARENCIA;
+  const { intro, identificacao, impacto, financeiro, documentos, governanca, politicas } =
+    TRANSPARENCIA;
   const anoAtual = new Date().getFullYear();
   useDocumentTitle(`Transparência e impacto — ${SITE.nome}`);
 
   const totalReceitas = financeiro.receitas.reduce((s, r) => s + r.valor, 0);
   const totalDespesas = financeiro.despesas.reduce((s, d) => s + d.valor, 0);
   const maxFin = Math.max(totalReceitas, totalDespesas, 1);
+
+  // Agrupa os documentos por ano (mais recente primeiro). Os sem ano vão para o
+  // fim, sob "Outros documentos" — assim o histórico mostra continuidade.
+  const documentosPorAno = useMemo(() => {
+    const grupos = new Map<number, DocumentoPublico[]>();
+    for (const d of documentos) {
+      const ano = d.ano ?? 0;
+      const lista = grupos.get(ano) ?? [];
+      lista.push(d);
+      grupos.set(ano, lista);
+    }
+    return [...grupos.entries()].sort(([a], [b]) => {
+      if (a === 0) return 1; // "sem ano" sempre por último
+      if (b === 0) return -1;
+      return b - a; // anos em ordem decrescente
+    });
+  }, [documentos]);
 
   return (
     <PaginaPublica>
@@ -236,28 +259,86 @@ export function TransparenciaPage() {
         </section>
       )}
 
-      {/* Documentos */}
+      {/* Documentos — agrupados por ano (histórico) */}
       {documentos.length > 0 && (
         <section className="mx-auto max-w-3xl px-4 py-12 md:py-16">
           <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
             <FileText className="size-6 text-primary" />
             Documentos
           </h2>
-          <ul className="mt-6 flex flex-col gap-2">
-            {documentos.map((d, i) => (
-              <li key={i}>
-                <a
-                  href={urlSegura(d.url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
-                >
-                  <FileText className="size-4 shrink-0 text-primary" />
-                  {d.nome}
-                </a>
-              </li>
+          <div className="mt-6 space-y-8">
+            {documentosPorAno.map(([ano, itens]) => (
+              <div key={ano}>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  {ano === 0 ? "Outros documentos" : ano}
+                </h3>
+                <ul className="flex flex-col gap-2">
+                  {itens.map((d, i) => (
+                    <li key={i}>
+                      <a
+                        href={urlSegura(d.url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
+                      >
+                        <FileText className="size-4 shrink-0 text-primary" />
+                        <span className="truncate">{d.nome}</span>
+                        {d.tipo && (
+                          <span className="ml-auto shrink-0 rounded-full border border-border bg-secondary/60 px-2 py-0.5 text-xs text-muted-foreground">
+                            {d.tipo}
+                          </span>
+                        )}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
+        </section>
+      )}
+
+      {/* Governança */}
+      {temGovernanca() && (
+        <section className="mx-auto max-w-5xl px-4 py-12 md:py-16">
+          <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
+            <Landmark className="size-6 text-primary" />
+            Governança
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Quem dirige e fiscaliza o instituto.
+          </p>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {governanca.diretoria.length > 0 && (
+              <div className="rounded-xl border border-border bg-card p-5">
+                <p className="mb-3 text-sm font-semibold">Diretoria</p>
+                <ul className="space-y-2.5">
+                  {governanca.diretoria.map((m, i) => (
+                    <li key={i} className="flex flex-wrap justify-between gap-x-4 text-sm">
+                      <span className="font-medium">{m.nome}</span>
+                      <span className="text-muted-foreground">{m.cargo}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {governanca.conselhoFiscal.length > 0 && (
+              <div className="rounded-xl border border-border bg-card p-5">
+                <p className="mb-3 text-sm font-semibold">Conselho fiscal</p>
+                <ul className="space-y-2.5">
+                  {governanca.conselhoFiscal.map((m, i) => (
+                    <li key={i} className="flex flex-wrap justify-between gap-x-4 text-sm">
+                      <span className="font-medium">{m.nome}</span>
+                      <span className="text-muted-foreground">{m.cargo}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          {governanca.observacao && (
+            <p className="mt-6 text-sm text-muted-foreground">{governanca.observacao}</p>
+          )}
         </section>
       )}
 
@@ -304,6 +385,44 @@ export function TransparenciaPage() {
               )}
             </dl>
           </div>
+        </section>
+      )}
+
+      {/* Políticas institucionais */}
+      {temPoliticas() && (
+        <section className="mx-auto max-w-3xl px-4 py-12 md:py-16">
+          <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
+            <ShieldCheck className="size-6 text-primary" />
+            Políticas
+          </h2>
+          <ul className="mt-6 flex flex-col gap-2">
+            {politicas.politicaPrivacidade && (
+              <li>
+                <a
+                  href={urlSegura(politicas.politicaPrivacidade)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
+                >
+                  <ShieldCheck className="size-4 shrink-0 text-primary" />
+                  Política de Privacidade
+                </a>
+              </li>
+            )}
+            {politicas.codigoEtica && (
+              <li>
+                <a
+                  href={urlSegura(politicas.codigoEtica)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
+                >
+                  <FileText className="size-4 shrink-0 text-primary" />
+                  Código de Ética
+                </a>
+              </li>
+            )}
+          </ul>
         </section>
       )}
 

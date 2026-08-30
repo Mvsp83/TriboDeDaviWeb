@@ -25,6 +25,16 @@ export interface ItemDistribuicao {
 export interface DocumentoPublico {
   nome: string;
   url: string; // link do documento (PDF, Drive, etc.)
+  // Ano de referência — agrupa o histórico. Ausente/0 = vai em "Outros documentos".
+  ano?: number;
+  // Rótulo curto do tipo (ex.: "Financeiro", "Atividades", "Legal"). Opcional.
+  tipo?: string;
+}
+
+// Uma pessoa da diretoria ou do conselho fiscal.
+export interface MembroGovernanca {
+  nome: string;
+  cargo: string;
 }
 
 export const TRANSPARENCIA = {
@@ -37,11 +47,12 @@ export const TRANSPARENCIA = {
   identificacao: {
     razaoSocial: "Instituto Tribo de Davi",
     cnpj: "11.407.173/0001-45",
-    endereco: "Rua Benjamin Constant, 2323, Apto 133 — Vila Nova, Blumenau/SC, 89035-100",
+    endereco:
+      "Rua Benjamin Constant, 2323, Apto 133 — Vila Nova, Blumenau/SC, 89035-100",
     // PREENCHER: nome de quem responde legalmente pelo instituto.
-    presidente: "",
+    presidente: "Valdeci da Silva",
     // PREENCHER: ano de fundação (0 esconde).
-    fundacao: 0,
+    fundacao: 2013,
   },
 
   // Números de impacto de um ano. Copie da tela "Relatório de Impacto".
@@ -69,14 +80,41 @@ export const TRANSPARENCIA = {
       "Valores consolidados do exercício. Os documentos contábeis completos estão disponíveis abaixo.",
   },
 
+  // Governança: quem dirige e fiscaliza o instituto. Mostra que há controle
+  // interno (não uma pessoa só). Listas vazias escondem a seção.
+  governanca: {
+    // PREENCHER: diretoria (ex.: { nome: "Fulano de Tal", cargo: "Presidente" }).
+    diretoria: [
+      { nome: "Valdeci da Silva", cargo: "Presidente" },
+      { nome: "Vinícius Negão", cargo: "Vice-Presidente" },
+    ] as MembroGovernanca[],
+    // PREENCHER: conselho fiscal, se houver.
+    conselhoFiscal: [] as MembroGovernanca[],
+    // Texto opcional sobre como as contas são conferidas (contador, auditoria,
+    // aprovação em assembleia). Vazio esconde a linha.
+    observacao: "",
+  },
+
   // Documentos públicos: estatuto, atas, prestação de contas, editais, certidões.
-  // Lista vazia esconde a seção.
+  // Agrupados por ano na exibição (mais recente primeiro). Lista vazia esconde
+  // a seção. Ex.: { nome: "Prestação de contas 2025", url: "...", ano: 2025, tipo: "Financeiro" }.
   documentos: [] as DocumentoPublico[],
+
+  // Políticas institucionais (links de PDF ou página). Fortalecem a confiança e
+  // atendem à LGPD (política de privacidade publicada). Vazio esconde o item.
+  politicas: {
+    // PREENCHER: link da Política de Privacidade.
+    politicaPrivacidade: "",
+    // PREENCHER: link do Código de Ética/Conduta.
+    codigoEtica: "",
+  },
 };
 
 export const temIdentificacao = () => {
   const i = TRANSPARENCIA.identificacao;
-  return Boolean(i.razaoSocial || i.cnpj || i.endereco || i.presidente || i.fundacao);
+  return Boolean(
+    i.razaoSocial || i.cnpj || i.endereco || i.presidente || i.fundacao
+  );
 };
 
 export const temImpacto = () => {
@@ -87,3 +125,13 @@ export const temImpacto = () => {
 export const temFinanceiro = () =>
   TRANSPARENCIA.financeiro.receitas.length > 0 ||
   TRANSPARENCIA.financeiro.despesas.length > 0;
+
+export const temGovernanca = () =>
+  TRANSPARENCIA.governanca.diretoria.length > 0 ||
+  TRANSPARENCIA.governanca.conselhoFiscal.length > 0;
+
+export const temPoliticas = () =>
+  Boolean(
+    TRANSPARENCIA.politicas.politicaPrivacidade ||
+      TRANSPARENCIA.politicas.codigoEtica
+  );
