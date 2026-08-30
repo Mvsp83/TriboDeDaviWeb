@@ -118,6 +118,14 @@ const MatriculasAnoPage = lazy(() =>
     default: m.MatriculasAnoPage,
   })),
 );
+const AtletasPage = lazy(() =>
+  import("@/features/atletas/AtletasPage").then((m) => ({ default: m.AtletasPage })),
+);
+const AtletaDetalhePage = lazy(() =>
+  import("@/features/atletas/AtletaDetalhePage").then((m) => ({
+    default: m.AtletaDetalhePage,
+  })),
+);
 const PostarFotoTreinoPage = lazy(() =>
   import("@/features/fotosTreino/PostarFotoTreinoPage").then((m) => ({
     default: m.PostarFotoTreinoPage,
@@ -307,6 +315,9 @@ export default function App() {
           <Route path="graduacoes" element={<GraduacoesPage />} />
           {/* Solicitações internas (operacional — professor e admin) */}
           <Route path="solicitacoes" element={<SolicitacoesPage />} />
+          {/* Atletas de alto rendimento (equipe) */}
+          <Route path="atletas" element={<AtletasPage />} />
+          <Route path="atletas/:id" element={<AtletaDetalhePage />} />
           {/* Captação & Impacto */}
           <Route element={<ProtectedRoute modulo="captacao" />}>
             <Route path="impacto" element={<ImpactoPage />} />

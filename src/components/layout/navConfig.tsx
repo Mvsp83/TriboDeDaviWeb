@@ -20,6 +20,7 @@ import {
   MessagesSquare,
   ShoppingBag,
   UserCheck,
+  Trophy,
   UserCog,
   ShieldCheck,
   Upload,
@@ -84,6 +85,7 @@ export const navGroups: NavGroup[] = [
       { label: "Dashboard", href: "/painel", icon: LayoutDashboard },
       // Operacional, disponível a professores e admin (sem gate de módulo).
       { label: "Solicitações", href: "/solicitacoes", icon: MessagesSquare },
+      { label: "Alto rendimento", href: "/atletas", icon: Trophy },
     ],
   },
   {

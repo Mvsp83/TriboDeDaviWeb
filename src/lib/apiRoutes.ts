@@ -250,6 +250,21 @@ export const ApiRotas = {
   produtoFotoUpload: "/api/Produto/foto",
   produtoFoto: (id: number) => `/api/Produto/${id}/foto`,
 
+  // Atletas de alto rendimento.
+  atletas: "/api/Atleta",
+  atleta: (id: number) => `/api/Atleta/${id}`,
+  atletaCriar: (alunoId: number) => `/api/Atleta?alunoId=${alunoId}`,
+  atletaAvaliacoes: (id: number) => `/api/Atleta/${id}/avaliacoes`,
+  atletaAvaliacaoExcluir: (id: number) => `/api/Atleta/avaliacoes/${id}`,
+  atletaCompeticoes: (id: number) => `/api/Atleta/${id}/competicoes`,
+  atletaCompeticaoExcluir: (id: number) => `/api/Atleta/competicoes/${id}`,
+  atletaAnotacoes: (id: number) => `/api/Atleta/${id}/anotacoes`,
+  atletaAnotacaoExcluir: (id: number) => `/api/Atleta/anotacoes/${id}`,
+  atletaMetas: (id: number) => `/api/Atleta/${id}/metas`,
+  atletaMetaStatus: (id: number, status: number) =>
+    `/api/Atleta/metas/${id}/status?status=${status}`,
+  atletaMetaExcluir: (id: number) => `/api/Atleta/metas/${id}`,
+
   // Solicitações internas (professor <-> administração). GET lista, POST cria.
   solicitacoes: "/api/SolicitacaoInterna",
   solicitacaoContador: "/api/SolicitacaoInterna/contador",
