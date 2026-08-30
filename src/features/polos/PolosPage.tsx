@@ -4,12 +4,33 @@ import { toast } from "sonner";
 import { usePolos, useExcluirPolo } from "@/features/polos/polosApi";
 import { PoloFormDialog } from "@/features/polos/PoloFormDialog";
 import { ApiError } from "@/lib/api";
-import type { Polo } from "@/types";
+import type { HorarioTurma, Polo } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+
+const DIA_CURTO: Record<number, string> = {
+  0: "Dom",
+  1: "Seg",
+  2: "Ter",
+  3: "Qua",
+  4: "Qui",
+  5: "Sex",
+  6: "Sáb",
+};
+
+// Agrupa os horários por turma, para exibir "Turma 1: Seg 18:00–19:30 · …".
+function agruparPorTurma(horarios: HorarioTurma[]): Map<number, HorarioTurma[]> {
+  const mapa = new Map<number, HorarioTurma[]>();
+  for (const h of [...horarios].sort((a, b) => a.diaSemana - b.diaSemana)) {
+    const lista = mapa.get(h.turma) ?? [];
+    lista.push(h);
+    mapa.set(h.turma, lista);
+  }
+  return new Map([...mapa.entries()].sort(([a], [b]) => a - b));
+}
 
 export function PolosPage() {
   const { data: polos, isLoading, isError } = usePolos();
@@ -140,6 +161,27 @@ export function PolosPage() {
                 {polo.cidade && <p>{polo.cidade}</p>}
                 {polo.informacoes && (
                   <p className="pt-1 text-foreground/80">{polo.informacoes}</p>
+                )}
+                {polo.horarios && polo.horarios.length > 0 && (
+                  <div className="space-y-0.5 border-t border-border pt-2 text-xs">
+                    {[...agruparPorTurma(polo.horarios).entries()].map(
+                      ([turma, hs]) => (
+                        <p key={turma}>
+                          <span className="font-medium text-foreground">
+                            Turma {turma}:
+                          </span>{" "}
+                          {hs
+                            .map(
+                              (h) =>
+                                `${DIA_CURTO[h.diaSemana]} ${h.horaInicio}${
+                                  h.horaFim ? `–${h.horaFim}` : ""
+                                }`,
+                            )
+                            .join(" · ")}
+                        </p>
+                      ),
+                    )}
+                  </div>
                 )}
               </div>
             </CardContent>

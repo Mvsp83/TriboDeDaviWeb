@@ -1,12 +1,19 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSalvarPolo } from "@/features/polos/polosApi";
 import { ApiError } from "@/lib/api";
-import type { Polo } from "@/types";
+import type { HorarioTurma, Polo } from "@/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +45,24 @@ const VAZIO: FormValues = {
   informacoes: "",
 };
 
+// Dias da semana (valor = padrão JS: 0=Domingo). Segunda primeiro, à brasileira.
+const DIAS: { valor: number; label: string }[] = [
+  { valor: 1, label: "Segunda" },
+  { valor: 2, label: "Terça" },
+  { valor: 3, label: "Quarta" },
+  { valor: 4, label: "Quinta" },
+  { valor: 5, label: "Sexta" },
+  { valor: 6, label: "Sábado" },
+  { valor: 0, label: "Domingo" },
+];
+
+const HORARIO_NOVO: HorarioTurma = {
+  turma: 1,
+  diaSemana: 1,
+  horaInicio: "",
+  horaFim: "",
+};
+
 interface Props {
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
@@ -47,6 +72,13 @@ interface Props {
 export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
   const salvar = useSalvarPolo();
   const editando = polo !== null;
+  const [horarios, setHorarios] = useState<HorarioTurma[]>([]);
+
+  function atualizarHorario(i: number, campo: keyof HorarioTurma, valor: string | number) {
+    setHorarios((atual) =>
+      atual.map((h, idx) => (idx === i ? { ...h, [campo]: valor } : h)),
+    );
+  }
 
   const {
     register,
@@ -71,11 +103,20 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
           }
         : VAZIO,
     );
+    setHorarios(polo?.horarios ? polo.horarios.map((h) => ({ ...h })) : []);
   }, [aberto, polo, reset]);
 
   async function onSubmit(values: FormValues) {
+    // Só envia linhas com turma e hora de início preenchidas.
+    const horariosValidos = horarios.filter(
+      (h) => h.turma > 0 && h.horaInicio.trim() !== "",
+    );
     try {
-      await salvar.mutateAsync({ id: polo?.id, ...values });
+      await salvar.mutateAsync({
+        id: polo?.id,
+        ...values,
+        horarios: horariosValidos,
+      });
       toast.success(editando ? "Polo atualizado." : "Polo criado.");
       onOpenChange(false);
     } catch (err) {
@@ -122,6 +163,104 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
               <Label className="mb-1.5">Informações</Label>
               <Textarea rows={3} {...register("informacoes")} />
             </div>
+          </div>
+
+          {/* Horários das aulas por turma */}
+          <div className="space-y-2 border-t border-border pt-3">
+            <div className="flex items-center justify-between">
+              <Label>Horários das turmas</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  setHorarios((atual) => [...atual, { ...HORARIO_NOVO }])
+                }
+              >
+                <Plus className="size-4" />
+                Adicionar
+              </Button>
+            </div>
+
+            {horarios.length === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                Nenhum horário informado. Adicione os dias e horas de cada turma.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {horarios.map((h, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-wrap items-end gap-2 rounded-lg border border-border p-2"
+                  >
+                    <div className="w-16">
+                      <Label className="mb-1 text-xs">Turma</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={h.turma}
+                        onChange={(e) =>
+                          atualizarHorario(i, "turma", Number(e.target.value))
+                        }
+                      />
+                    </div>
+                    <div className="min-w-28 flex-1">
+                      <Label className="mb-1 text-xs">Dia</Label>
+                      <Select
+                        value={String(h.diaSemana)}
+                        onValueChange={(v) =>
+                          atualizarHorario(i, "diaSemana", Number(v))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DIAS.map((d) => (
+                            <SelectItem key={d.valor} value={String(d.valor)}>
+                              {d.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="w-24">
+                      <Label className="mb-1 text-xs">Início</Label>
+                      <Input
+                        type="time"
+                        value={h.horaInicio}
+                        onChange={(e) =>
+                          atualizarHorario(i, "horaInicio", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="w-24">
+                      <Label className="mb-1 text-xs">Fim</Label>
+                      <Input
+                        type="time"
+                        value={h.horaFim}
+                        onChange={(e) =>
+                          atualizarHorario(i, "horaFim", e.target.value)
+                        }
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        setHorarios((atual) =>
+                          atual.filter((_, idx) => idx !== i),
+                        )
+                      }
+                      aria-label="Remover horário"
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <DialogFooter>

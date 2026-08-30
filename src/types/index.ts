@@ -40,6 +40,17 @@ export interface Aluno {
   temFoto?: boolean;
 }
 
+// Horário de treino de uma turma (um item por dia da semana).
+// diaSemana: 0=Domingo … 6=Sábado. Horas em "HH:mm".
+export interface HorarioTurma {
+  id?: number;
+  poloId?: number;
+  turma: number;
+  diaSemana: number;
+  horaInicio: string;
+  horaFim: string;
+}
+
 export interface Polo {
   id: number;
   nome: string;
@@ -47,6 +58,7 @@ export interface Polo {
   endereco?: string | null;
   bairro?: string | null;
   cidade?: string | null;
+  horarios?: HorarioTurma[];
 }
 
 export interface Aula {

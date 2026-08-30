@@ -18,6 +18,12 @@ function montarBody(polo: Partial<Polo>, incluirId: boolean) {
     endereco: polo.endereco ?? "",
     bairro: polo.bairro ?? "",
     cidade: polo.cidade ?? "",
+    horarios: (polo.horarios ?? []).map((h) => ({
+      turma: h.turma,
+      diaSemana: h.diaSemana,
+      horaInicio: h.horaInicio,
+      horaFim: h.horaFim ?? "",
+    })),
   };
   return incluirId ? { id: polo.id, ...base } : base;
 }
