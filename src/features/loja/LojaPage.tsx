@@ -1,9 +1,18 @@
-import { ShoppingBag, CreditCard, Info, Package } from "lucide-react";
+import { useState } from "react";
+import {
+  ShoppingBag,
+  CreditCard,
+  Info,
+  Package,
+  MessageCircle,
+} from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import { moeda } from "@/lib/format";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { PaginaPublica } from "@/components/PaginaPublica";
+import { COMPRA_WHATSAPP_HABILITADA } from "@/features/loja/lojaConfig";
 import {
   useVitrine,
   produtoFotoUrl,
@@ -14,6 +23,75 @@ import {
 // Distintos e não-vazios, preservando a ordem de cadastro.
 function distintos(valores: string[]) {
   return [...new Set(valores.map((v) => v?.trim()).filter(Boolean))];
+}
+
+// Botão "Comprar via WhatsApp" — só aparece com o flag ligado e um número
+// configurado. Abre o WhatsApp com uma mensagem pronta (produto, tamanho, cor).
+function BotaoComprar({
+  produto,
+  tamanhos,
+  cores,
+  whatsapp,
+}: {
+  produto: Produto;
+  tamanhos: string[];
+  cores: string[];
+  whatsapp: string;
+}) {
+  const [tam, setTam] = useState(tamanhos[0] ?? "");
+  const [cor, setCor] = useState(cores[0] ?? "");
+
+  const msg =
+    `Olá! Tenho interesse no produto: ${produto.nome} (${moeda(produto.preco)})` +
+    (tam ? `, tamanho ${tam}` : "") +
+    (cor ? `, cor ${cor}` : "") +
+    ".";
+  const href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+  const selectClass =
+    "flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm";
+
+  return (
+    <div className="mt-2 space-y-2">
+      {(tamanhos.length > 0 || cores.length > 0) && (
+        <div className="flex gap-2">
+          {tamanhos.length > 0 && (
+            <select
+              value={tam}
+              onChange={(e) => setTam(e.target.value)}
+              className={selectClass}
+              aria-label="Tamanho"
+            >
+              {tamanhos.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          )}
+          {cores.length > 0 && (
+            <select
+              value={cor}
+              onChange={(e) => setCor(e.target.value)}
+              className={selectClass}
+              aria-label="Cor"
+            >
+              {cores.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
+      <Button asChild size="sm" className="w-full">
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          <MessageCircle className="size-4" />
+          Comprar via WhatsApp
+        </a>
+      </Button>
+    </div>
+  );
 }
 
 function CartaoProduto({ produto }: { produto: Produto }) {
@@ -88,6 +166,15 @@ function CartaoProduto({ produto }: { produto: Produto }) {
             <Info className="mt-0.5 size-3.5 shrink-0 text-primary" />
             {produto.informacoes}
           </p>
+        )}
+
+        {COMPRA_WHATSAPP_HABILITADA && SITE.contato.whatsapp && !esgotado && (
+          <BotaoComprar
+            produto={produto}
+            tamanhos={tamanhos}
+            cores={cores}
+            whatsapp={SITE.contato.whatsapp}
+          />
         )}
       </div>
     </div>
