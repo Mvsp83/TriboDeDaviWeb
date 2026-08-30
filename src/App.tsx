@@ -131,6 +131,16 @@ const AtletaComparativoPage = lazy(() =>
     default: m.AtletaComparativoPage,
   })),
 );
+const CompeticoesPage = lazy(() =>
+  import("@/features/competicoes/CompeticoesPage").then((m) => ({
+    default: m.CompeticoesPage,
+  })),
+);
+const CompeticaoDetalhePage = lazy(() =>
+  import("@/features/competicoes/CompeticaoDetalhePage").then((m) => ({
+    default: m.CompeticaoDetalhePage,
+  })),
+);
 const PostarFotoTreinoPage = lazy(() =>
   import("@/features/fotosTreino/PostarFotoTreinoPage").then((m) => ({
     default: m.PostarFotoTreinoPage,
@@ -324,6 +334,8 @@ export default function App() {
           <Route path="atletas" element={<AtletasPage />} />
           <Route path="atletas/comparativo" element={<AtletaComparativoPage />} />
           <Route path="atletas/:id" element={<AtletaDetalhePage />} />
+          <Route path="competicoes" element={<CompeticoesPage />} />
+          <Route path="competicoes/:id" element={<CompeticaoDetalhePage />} />
           {/* Captação & Impacto */}
           <Route element={<ProtectedRoute modulo="captacao" />}>
             <Route path="impacto" element={<ImpactoPage />} />

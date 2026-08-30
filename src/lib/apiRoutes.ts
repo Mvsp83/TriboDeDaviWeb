@@ -250,6 +250,15 @@ export const ApiRotas = {
   produtoFotoUpload: "/api/Produto/foto",
   produtoFoto: (id: number) => `/api/Produto/${id}/foto`,
 
+  // Competições (eventos) com participantes/resultados.
+  competicoesEvento: "/api/CompeticaoEvento",
+  competicaoEvento: (id: number) => `/api/CompeticaoEvento/${id}`,
+  competicaoParticipacoes: (id: number) =>
+    `/api/CompeticaoEvento/${id}/participacoes`,
+  competicaoParticipacaoAtualizar: "/api/CompeticaoEvento/participacoes",
+  competicaoParticipacaoExcluir: (id: number) =>
+    `/api/CompeticaoEvento/participacoes/${id}`,
+
   // Atletas de alto rendimento.
   atletas: "/api/Atleta",
   atleta: (id: number) => `/api/Atleta/${id}`,

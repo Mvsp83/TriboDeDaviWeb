@@ -21,6 +21,7 @@ import {
   ShoppingBag,
   UserCheck,
   Trophy,
+  Medal,
   UserCog,
   ShieldCheck,
   Upload,
@@ -86,6 +87,7 @@ export const navGroups: NavGroup[] = [
       // Operacional, disponível a professores e admin (sem gate de módulo).
       { label: "Solicitações", href: "/solicitacoes", icon: MessagesSquare },
       { label: "Alto rendimento", href: "/atletas", icon: Trophy },
+      { label: "Competições", href: "/competicoes", icon: Medal },
     ],
   },
   {
