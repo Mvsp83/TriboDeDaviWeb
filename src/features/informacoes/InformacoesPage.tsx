@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Info, ChevronDown, MapPin, ClipboardList, ArrowRight } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import type { LinkFaq } from "@/features/site/conteudoSite";
+import { faixaInfo } from "@/features/alunos/faixa";
 import { ApiRotas } from "@/lib/apiRoutes";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,11 @@ interface HorarioTurmaPub {
   horaInicio: string;
   horaFim: string;
 }
+interface ProfessorPub {
+  nome: string | null;
+  faixa: number | null;
+  foto: string;
+}
 interface PoloPub {
   nome: string;
   endereco: string;
@@ -30,6 +36,7 @@ interface PoloPub {
   cidade: string;
   informacoes: string;
   horarios: HorarioTurmaPub[];
+  professores: ProfessorPub[];
 }
 
 const DIA_CURTO: Record<number, string> = {
@@ -63,7 +70,13 @@ function PolosCadastrados() {
         const res = await fetch(`${base}${ApiRotas.polosPublicos}`);
         if (!res.ok) return [];
         const json = await res.json();
-        return (json?.data as PoloPub[]) ?? [];
+        const lista = (json?.data as PoloPub[]) ?? [];
+        // Garante os arrays mesmo com API antiga (sem o campo professores).
+        return lista.map((p) => ({
+          ...p,
+          horarios: p.horarios ?? [],
+          professores: p.professores ?? [],
+        }));
       } catch {
         return [];
       }
@@ -108,6 +121,36 @@ function PolosCadastrados() {
                     .join(" · ")}
                 </p>
               ))}
+            </div>
+          )}
+          {p.professores.length > 0 && (
+            <div className="mt-3 border-t border-border pt-3">
+              <p className="mb-2 text-xs font-medium text-foreground">Professores</p>
+              <div className="flex flex-wrap gap-3">
+                {p.professores.map((prof, i) => {
+                  const info = prof.faixa != null ? faixaInfo(prof.faixa) : null;
+                  return (
+                    <div key={i} className="flex w-16 flex-col items-center gap-1 text-center">
+                      <div
+                        className="size-14 overflow-hidden rounded-full bg-muted"
+                        style={{ border: `3px solid ${info?.cor ?? "#d4d4d8"}` }}
+                        title={info ? `Faixa ${info.nome}` : undefined}
+                      >
+                        <img
+                          src={prof.foto}
+                          alt={prof.nome ?? "Professor"}
+                          className="size-full object-cover"
+                        />
+                      </div>
+                      {prof.nome && (
+                        <span className="w-full truncate text-[11px] leading-tight text-muted-foreground">
+                          {prof.nome}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Menu, LogOut, ImageIcon, ShieldCheck, Bell } from "lucide-react";
+import { Menu, LogOut, ImageIcon, ShieldCheck, Bell, IdCard } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useMeuAvatar } from "@/features/perfil/perfilApi";
 import { AvatarView } from "@/features/perfil/presets";
 import { AvatarDialog } from "@/features/perfil/AvatarDialog";
+import { PerfilSiteDialog } from "@/features/perfil/PerfilSiteDialog";
 import { Seguranca2FADialog } from "@/features/seguranca/Seguranca2FADialog";
 import { NotificacoesDialog } from "@/features/notificacoes/NotificacoesDialog";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ export function Topbar({
   const { sessao, sair } = useAuth();
   const { data: avatar } = useMeuAvatar();
   const [dialogAvatar, setDialogAvatar] = useState(false);
+  const [dialogPerfilSite, setDialogPerfilSite] = useState(false);
   const [dialog2fa, setDialog2fa] = useState(false);
   const [dialogNotif, setDialogNotif] = useState(false);
 
@@ -68,6 +70,10 @@ export function Topbar({
             <ImageIcon className="size-4" />
             Alterar avatar
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDialogPerfilSite(true)}>
+            <IdCard className="size-4" />
+            Meu perfil no site
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setDialog2fa(true)}>
             <ShieldCheck className="size-4" />
             Verificação em 2 etapas
@@ -92,6 +98,8 @@ export function Topbar({
         nome={nome}
         avatarAtual={avatar ?? null}
       />
+
+      <PerfilSiteDialog aberto={dialogPerfilSite} onOpenChange={setDialogPerfilSite} />
 
       <Seguranca2FADialog aberto={dialog2fa} onOpenChange={setDialog2fa} />
 

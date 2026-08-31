@@ -65,6 +65,7 @@ export const ApiRotas = {
   usuarioUpdate: "/api/Usuario/update",
   usuarioDelete: (id: number) => `/api/Usuario/delete/${id}`,
   meuAvatar: "/api/Usuario/meu-avatar",
+  meuPerfilSite: "/api/Usuario/meu-perfil-site",
 
   aniversariantes: (mes: number) => `/api/Aniversariante/aniversariantes/${mes}`,
 
