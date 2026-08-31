@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Camera,
@@ -6,6 +6,8 @@ import {
   X,
   HeartHandshake,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   Image as ImageIcon,
 } from "lucide-react";
 import {
@@ -81,6 +83,30 @@ export function GaleriaPage() {
 
   const selecionada = opcoes.find((o) => o.id === selId) ?? null;
   const temFotos = opcoes.length > 0;
+
+  // Navegação do lightbox: anterior/próxima dentro da coleção aberta (com giro).
+  const fotosColecao = selecionada?.fotos ?? [];
+  const idxAmpliada = ampliada
+    ? fotosColecao.findIndex((f) => f.id === ampliada.id)
+    : -1;
+  const navegar = (delta: number) => {
+    if (idxAmpliada < 0 || fotosColecao.length === 0) return;
+    const n = fotosColecao.length;
+    setAmpliada(fotosColecao[(idxAmpliada + delta + n) % n]);
+  };
+
+  // Teclado: ←/→ trocam a foto; Esc fecha.
+  useEffect(() => {
+    if (!ampliada) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") navegar(-1);
+      else if (e.key === "ArrowRight") navegar(1);
+      else if (e.key === "Escape") setAmpliada(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ampliada, idxAmpliada, fotosColecao]);
 
   return (
     <PaginaPublica>
@@ -267,6 +293,34 @@ export function GaleriaPage() {
           >
             <X className="size-5" />
           </button>
+
+          {fotosColecao.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 md:left-4"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navegar(-1);
+                }}
+                aria-label="Foto anterior"
+              >
+                <ChevronLeft className="size-6" />
+              </button>
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 md:right-4"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navegar(1);
+                }}
+                aria-label="Próxima foto"
+              >
+                <ChevronRight className="size-6" />
+              </button>
+            </>
+          )}
+
           <figure className="max-h-[90svh] max-w-4xl" onClick={(e) => e.stopPropagation()}>
             <img
               src={ampliada.url}
@@ -275,6 +329,11 @@ export function GaleriaPage() {
             />
             <figcaption className="mt-2 text-center text-sm text-white/80">
               {[dataBR(ampliada.dataAula), ampliada.legenda].filter(Boolean).join(" · ")}
+              {fotosColecao.length > 1 && (
+                <span className="ml-2 text-white/50">
+                  {idxAmpliada + 1}/{fotosColecao.length}
+                </span>
+              )}
             </figcaption>
           </figure>
         </div>
