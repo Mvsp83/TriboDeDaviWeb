@@ -38,15 +38,19 @@ export function MolduraFaixa({
   const costura = corCostura(cor);
   const costuraPonteira = "rgba(255,255,255,0.32)";
 
-  // Uma ponta da faixa (fita + ponteira costurada), inclinada a partir do nó.
-  const ponta = (ang: number) => (
+  // Uma ponta da faixa, inclinada a partir do nó. A ponteira (barra costurada)
+  // aparece só na ponta direita, como na faixa real.
+  const ponta = (ang: number, comPonteira: boolean) => (
     <g key={ang} transform={`translate(50 73) rotate(${ang})`}>
       <rect x="-5" y="1" width="10" height="27" rx="3" fill={cor} stroke={borda} strokeWidth="0.8" />
-      <line x1="0" y1="3" x2="0" y2="15" stroke={costura} strokeWidth="0.7" />
-      {/* Ponteira (barra costurada na ponta) */}
-      <rect x="-5" y="16" width="10" height="12" rx="3" fill={ponteira} stroke={borda} strokeWidth="0.6" />
-      <line x1="-3.4" y1="20" x2="3.4" y2="20" stroke={costuraPonteira} strokeWidth="0.7" />
-      <line x1="-3.4" y1="24" x2="3.4" y2="24" stroke={costuraPonteira} strokeWidth="0.7" />
+      <line x1="0" y1="3" x2="0" y2={comPonteira ? 15 : 26} stroke={costura} strokeWidth="0.7" />
+      {comPonteira && (
+        <>
+          <rect x="-5" y="16" width="10" height="12" rx="3" fill={ponteira} stroke={borda} strokeWidth="0.6" />
+          <line x1="-3.4" y1="20" x2="3.4" y2="20" stroke={costuraPonteira} strokeWidth="0.7" />
+          <line x1="-3.4" y1="24" x2="3.4" y2="24" stroke={costuraPonteira} strokeWidth="0.7" />
+        </>
+      )}
     </g>
   );
 
@@ -73,8 +77,13 @@ export function MolduraFaixa({
         </clipPath>
       </defs>
 
-      {/* Pontas, atrás do nó e da fita */}
-      {temFaixa && [-24, 24].map(ponta)}
+      {/* Pontas, atrás do nó e da fita (ponteira só na direita) */}
+      {temFaixa && (
+        <>
+          {ponta(-24, false)}
+          {ponta(24, true)}
+        </>
+      )}
 
       {/* Foto de rosto */}
       <image
