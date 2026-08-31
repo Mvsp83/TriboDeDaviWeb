@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Davizinho } from "@/features/assistente/Davizinho";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { SitePublico } from "@/features/site/SitePublico";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -465,6 +466,7 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    <Davizinho />
     </Suspense>
   );
 }
