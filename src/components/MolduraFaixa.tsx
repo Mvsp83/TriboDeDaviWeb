@@ -77,11 +77,11 @@ export function MolduraFaixa({
         </clipPath>
       </defs>
 
-      {/* Pontas, atrás do nó e da fita (ponteira só na direita) */}
+      {/* Pontas, atrás do nó e da fita (ponteira só na esquerda) */}
       {temFaixa && (
         <>
-          {ponta(-24, false)}
-          {ponta(24, true)}
+          {ponta(-24, true)}
+          {ponta(24, false)}
         </>
       )}
 
