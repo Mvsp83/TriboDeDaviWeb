@@ -30,6 +30,7 @@ const ATALHOS: { label: string; para: string }[] = [
 
 // Perguntas iniciais sugeridas.
 const SUGESTOES_INICIAIS = [
+  "Polos e Endereços",
   "Como faço a inscrição?",
   "Onde vejo as fotos?",
   "Como acompanho meu filho?",
@@ -110,6 +111,17 @@ export function Davizinho() {
     // Saudação simples.
     if (tokens.length === 0 || /\b(oi|ola|opa|bom dia|boa tarde|boa noite)\b/.test(pergunta.toLowerCase())) {
       return { ...saudacao, texto: "Como posso ajudar? Escolha uma opção ou escreva sua dúvida:" };
+    }
+
+    // Intenção de polos: leva à lista de polos com endereços e horários, que é
+    // montada a partir do próprio cadastro na página de Informações.
+    if (tokens.some((t) => t === "polo" || t === "polos")) {
+      return {
+        autor: "davi",
+        texto:
+          "Temos vários polos. Você pode ver todos, com endereço e horários das turmas, na página de Informações.",
+        link: { label: "Ver polos e endereços", para: "/informacoes" },
+      };
     }
 
     const ranqueados = indice
