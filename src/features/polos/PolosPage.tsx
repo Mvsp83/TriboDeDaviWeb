@@ -185,12 +185,12 @@ export function PolosPage() {
                             Turma {turma}:
                           </span>{" "}
                           {hs
-                            .map(
-                              (h) =>
-                                `${DIA_CURTO[h.diaSemana]} ${h.horaInicio}${
-                                  h.horaFim ? `–${h.horaFim}` : ""
-                                }`,
-                            )
+                            .map((h) => {
+                              const hora = h.horaInicio
+                                ? `${h.horaInicio}${h.horaFim ? `–${h.horaFim}` : ""}`
+                                : "horário a definir";
+                              return `${DIA_CURTO[h.diaSemana]} ${hora}`;
+                            })
                             .join(" · ")}
                         </p>
                       ),

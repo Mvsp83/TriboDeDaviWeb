@@ -109,10 +109,10 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
   }, [aberto, polo, reset]);
 
   async function onSubmit(values: FormValues) {
-    // Só envia linhas com turma e hora de início preenchidas.
-    const horariosValidos = horarios.filter(
-      (h) => h.turma > 0 && h.horaInicio.trim() !== "",
-    );
+    // Envia as linhas com turma definida (o horário em si pode ficar "a
+    // definir"). Só descarta linha sem turma. Para remover um horário, use a
+    // lixeira ao lado dele.
+    const horariosValidos = horarios.filter((h) => h.turma > 0);
     try {
       await salvar.mutateAsync({
         id: polo?.id,
