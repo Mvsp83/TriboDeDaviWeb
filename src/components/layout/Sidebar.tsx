@@ -13,27 +13,15 @@ import {
 import { LogoLockup } from "@/components/Logo";
 import { cn } from "@/lib/utils";
 
-// Cor de cada seção (nível 0). A cor "desce" para os filhos, agrupando
+// Cor de cada pilar (nível 0). A cor "desce" para os filhos, agrupando
 // visualmente as opções. No item ativo, o dourado da marca assume.
 const CORES_SECAO: Record<string, string> = {
   Dashboard: "#38bdf8",
-  Calendário: "#a78bfa",
-  "Modelos de Documentos": "#fbbf24",
-  "Ofícios e Recibos": "#2dd4bf",
-  "Patrimônio": "#e879f9",
-  Cadastros: "#34d399",
-  Aula: "#818cf8",
-  Presenças: "#4ade80",
-  Frequência: "#22d3ee",
-  Aniversariantes: "#f472b6",
-  Contabilidade: "#fb923c",
+  Operacional: "#34d399",
+  Administrativo: "#a78bfa",
   Financeiro: "#a3e635",
-  Avisos: "#f59e0b",
-  Usuários: "#fb7185",
-  "Padrão de Documentos": "#fcd34d",
-  Importação: "#60a5fa",
-  Sincronização: "#67e8f9",
   Relatórios: "#c084fc",
+  Configurações: "#f59e0b",
 };
 
 function rotaAtiva(href: string, pathname: string): boolean {
@@ -53,6 +41,10 @@ interface NodeProps {
   depth: number;
   cor: string;
   onNavigate?: () => void;
+  // Abertura controlada de fora (usada nos pilares de nível 0, para manter só
+  // um aberto por vez). Sem isto, o ramo controla o próprio estado.
+  aberto?: boolean;
+  onAlternar?: () => void;
 }
 
 function NavNodeItem(props: NodeProps) {
@@ -95,16 +87,27 @@ function NavLeafItem({ node, depth, cor, onNavigate }: NodeProps & { node: NavLe
   );
 }
 
-function NavBranchItem({ node, depth, cor, onNavigate }: NodeProps & { node: NavBranch }) {
+function NavBranchItem({
+  node,
+  depth,
+  cor,
+  onNavigate,
+  aberto: abertoProp,
+  onAlternar,
+}: NodeProps & { node: NavBranch }) {
   const { pathname } = useLocation();
   const ativo = contemAtivo(node, pathname);
-  const [aberto, setAberto] = useState(ativo);
+  const [abertoLocal, setAbertoLocal] = useState(ativo);
   const raiz = depth === 0;
+  // Se o pai controla a abertura (pilares), usa isso; senão, estado próprio.
+  const controlado = onAlternar !== undefined;
+  const aberto = controlado ? !!abertoProp : abertoLocal;
+  const alternar = controlado ? onAlternar : () => setAbertoLocal((v) => !v);
 
   return (
     <div>
       <button
-        onClick={() => setAberto((v) => !v)}
+        onClick={alternar}
         className={cn(
           "flex w-full items-center rounded-lg transition-colors",
           raiz ? "gap-3 px-3 py-2.5 text-sm font-medium" : "gap-2.5 px-2.5 py-1.5 text-[13px] font-medium",
@@ -151,8 +154,18 @@ function NavBranchItem({ node, depth, cor, onNavigate }: NodeProps & { node: Nav
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { sessao, sair } = useAuth();
+  const { pathname } = useLocation();
   const admin = sessao?.isAdministrador ?? false;
   const modulos = sessao?.modulos ?? [];
+
+  // Acordeão dos pilares (nível 0): só um aberto por vez. Começa aberto no
+  // pilar que contém a página atual.
+  const pilarInicial = navGroups
+    .flatMap((g) => filtrarPorPapel(g.nodes, { admin, modulos }))
+    .find((n) => isBranch(n) && contemAtivo(n, pathname));
+  const [pilarAberto, setPilarAberto] = useState<string | null>(
+    pilarInicial ? pilarInicial.label : null,
+  );
 
   return (
     <div className="flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground">
@@ -194,6 +207,15 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                     depth={0}
                     cor={CORES_SECAO[node.label] ?? "#94a3b8"}
                     onNavigate={onNavigate}
+                    {...(isBranch(node)
+                      ? {
+                          aberto: pilarAberto === node.label,
+                          onAlternar: () =>
+                            setPilarAberto((atual) =>
+                              atual === node.label ? null : node.label,
+                            ),
+                        }
+                      : {})}
                   />
                 ))}
               </div>

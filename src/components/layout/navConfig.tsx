@@ -44,6 +44,11 @@ import {
   HeartHandshake,
   TrendingUp,
   FileSpreadsheet,
+  Activity,
+  Briefcase,
+  Settings,
+  Landmark,
+  Database,
   type LucideIcon,
 } from "lucide-react";
 import type { ModuloId } from "@/config/modulos";
@@ -79,171 +84,163 @@ export interface NavGroup {
   nodes: NavNode[];
 }
 
-// Espelha o menu do portal, agora com submenus dentro de "Operacional".
+// Menu em pilares: no primeiro nível ficam o Dashboard e 5 "pilares" que
+// abrem/fecham (só um aberto por vez — ver Sidebar). Cada pilar reúne as telas
+// do seu tema. Rotas e permissões (adminOnly/modulo) seguem nas folhas.
 export const navGroups: NavGroup[] = [
   {
     nodes: [
       { label: "Dashboard", href: "/painel", icon: LayoutDashboard },
-      // Operacional, disponível a professores e admin (sem gate de módulo).
-      { label: "Solicitações", href: "/solicitacoes", icon: MessagesSquare },
-      { label: "Alto rendimento", href: "/atletas", icon: Trophy },
-      { label: "Competições", href: "/competicoes", icon: Medal },
-    ],
-  },
-  {
-    titulo: "Operacional",
-    nodes: [
+
+      // ── Operacional: o dia a dia com alunos e aulas ──────────────────────
       {
-        label: "Cadastros",
-        icon: FolderPlus,
+        label: "Operacional",
+        icon: Activity,
         children: [
-          { label: "Alunos", href: "/alunos", icon: Users },
-          { label: "Inscrições", href: "/inscricoes", icon: ClipboardList },
-          { label: "Polos", href: "/polos", icon: MapPin, adminOnly: true },
           {
-            label: "Alunos do ano",
-            href: "/matriculas-ano",
-            icon: UserCheck,
-            adminOnly: true,
-          },
-        ],
-      },
-      {
-        label: "Aula",
-        icon: GraduationCap,
-        children: [
-          { label: "Chamada", href: "/chamada", icon: ClipboardCheck },
-          { label: "Aulas", href: "/aulas", icon: CalendarDays },
-          {
-            label: "Planejamento de Aula",
-            icon: NotebookPen,
+            label: "Cadastros",
+            icon: FolderPlus,
             children: [
+              { label: "Alunos", href: "/alunos", icon: Users },
+              { label: "Inscrições", href: "/inscricoes", icon: ClipboardList },
+              { label: "Polos", href: "/polos", icon: MapPin, adminOnly: true },
               {
-                label: "Planos de Aula",
-                href: "/planos-de-aula",
-                icon: ClipboardList,
+                label: "Alunos do ano",
+                href: "/matriculas-ano",
+                icon: UserCheck,
+                adminOnly: true,
               },
-              {
-                label: "Modelos de Aula",
-                href: "/modelos-de-aula",
-                icon: ClipboardPaste,
-              },
-              { label: "Atividades", href: "/atividades", icon: BookOpen },
             ],
           },
-          { label: "Presenças", href: "/presencas", icon: CheckCircle2 },
-          { label: "Frequência", href: "/frequencia", icon: BarChart3 },
-          { label: "Graduações", href: "/graduacoes", icon: Award },
-          { label: "Aniversariantes", href: "/aniversariantes", icon: Cake },
-        ],
-      },
-      {
-        label: "Fotos do Treino",
-        icon: Camera,
-        modulo: "relacionamento",
-        children: [
           {
-            label: "Postar foto",
-            href: "/fotos-treino/postar",
+            label: "Aula",
+            icon: GraduationCap,
+            children: [
+              { label: "Chamada", href: "/chamada", icon: ClipboardCheck },
+              { label: "Aulas", href: "/aulas", icon: CalendarDays },
+              {
+                label: "Planejamento de Aula",
+                icon: NotebookPen,
+                children: [
+                  {
+                    label: "Planos de Aula",
+                    href: "/planos-de-aula",
+                    icon: ClipboardList,
+                  },
+                  {
+                    label: "Modelos de Aula",
+                    href: "/modelos-de-aula",
+                    icon: ClipboardPaste,
+                  },
+                  { label: "Atividades", href: "/atividades", icon: BookOpen },
+                ],
+              },
+              { label: "Presenças", href: "/presencas", icon: CheckCircle2 },
+              { label: "Frequência", href: "/frequencia", icon: BarChart3 },
+              { label: "Graduações", href: "/graduacoes", icon: Award },
+              { label: "Aniversariantes", href: "/aniversariantes", icon: Cake },
+            ],
+          },
+          {
+            label: "Alto rendimento",
+            icon: Trophy,
+            children: [
+              { label: "Atletas", href: "/atletas", icon: Trophy },
+              { label: "Competições", href: "/competicoes", icon: Medal },
+            ],
+          },
+          { label: "Solicitações", href: "/solicitacoes", icon: MessagesSquare },
+          {
+            label: "Fotos do Treino",
             icon: Camera,
             modulo: "relacionamento",
+            children: [
+              {
+                label: "Postar foto",
+                href: "/fotos-treino/postar",
+                icon: Camera,
+                modulo: "relacionamento",
+              },
+              {
+                label: "Moderar fotos",
+                href: "/fotos-treino/moderacao",
+                icon: ShieldCheck,
+                adminOnly: true,
+                modulo: "relacionamento",
+              },
+              {
+                label: "Vídeos da galeria",
+                href: "/galeria/videos",
+                icon: Video,
+                adminOnly: true,
+                modulo: "relacionamento",
+              },
+            ],
           },
           {
-            label: "Moderar fotos",
-            href: "/fotos-treino/moderacao",
-            icon: ShieldCheck,
-            adminOnly: true,
-            modulo: "relacionamento",
-          },
-          {
-            label: "Vídeos da galeria",
-            href: "/galeria/videos",
-            icon: Video,
-            adminOnly: true,
-            modulo: "relacionamento",
+            label: "Programas de Graduação",
+            icon: ListChecks,
+            modulo: "graduacao",
+            children: [
+              { label: "Programas", href: "/graduacao/programas", icon: GraduationCap },
+              { label: "Posições", href: "/graduacao/posicoes", icon: BookOpen },
+              { label: "Golpes Restritos", href: "/graduacao/golpes", icon: ShieldAlert },
+              { label: "Regras (IBJJF)", href: "/graduacao/regras", icon: ScrollText },
+              { label: "Parâmetros", href: "/graduacao/parametros", icon: SlidersHorizontal },
+            ],
           },
         ],
       },
+
+      // ── Administrativo: institucional (não-financeiro) ───────────────────
       {
-        label: "Programas de Graduação",
-        icon: ListChecks,
-        modulo: "graduacao",
-        children: [
-          { label: "Programas", href: "/graduacao/programas", icon: GraduationCap },
-          { label: "Posições", href: "/graduacao/posicoes", icon: BookOpen },
-          { label: "Golpes Restritos", href: "/graduacao/golpes", icon: ShieldAlert },
-          { label: "Regras (IBJJF)", href: "/graduacao/regras", icon: ScrollText },
-          { label: "Parâmetros", href: "/graduacao/parametros", icon: SlidersHorizontal },
-        ],
-      },
-      { label: "Relatórios", href: "/relatorios", icon: FileBarChart },
-      {
-        label: "Relatório de Impacto",
-        href: "/impacto",
-        icon: TrendingUp,
-        modulo: "captacao",
-      },
-    ],
-  },
-  {
-    titulo: "Administrativo",
-    nodes: [
-      {
-        label: "Calendário",
-        href: "/calendario",
-        icon: CalendarRange,
-        modulo: "relacionamento",
-      },
-      {
-        label: "Modelos de Documentos",
-        href: "/documentos",
-        icon: FileText,
-        adminOnly: true,
-      },
-      {
-        label: "Ofícios e Recibos",
-        href: "/documentos-oficiais",
-        icon: FileSignature,
-        adminOnly: true,
-        modulo: "financeiro",
-      },
-      {
-        label: "Patrimônio",
-        href: "/patrimonio",
-        icon: Boxes,
-        adminOnly: true,
-        modulo: "financeiro",
-      },
-      {
-        label: "Doações",
-        href: "/doacoes",
-        icon: HeartHandshake,
-        adminOnly: true,
-        modulo: "captacao",
-      },
-      {
-        label: "Contabilidade",
-        icon: Calculator,
-        adminOnly: true,
-        modulo: "financeiro",
+        label: "Administrativo",
+        icon: Briefcase,
         children: [
           {
-            label: "DRE",
-            href: "/administrativo/contabilidade/dre",
+            label: "Calendário",
+            href: "/calendario",
+            icon: CalendarRange,
+            modulo: "relacionamento",
+          },
+          {
+            label: "Documentos",
             icon: FileText,
+            adminOnly: true,
+            children: [
+              {
+                label: "Modelos de Documentos",
+                href: "/documentos",
+                icon: FileText,
+                adminOnly: true,
+              },
+              {
+                label: "Ofícios e Recibos",
+                href: "/documentos-oficiais",
+                icon: FileSignature,
+                adminOnly: true,
+                modulo: "financeiro",
+              },
+            ],
           },
           {
-            label: "Relatório de Atividades",
-            href: "/administrativo/contabilidade/relatorio-atividades",
-            icon: FileBarChart,
+            label: "Patrimônio",
+            href: "/patrimonio",
+            icon: Boxes,
+            adminOnly: true,
+            modulo: "financeiro",
           },
           {
-            label: "Balanço",
-            href: "/administrativo/contabilidade/balanco",
-            icon: Scale,
+            label: "Doações",
+            href: "/doacoes",
+            icon: HeartHandshake,
+            adminOnly: true,
+            modulo: "captacao",
           },
         ],
       },
+
+      // ── Financeiro: pilar próprio (antes dentro do Administrativo) ────────
       {
         label: "Financeiro",
         icon: Wallet,
@@ -251,83 +248,146 @@ export const navGroups: NavGroup[] = [
         modulo: "financeiro",
         children: [
           {
-            label: "Extratos",
-            href: "/administrativo/financeiro/contas/extratos",
-            icon: Receipt,
+            label: "Contabilidade",
+            icon: Calculator,
+            adminOnly: true,
+            modulo: "financeiro",
+            children: [
+              {
+                label: "DRE",
+                href: "/administrativo/contabilidade/dre",
+                icon: FileText,
+              },
+              {
+                label: "Relatório de Atividades",
+                href: "/administrativo/contabilidade/relatorio-atividades",
+                icon: FileBarChart,
+              },
+              {
+                label: "Balanço",
+                href: "/administrativo/contabilidade/balanco",
+                icon: Scale,
+              },
+            ],
           },
           {
-            label: "Aplicações",
-            href: "/administrativo/financeiro/contas/aplicacoes",
-            icon: TrendingUp,
+            label: "Contas",
+            icon: Landmark,
+            adminOnly: true,
+            modulo: "financeiro",
+            children: [
+              {
+                label: "Extratos",
+                href: "/administrativo/financeiro/contas/extratos",
+                icon: Receipt,
+              },
+              {
+                label: "Aplicações",
+                href: "/administrativo/financeiro/contas/aplicacoes",
+                icon: TrendingUp,
+              },
+              {
+                label: "Planilha Financeira",
+                href: "/administrativo/financeiro/contas/planilha",
+                icon: FileSpreadsheet,
+              },
+            ],
           },
           {
-            label: "Planilha Financeira",
-            href: "/administrativo/financeiro/contas/planilha",
-            icon: FileSpreadsheet,
-          },
-        ],
-      },
-      {
-        label: "Mensalidades",
-        icon: CircleDollarSign,
-        adminOnly: true,
-        modulo: "financeiro",
-        children: [
-          {
-            label: "Planos",
-            href: "/administrativo/financeiro/mensalidades/planos",
+            label: "Mensalidades",
             icon: CircleDollarSign,
-          },
-          {
-            label: "Matrículas",
-            href: "/administrativo/financeiro/mensalidades/matriculas",
-            icon: Users,
-          },
-          {
-            label: "Cobranças",
-            href: "/administrativo/financeiro/mensalidades/cobrancas",
-            icon: Receipt,
+            adminOnly: true,
+            modulo: "financeiro",
+            children: [
+              {
+                label: "Planos",
+                href: "/administrativo/financeiro/mensalidades/planos",
+                icon: CircleDollarSign,
+              },
+              {
+                label: "Matrículas",
+                href: "/administrativo/financeiro/mensalidades/matriculas",
+                icon: Users,
+              },
+              {
+                label: "Cobranças",
+                href: "/administrativo/financeiro/mensalidades/cobrancas",
+                icon: Receipt,
+              },
+            ],
           },
         ],
       },
-    ],
-  },
-  {
-    titulo: "Configurações",
-    nodes: [
+
+      // ── Relatórios: pilar próprio ────────────────────────────────────────
       {
-        label: "Avisos",
-        href: "/avisos",
-        icon: Megaphone,
-        adminOnly: true,
-        modulo: "relacionamento",
+        label: "Relatórios",
+        icon: FileBarChart,
+        children: [
+          { label: "Relatórios", href: "/relatorios", icon: FileBarChart },
+          {
+            label: "Relatório de Impacto",
+            href: "/impacto",
+            icon: TrendingUp,
+            modulo: "captacao",
+          },
+        ],
       },
-      { label: "Loja (produtos)", href: "/produtos", icon: ShoppingBag, adminOnly: true },
-      { label: "Usuários", href: "/usuarios", icon: UserCog, adminOnly: true },
-      { label: "Auditoria", href: "/auditoria", icon: ShieldCheck, adminOnly: true },
+
+      // ── Configurações: administração do sistema ──────────────────────────
       {
-        label: "Padrão de Documentos",
-        href: "/padrao-documentos",
-        icon: Stamp,
-        adminOnly: true,
-      },
-      {
-        label: "Foto do Aluno",
-        href: "/config-foto-aluno",
-        icon: Camera,
-        adminOnly: true,
-      },
-      {
-        label: "Importação",
-        href: "/importacao",
-        icon: Upload,
-        adminOnly: true,
-      },
-      {
-        label: "Sincronização",
-        href: "/sincronizacao",
-        icon: RefreshCw,
-        adminOnly: true,
+        label: "Configurações",
+        icon: Settings,
+        children: [
+          { label: "Usuários", href: "/usuarios", icon: UserCog, adminOnly: true },
+          { label: "Auditoria", href: "/auditoria", icon: ShieldCheck, adminOnly: true },
+          { label: "Loja (produtos)", href: "/produtos", icon: ShoppingBag, adminOnly: true },
+          {
+            label: "Avisos",
+            href: "/avisos",
+            icon: Megaphone,
+            adminOnly: true,
+            modulo: "relacionamento",
+          },
+          {
+            label: "Padrões",
+            icon: SlidersHorizontal,
+            adminOnly: true,
+            children: [
+              {
+                label: "Padrão de Documentos",
+                href: "/padrao-documentos",
+                icon: Stamp,
+                adminOnly: true,
+              },
+              {
+                label: "Foto do Aluno",
+                href: "/config-foto-aluno",
+                icon: Camera,
+                adminOnly: true,
+              },
+            ],
+          },
+          {
+            label: "Dados",
+            icon: Database,
+            adminOnly: true,
+            children: [
+              {
+                label: "Importação",
+                href: "/importacao",
+                icon: Upload,
+                adminOnly: true,
+              },
+              {
+                label: "Sincronização",
+                href: "/sincronizacao",
+                icon: RefreshCw,
+                adminOnly: true,
+              },
+            ],
+          },
+        ],
       },
     ],
   },
