@@ -22,6 +22,7 @@ import {
 import { redimensionarQuadrado } from "@/lib/imagem";
 import { ApiError } from "@/lib/api";
 import { OPCOES_FAIXA_BASE, faixaInfo } from "@/features/alunos/faixa";
+import { MolduraFaixa } from "@/components/MolduraFaixa";
 import {
   useMeuPerfilSite,
   useSalvarMeuPerfilSite,
@@ -102,16 +103,21 @@ export function PerfilSiteDialog({ aberto, onOpenChange }: Props) {
 
         {/* Prévia: foto na moldura da faixa */}
         <div className="flex flex-col items-center gap-3">
-          <div
-            className="flex size-24 items-center justify-center overflow-hidden rounded-full bg-muted"
-            style={{ border: `4px solid ${corFaixa}` }}
-          >
-            {foto ? (
-              <img src={foto} alt="Foto do professor" className="size-full object-cover" />
-            ) : (
+          {foto ? (
+            <MolduraFaixa
+              foto={foto}
+              faixa={faixa !== "" ? Number(faixa) : null}
+              tamanho={104}
+              alt="Foto do professor"
+            />
+          ) : (
+            <div
+              className="flex size-24 items-center justify-center overflow-hidden rounded-full bg-muted"
+              style={{ border: `4px solid ${corFaixa}` }}
+            >
               <User className="size-10 text-muted-foreground" />
-            )}
-          </div>
+            </div>
+          )}
           <input
             ref={inputRef}
             type="file"

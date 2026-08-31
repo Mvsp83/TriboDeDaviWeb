@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Info, ChevronDown, MapPin, ClipboardList, ArrowRight } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import type { LinkFaq } from "@/features/site/conteudoSite";
-import { faixaInfo } from "@/features/alunos/faixa";
+import { MolduraFaixa } from "@/components/MolduraFaixa";
 import { ApiRotas } from "@/lib/apiRoutes";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
@@ -127,29 +127,21 @@ function PolosCadastrados() {
             <div className="mt-3 border-t border-border pt-3">
               <p className="mb-2 text-xs font-medium text-foreground">Professores</p>
               <div className="flex flex-wrap gap-3">
-                {p.professores.map((prof, i) => {
-                  const info = prof.faixa != null ? faixaInfo(prof.faixa) : null;
-                  return (
-                    <div key={i} className="flex w-16 flex-col items-center gap-1 text-center">
-                      <div
-                        className="size-14 overflow-hidden rounded-full bg-muted"
-                        style={{ border: `3px solid ${info?.cor ?? "#d4d4d8"}` }}
-                        title={info ? `Faixa ${info.nome}` : undefined}
-                      >
-                        <img
-                          src={prof.foto}
-                          alt={prof.nome ?? "Professor"}
-                          className="size-full object-cover"
-                        />
-                      </div>
-                      {prof.nome && (
-                        <span className="w-full truncate text-[11px] leading-tight text-muted-foreground">
-                          {prof.nome}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
+                {p.professores.map((prof, i) => (
+                  <div key={i} className="flex w-16 flex-col items-center gap-1 text-center">
+                    <MolduraFaixa
+                      foto={prof.foto}
+                      faixa={prof.faixa}
+                      tamanho={64}
+                      alt={prof.nome ?? "Professor"}
+                    />
+                    {prof.nome && (
+                      <span className="w-full truncate text-[11px] leading-tight text-muted-foreground">
+                        {prof.nome}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}
