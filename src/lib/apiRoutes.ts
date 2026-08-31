@@ -244,6 +244,10 @@ export const ApiRotas = {
     `/api/DocumentoContabil/download/${fileId}`,
   documentoContabilExcluir: (fileId: string) =>
     `/api/DocumentoContabil/excluir/${fileId}`,
+  // Balanços públicos (página de Transparência) — só a categoria Balanço.
+  balancosPublicos: "/api/DocumentoPublico/balancos",
+  balancoPublicoDownload: (fileId: string) =>
+    `/api/DocumentoPublico/balanco/${fileId}`,
 
   // Loja virtual. vitrine/foto são públicas; o resto é admin.
   produtoVitrine: "/api/Produto/vitrine",

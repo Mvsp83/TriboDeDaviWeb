@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
   HeartHandshake,
@@ -22,11 +23,28 @@ import {
   type DocumentoPublico,
 } from "@/features/transparencia/conteudoTransparencia";
 import { SITE } from "@/features/site/conteudoSite";
+import { ApiRotas } from "@/lib/apiRoutes";
 import { moeda } from "@/lib/format";
 import { urlSegura } from "@/lib/utils";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { PaginaPublica } from "@/components/PaginaPublica";
+
+// Balanço cadastrado (categoria Balanço do DocumentoContabil), exposto público.
+interface BalancoPublico {
+  id: string;
+  nome: string;
+  dataCriacao: string | null;
+}
+
+// Ano do balanço: do nome do arquivo ("Balanço 2025.pdf") e, na falta, da data
+// de envio. 0 = sem ano identificável.
+function anoDoBalanco(b: BalancoPublico): number {
+  const m = /(20\d{2})/.exec(b.nome);
+  if (m) return Number(m[1]);
+  if (b.dataCriacao) return new Date(b.dataCriacao).getFullYear();
+  return 0;
+}
 
 function Numero({ valor, rotulo }: { valor: string; rotulo: string }) {
   return (
@@ -104,6 +122,40 @@ export function TransparenciaPage() {
       return b - a; // anos em ordem decrescente
     });
   }, [documentos]);
+
+  // Balanços cadastrados (público). fetch puro: página pública não pode ser
+  // redirecionada ao /login se a API responder erro.
+  const { data: balancos = [] } = useQuery({
+    queryKey: ["balancos-publicos"],
+    queryFn: async (): Promise<BalancoPublico[]> => {
+      const base = import.meta.env.VITE_API_BASE_URL || "";
+      try {
+        const res = await fetch(`${base}${ApiRotas.balancosPublicos}`);
+        if (!res.ok) return [];
+        const json = await res.json();
+        return (json?.data as BalancoPublico[]) ?? [];
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  const balancosPorAno = useMemo(() => {
+    const grupos = new Map<number, BalancoPublico[]>();
+    for (const b of balancos) {
+      const ano = anoDoBalanco(b);
+      const lista = grupos.get(ano) ?? [];
+      lista.push(b);
+      grupos.set(ano, lista);
+    }
+    return [...grupos.entries()].sort(([a], [b]) => {
+      if (a === 0) return 1;
+      if (b === 0) return -1;
+      return b - a;
+    });
+  }, [balancos]);
+
+  const baseApi = import.meta.env.VITE_API_BASE_URL || "";
 
   return (
     <PaginaPublica>
@@ -423,6 +475,45 @@ export function TransparenciaPage() {
               </li>
             )}
           </ul>
+        </section>
+      )}
+
+      {/* Balanços por ano (cadastrados na contabilidade) */}
+      {balancos.length > 0 && (
+        <section className="border-t border-border bg-secondary/20">
+          <div className="mx-auto max-w-3xl px-4 py-12 md:py-16">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
+              <Landmark className="size-6 text-primary" />
+              Balanços por ano
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Balanços patrimoniais cadastrados, do mais recente ao mais antigo.
+            </p>
+            <div className="mt-6 space-y-8">
+              {balancosPorAno.map(([ano, itens]) => (
+                <div key={ano}>
+                  <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    {ano === 0 ? "Sem ano" : ano}
+                  </h3>
+                  <ul className="flex flex-col gap-2">
+                    {itens.map((b) => (
+                      <li key={b.id}>
+                        <a
+                          href={`${baseApi}${ApiRotas.balancoPublicoDownload(b.id)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
+                        >
+                          <FileText className="size-4 shrink-0 text-primary" />
+                          <span className="truncate">{b.nome}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
       )}
 
