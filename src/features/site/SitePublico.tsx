@@ -13,6 +13,7 @@ import {
 import { SITE, temInformacoes } from "@/features/site/conteudoSite";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { SobreApp } from "@/components/SobreApp";
+import { BotaoVoltarAoTopo } from "@/components/BotaoVoltarAoTopo";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { urlSegura } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -370,6 +371,9 @@ export function SitePublico() {
           </div>
         </div>
       </footer>
+
+      {/* Fica acima do assistente flutuante (bottom-4). */}
+      <BotaoVoltarAoTopo className="bottom-20" />
     </div>
   );
 }
