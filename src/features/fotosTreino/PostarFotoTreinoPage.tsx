@@ -1,9 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Camera, ImagePlus, Loader2, Send } from "lucide-react";
+import { Camera, ImagePlus, Loader2, Send, CalendarX } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePolos } from "@/features/polos/polosApi";
+import { useAulas } from "@/features/aulas/aulasApi";
 import {
   useEnviarFotoTreino,
   comprimirImagem,
@@ -27,7 +28,9 @@ export function PostarFotoTreinoPage() {
   const { sessao } = useAuth();
   const admin = sessao?.isAdministrador ?? false;
   const { data: polos } = usePolos();
+  const { data: aulas } = useAulas(admin);
   const enviar = useEnviarFotoTreino();
+  const hoje = new Date().toISOString().slice(0, 10);
 
   // Professor só posta treino do polo; admin pode escolher a coleção.
   const [categoria, setCategoria] = useState<CategoriaFoto>("polo");
@@ -35,8 +38,8 @@ export function PostarFotoTreinoPage() {
   const [poloId, setPoloId] = useState<string>(
     sessao?.poloId != null ? String(sessao.poloId) : "",
   );
-  const [turma, setTurma] = useState("1");
-  const [dataAula, setDataAula] = useState(() => new Date().toISOString().slice(0, 10));
+  const [turma, setTurma] = useState("");
+  const [dataAula, setDataAula] = useState(hoje);
   const [legenda, setLegenda] = useState("");
   const [consentimento, setConsentimento] = useState(true);
   const [arquivo, setArquivo] = useState<File | null>(null);
@@ -46,6 +49,62 @@ export function PostarFotoTreinoPage() {
     () => (arquivo ? URL.createObjectURL(arquivo) : null),
     [arquivo],
   );
+
+  // Polo cujas aulas alimentam os seletores: o professor usa o próprio; o admin
+  // usa o que escolheu. Sem polo definido, não há aulas para oferecer.
+  const poloEfetivo = admin
+    ? poloId
+      ? Number(poloId)
+      : null
+    : sessao?.poloId ?? null;
+
+  // Aulas do polo já realizadas (data <= hoje): a foto se amarra a uma delas,
+  // então turma e data só podem sair daqui. Mais recentes primeiro.
+  const aulasDoPolo = useMemo(() => {
+    if (!ehPolo || poloEfetivo == null) return [];
+    return (aulas ?? [])
+      .filter((a) => a.poloId === poloEfetivo && a.data.slice(0, 10) <= hoje)
+      .sort((a, b) => b.data.slice(0, 10).localeCompare(a.data.slice(0, 10)));
+  }, [aulas, ehPolo, poloEfetivo, hoje]);
+
+  const turmasDisponiveis = useMemo(
+    () => [...new Set(aulasDoPolo.map((a) => a.turma))].sort((a, b) => a - b),
+    [aulasDoPolo],
+  );
+
+  // Aulas da turma escolhida (para o seletor de data).
+  const aulasDaTurma = useMemo(
+    () => aulasDoPolo.filter((a) => a.turma === Number(turma)),
+    [aulasDoPolo, turma],
+  );
+
+  // Mantém a turma selecionada dentro das disponíveis (ao trocar de polo etc.).
+  useEffect(() => {
+    if (!ehPolo) return;
+    if (turmasDisponiveis.length === 0) {
+      if (turma) setTurma("");
+    } else if (!turmasDisponiveis.includes(Number(turma))) {
+      setTurma(String(turmasDisponiveis[0]));
+    }
+  }, [ehPolo, turmasDisponiveis, turma]);
+
+  // Mantém a data dentro das aulas da turma; em coleção não-polo, data livre.
+  useEffect(() => {
+    if (!ehPolo) {
+      if (!dataAula) setDataAula(hoje);
+      return;
+    }
+    const datas = aulasDaTurma.map((a) => a.data.slice(0, 10));
+    if (datas.length === 0) {
+      if (dataAula) setDataAula("");
+    } else if (!datas.includes(dataAula)) {
+      setDataAula(datas[0]);
+    }
+  }, [ehPolo, aulasDaTurma, dataAula, hoje]);
+
+  const semAulasNoPolo = ehPolo && poloEfetivo != null && turmasDisponiveis.length === 0;
+  const fmtData = (yyyyMMdd: string) =>
+    new Date(`${yyyyMMdd}T00:00:00`).toLocaleDateString("pt-BR");
 
   function escolher(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null;
@@ -64,6 +123,18 @@ export function PostarFotoTreinoPage() {
     if (ehPolo && admin && !poloId) {
       toast.warning("Selecione o polo.");
       return;
+    }
+    if (ehPolo) {
+      // A foto precisa se vincular a uma aula existente (mesma turma e data).
+      const temAula = aulasDoPolo.some(
+        (a) => a.turma === Number(turma) && a.data.slice(0, 10) === dataAula,
+      );
+      if (!temAula) {
+        toast.warning(
+          "Escolha uma turma e uma data com aula cadastrada. Sem aula, crie-a primeiro em Aula › Aulas.",
+        );
+        return;
+      }
     }
     if (!dataAula) {
       toast.warning("Informe a data.");
@@ -125,7 +196,14 @@ export function PostarFotoTreinoPage() {
           {admin && (
             <div>
               <Label className="mb-1.5">Coleção</Label>
-              <Select value={categoria} onValueChange={(v) => setCategoria(v as CategoriaFoto)}>
+              <Select
+                value={categoria}
+                onValueChange={(v) => {
+                  const c = v as CategoriaFoto;
+                  setCategoria(c);
+                  if (c !== "polo" && !dataAula) setDataAula(hoje);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -158,31 +236,73 @@ export function PostarFotoTreinoPage() {
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            {ehPolo && (
-              <div>
-                <Label className="mb-1.5">Turma</Label>
-                <Select value={turma} onValueChange={setTurma}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Turma 1</SelectItem>
-                    <SelectItem value="2">Turma 2</SelectItem>
-                    <SelectItem value="3">Turma 3</SelectItem>
-                  </SelectContent>
-                </Select>
+            {ehPolo ? (
+              <>
+                <div>
+                  <Label className="mb-1.5">Turma</Label>
+                  <Select
+                    value={turma}
+                    onValueChange={setTurma}
+                    disabled={turmasDisponiveis.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {turmasDisponiveis.map((t) => (
+                        <SelectItem key={t} value={String(t)}>
+                          Turma {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="mb-1.5">Data da aula</Label>
+                  <Select
+                    value={dataAula}
+                    onValueChange={setDataAula}
+                    disabled={aulasDaTurma.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {aulasDaTurma.map((a) => {
+                        const d = a.data.slice(0, 10);
+                        return (
+                          <SelectItem key={a.id} value={d}>
+                            {fmtData(d)} · {a.horaInicio.slice(0, 5)}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            ) : (
+              <div className="col-span-2">
+                <Label className="mb-1.5">Data da foto</Label>
+                <Input
+                  type="date"
+                  value={dataAula}
+                  max={hoje}
+                  onChange={(e) => setDataAula(e.target.value)}
+                />
               </div>
             )}
-            <div className={ehPolo ? "" : "col-span-2"}>
-              <Label className="mb-1.5">{ehPolo ? "Data da aula" : "Data da foto"}</Label>
-              <Input
-                type="date"
-                value={dataAula}
-                max={new Date().toISOString().slice(0, 10)}
-                onChange={(e) => setDataAula(e.target.value)}
-              />
-            </div>
           </div>
+
+          {semAulasNoPolo && (
+            <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-600 dark:text-amber-300">
+              <CalendarX className="mt-0.5 size-4 shrink-0" />
+              <span>
+                Nenhuma aula cadastrada para este polo. Crie a aula em{" "}
+                <span className="font-medium">Aula › Aulas</span> antes de postar a foto —
+                a foto fica vinculada a uma aula.
+              </span>
+            </div>
+          )}
 
           <div>
             <Label className="mb-1.5">Foto</Label>
@@ -242,7 +362,11 @@ export function PostarFotoTreinoPage() {
             </span>
           </label>
 
-          <Button className="w-full" onClick={enviarFoto} disabled={enviar.isPending}>
+          <Button
+            className="w-full"
+            onClick={enviarFoto}
+            disabled={enviar.isPending || (ehPolo && (!turma || !dataAula))}
+          >
             {enviar.isPending ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
