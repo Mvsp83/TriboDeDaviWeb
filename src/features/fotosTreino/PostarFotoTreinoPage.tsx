@@ -67,42 +67,37 @@ export function PostarFotoTreinoPage() {
       .sort((a, b) => b.data.slice(0, 10).localeCompare(a.data.slice(0, 10)));
   }, [aulas, ehPolo, poloEfetivo, hoje]);
 
-  const turmasDisponiveis = useMemo(
-    () => [...new Set(aulasDoPolo.map((a) => a.turma))].sort((a, b) => a - b),
-    [aulasDoPolo],
+  // Aula escolhida = a que casa com turma + data atuais (turma e data sempre
+  // saem juntas de uma mesma aula, então nunca ficam descompassadas).
+  const aulaSelecionada = useMemo(
+    () =>
+      aulasDoPolo.find(
+        (a) => a.turma === Number(turma) && a.data.slice(0, 10) === dataAula,
+      ) ?? null,
+    [aulasDoPolo, turma, dataAula],
   );
 
-  // Aulas da turma escolhida (para o seletor de data).
-  const aulasDaTurma = useMemo(
-    () => aulasDoPolo.filter((a) => a.turma === Number(turma)),
-    [aulasDoPolo, turma],
-  );
-
-  // Mantém a turma selecionada dentro das disponíveis (ao trocar de polo etc.).
-  useEffect(() => {
-    if (!ehPolo) return;
-    if (turmasDisponiveis.length === 0) {
-      if (turma) setTurma("");
-    } else if (!turmasDisponiveis.includes(Number(turma))) {
-      setTurma(String(turmasDisponiveis[0]));
-    }
-  }, [ehPolo, turmasDisponiveis, turma]);
-
-  // Mantém a data dentro das aulas da turma; em coleção não-polo, data livre.
+  // Mantém a seleção válida: escolhe a aula mais recente ao trocar de polo, e
+  // limpa se o polo não tem aulas. Em coleção não-polo, a data é livre.
   useEffect(() => {
     if (!ehPolo) {
       if (!dataAula) setDataAula(hoje);
       return;
     }
-    const datas = aulasDaTurma.map((a) => a.data.slice(0, 10));
-    if (datas.length === 0) {
-      if (dataAula) setDataAula("");
-    } else if (!datas.includes(dataAula)) {
-      setDataAula(datas[0]);
+    if (aulaSelecionada) return; // já válida
+    if (aulasDoPolo.length === 0) {
+      if (turma || dataAula) {
+        setTurma("");
+        setDataAula("");
+      }
+    } else {
+      const a = aulasDoPolo[0];
+      setTurma(String(a.turma));
+      setDataAula(a.data.slice(0, 10));
     }
-  }, [ehPolo, aulasDaTurma, dataAula, hoje]);
+  }, [ehPolo, aulasDoPolo, aulaSelecionada, turma, dataAula, hoje]);
 
-  const semAulasNoPolo = ehPolo && poloEfetivo != null && turmasDisponiveis.length === 0;
+  const semAulasNoPolo = ehPolo && poloEfetivo != null && aulasDoPolo.length === 0;
   const fmtData = (yyyyMMdd: string) =>
     new Date(`${yyyyMMdd}T00:00:00`).toLocaleDateString("pt-BR");
 
@@ -235,63 +230,46 @@ export function PostarFotoTreinoPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
-            {ehPolo ? (
-              <>
-                <div>
-                  <Label className="mb-1.5">Turma</Label>
-                  <Select
-                    value={turma}
-                    onValueChange={setTurma}
-                    disabled={turmasDisponiveis.length === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="—" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {turmasDisponiveis.map((t) => (
-                        <SelectItem key={t} value={String(t)}>
-                          Turma {t}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="mb-1.5">Data da aula</Label>
-                  <Select
-                    value={dataAula}
-                    onValueChange={setDataAula}
-                    disabled={aulasDaTurma.length === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="—" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {aulasDaTurma.map((a) => {
-                        const d = a.data.slice(0, 10);
-                        return (
-                          <SelectItem key={a.id} value={d}>
-                            {fmtData(d)} · {a.horaInicio.slice(0, 5)}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            ) : (
-              <div className="col-span-2">
-                <Label className="mb-1.5">Data da foto</Label>
-                <Input
-                  type="date"
-                  value={dataAula}
-                  max={hoje}
-                  onChange={(e) => setDataAula(e.target.value)}
-                />
-              </div>
-            )}
-          </div>
+          {ehPolo ? (
+            <div>
+              <Label className="mb-1.5">Aula</Label>
+              <Select
+                value={aulaSelecionada ? String(aulaSelecionada.id) : ""}
+                onValueChange={(id) => {
+                  const a = aulasDoPolo.find((x) => String(x.id) === id);
+                  if (a) {
+                    setTurma(String(a.turma));
+                    setDataAula(a.data.slice(0, 10));
+                  }
+                }}
+                disabled={aulasDoPolo.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a aula" />
+                </SelectTrigger>
+                <SelectContent>
+                  {aulasDoPolo.map((a) => {
+                    const d = a.data.slice(0, 10);
+                    return (
+                      <SelectItem key={a.id} value={String(a.id)}>
+                        Turma {a.turma} · {fmtData(d)} · {a.horaInicio.slice(0, 5)}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div>
+              <Label className="mb-1.5">Data da foto</Label>
+              <Input
+                type="date"
+                value={dataAula}
+                max={hoje}
+                onChange={(e) => setDataAula(e.target.value)}
+              />
+            </div>
+          )}
 
           {semAulasNoPolo && (
             <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-600 dark:text-amber-300">
