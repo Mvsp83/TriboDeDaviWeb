@@ -55,6 +55,7 @@ export const ApiRotas = {
   presencaUpdate: "/api/Presenca/update",
 
   polos: "/api/Polo/get-por-polo",
+  polosPublicos: "/api/Polo/publicos",
   poloCreate: "/api/Polo/create",
   poloUpdate: "/api/Polo/update",
   poloDelete: (id: number) => `/api/Polo/delete/${id}`,

@@ -1,16 +1,10 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import {
-  Info,
-  ChevronDown,
-  MapPin,
-  Clock,
-  UserRound,
-  ClipboardList,
-  ArrowRight,
-} from "lucide-react";
+import { Info, ChevronDown, MapPin, ClipboardList, ArrowRight } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import type { LinkFaq } from "@/features/site/conteudoSite";
+import { ApiRotas } from "@/lib/apiRoutes";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { PaginaPublica } from "@/components/PaginaPublica";
@@ -18,8 +12,111 @@ import { PaginaPublica } from "@/components/PaginaPublica";
 // Âncora estável por índice — não depende do texto do título (editável).
 const idCategoria = (i: number) => `cat-${i}`;
 
-// Botão de link da resposta: leva à parte certa do site (rota interna) ou a um
-// endereço externo.
+// Reconhece a categoria de polos pelo título (para injetar a lista dinâmica).
+const ehCategoriaPolos = (titulo: string) =>
+  titulo.toLowerCase().startsWith("polos");
+
+// ── Polos do cadastro (dinâmico, endpoint público) ───────────────────────────
+interface HorarioTurmaPub {
+  turma: number;
+  diaSemana: number;
+  horaInicio: string;
+  horaFim: string;
+}
+interface PoloPub {
+  nome: string;
+  endereco: string;
+  bairro: string;
+  cidade: string;
+  informacoes: string;
+  horarios: HorarioTurmaPub[];
+}
+
+const DIA_CURTO: Record<number, string> = {
+  0: "Dom",
+  1: "Seg",
+  2: "Ter",
+  3: "Qua",
+  4: "Qui",
+  5: "Sex",
+  6: "Sáb",
+};
+
+function agruparPorTurma(horarios: HorarioTurmaPub[]) {
+  const mapa = new Map<number, HorarioTurmaPub[]>();
+  for (const h of [...horarios].sort((a, b) => a.diaSemana - b.diaSemana)) {
+    const lista = mapa.get(h.turma) ?? [];
+    lista.push(h);
+    mapa.set(h.turma, lista);
+  }
+  return [...mapa.entries()].sort(([a], [b]) => a - b);
+}
+
+function PolosCadastrados() {
+  // fetch puro (sem o interceptor do axios) — página pública não pode ser
+  // redirecionada ao /login se a API responder 401/erro.
+  const { data: polos = [], isLoading } = useQuery({
+    queryKey: ["polos-publicos"],
+    queryFn: async (): Promise<PoloPub[]> => {
+      const base = import.meta.env.VITE_API_BASE_URL || "";
+      try {
+        const res = await fetch(`${base}${ApiRotas.polosPublicos}`);
+        if (!res.ok) return [];
+        const json = await res.json();
+        return (json?.data as PoloPub[]) ?? [];
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  if (isLoading)
+    return <p className="text-sm text-muted-foreground">Carregando…</p>;
+  if (polos.length === 0)
+    return (
+      <p className="text-sm text-muted-foreground">
+        Os polos aparecerão aqui assim que forem cadastrados.
+      </p>
+    );
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {polos.map((p) => (
+        <div key={p.nome} className="rounded-lg border border-border bg-background p-4">
+          <h4 className="flex items-center gap-1.5 font-semibold text-foreground">
+            <MapPin className="size-4 shrink-0 text-primary" />
+            {p.nome}
+          </h4>
+          {(p.endereco || p.bairro || p.cidade) && (
+            <p className="mt-1 text-xs">
+              {[p.endereco, p.bairro, p.cidade].filter(Boolean).join(", ")}
+            </p>
+          )}
+          {p.informacoes && <p className="mt-1 text-xs">{p.informacoes}</p>}
+          {p.horarios.length > 0 && (
+            <div className="mt-2 space-y-0.5 border-t border-border pt-2 text-xs">
+              {agruparPorTurma(p.horarios).map(([turma, hs]) => (
+                <p key={turma}>
+                  <span className="font-medium text-foreground">Turma {turma}:</span>{" "}
+                  {hs
+                    .map((h) => {
+                      const hora = h.horaInicio
+                        ? `${h.horaInicio}${h.horaFim ? `–${h.horaFim}` : ""}`
+                        : "horário a definir";
+                      return `${DIA_CURTO[h.diaSemana]} ${hora}`;
+                    })
+                    .join(" · ")}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Botão de link da resposta: leva à parte certa do site ou a um endereço externo.
 function LinkResposta({ link }: { link: LinkFaq }) {
   const conteudo = (
     <>
@@ -40,19 +137,16 @@ function LinkResposta({ link }: { link: LinkFaq }) {
   );
 }
 
-// Página pública de Informações em formato de FAQ: perguntas por assunto que
-// abrem a resposta ao clicar e apontam para a parte certa do site. Conteúdo
-// curado em conteudoSite.ts.
+// Página pública de Informações em formato de FAQ. A categoria de polos ganha,
+// no fim, uma pergunta com a lista dos polos cadastrados (dados do cadastro).
 export function InformacoesPage() {
   useDocumentTitle(`Informações — ${SITE.nome}`);
-  const { informacoes, polos } = SITE;
+  const { informacoes } = SITE;
 
   const categorias = informacoes.categorias.filter(
     (c) => c.perguntas.length > 0,
   );
-  const temPolos = polos.length > 0;
 
-  // Perguntas abertas, por chave "categoria-pergunta". Várias podem ficar abertas.
   const [abertas, setAbertas] = useState<Set<string>>(new Set());
   const alternar = (chave: string) =>
     setAbertas((atual) => {
@@ -62,10 +156,44 @@ export function InformacoesPage() {
       return proxima;
     });
 
-  const secoes = [
-    ...categorias.map((c, i) => ({ id: idCategoria(i), label: c.titulo })),
-    ...(temPolos ? [{ id: "polos", label: "Polos e endereços" }] : []),
-  ];
+  const secoes = categorias.map((c, i) => ({
+    id: idCategoria(i),
+    label: c.titulo,
+  }));
+
+  function ItemPergunta({
+    chave,
+    pergunta,
+    children,
+  }: {
+    chave: string;
+    pergunta: string;
+    children: React.ReactNode;
+  }) {
+    const aberta = abertas.has(chave);
+    return (
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <button
+          type="button"
+          onClick={() => alternar(chave)}
+          aria-expanded={aberta}
+          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left font-medium hover:text-primary"
+        >
+          <span>{pergunta}</span>
+          <ChevronDown
+            className={`size-4 shrink-0 text-muted-foreground transition-transform ${
+              aberta ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+        {aberta && (
+          <div className="border-t border-border px-4 py-3 text-sm text-muted-foreground">
+            {children}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <PaginaPublica larguraMax="max-w-4xl">
@@ -99,7 +227,7 @@ export function InformacoesPage() {
 
       {/* FAQ por categoria */}
       <section className="mx-auto max-w-4xl px-4 pb-16">
-        {secoes.length === 0 ? (
+        {categorias.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
             Em breve — as informações do projeto aparecerão aqui.
           </div>
@@ -111,77 +239,25 @@ export function InformacoesPage() {
                   {cat.titulo}
                 </h2>
                 <div className="mt-4 flex flex-col gap-2">
-                  {cat.perguntas.map((p, qi) => {
-                    const chave = `${ci}-${qi}`;
-                    const aberta = abertas.has(chave);
-                    return (
-                      <div
-                        key={qi}
-                        className="overflow-hidden rounded-xl border border-border bg-card"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => alternar(chave)}
-                          aria-expanded={aberta}
-                          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left font-medium hover:text-primary"
-                        >
-                          <span>{p.pergunta}</span>
-                          <ChevronDown
-                            className={`size-4 shrink-0 text-muted-foreground transition-transform ${
-                              aberta ? "rotate-180" : ""
-                            }`}
-                          />
-                        </button>
-                        {aberta && (
-                          <div className="border-t border-border px-4 py-3 text-sm text-muted-foreground">
-                            <p className="whitespace-pre-line">{p.resposta}</p>
-                            {p.link && <LinkResposta link={p.link} />}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                  {cat.perguntas.map((p, qi) => (
+                    <ItemPergunta key={qi} chave={`${ci}-${qi}`} pergunta={p.pergunta}>
+                      <p className="whitespace-pre-line">{p.resposta}</p>
+                      {p.link && <LinkResposta link={p.link} />}
+                    </ItemPergunta>
+                  ))}
+
+                  {/* Lista dinâmica dos polos, na categoria de polos. */}
+                  {ehCategoriaPolos(cat.titulo) && (
+                    <ItemPergunta
+                      chave={`polos-${ci}`}
+                      pergunta="Quais são os polos e seus endereços?"
+                    >
+                      <PolosCadastrados />
+                    </ItemPergunta>
+                  )}
                 </div>
               </div>
             ))}
-
-            {temPolos && (
-              <div id="polos" className="scroll-mt-6">
-                <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
-                  Polos e endereços
-                </h2>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  {polos.map((polo) => (
-                    <div
-                      key={polo.nome}
-                      className="rounded-xl border border-border bg-card p-5"
-                    >
-                      <h3 className="flex items-center gap-2 font-semibold">
-                        <MapPin className="size-4 text-primary" />
-                        {polo.nome}
-                      </h3>
-                      {polo.endereco && (
-                        <p className="mt-1.5 text-sm text-muted-foreground">
-                          {polo.endereco}
-                        </p>
-                      )}
-                      {polo.horarios && (
-                        <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <Clock className="size-3.5" />
-                          {polo.horarios}
-                        </p>
-                      )}
-                      {polo.responsavel && (
-                        <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <UserRound className="size-3.5" />
-                          {polo.responsavel}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </section>
