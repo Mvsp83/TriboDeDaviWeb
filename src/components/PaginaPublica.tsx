@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import { SobreApp } from "@/components/SobreApp";
+import { BotaoVoltarAoTopo } from "@/components/BotaoVoltarAoTopo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -72,6 +73,9 @@ export function PaginaPublica({
           </div>
         </div>
       </footer>
+
+      {/* Fica acima do assistente flutuante (bottom-4). */}
+      <BotaoVoltarAoTopo className="bottom-20" />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { navGroups, coletarFolhas } from "@/components/layout/navConfig";
 import { useDocumentoPadraoRemoto } from "@/features/configuracoes/configuracaoDocumentoApi";
 import { AvisosPendentes } from "@/features/avisos/AvisosPendentes";
+import { BotaoVoltarAoTopo } from "@/components/BotaoVoltarAoTopo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -76,6 +77,8 @@ export function AppLayout() {
       </div>
 
       {mostrarBottomNav && <BottomNav />}
+      {/* No mobile fica acima da navegação inferior; no desktop, junto à base. */}
+      <BotaoVoltarAoTopo className={cn(mostrarBottomNav ? "bottom-24" : "bottom-6", "md:bottom-6")} />
       <AvisosPendentes />
     </div>
   );
