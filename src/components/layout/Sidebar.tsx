@@ -21,6 +21,7 @@ const CORES_SECAO: Record<string, string> = {
   Administrativo: "#a78bfa",
   Financeiro: "#a3e635",
   Relatórios: "#c084fc",
+  Loja: "#f472b6",
   Configurações: "#f59e0b",
 };
 

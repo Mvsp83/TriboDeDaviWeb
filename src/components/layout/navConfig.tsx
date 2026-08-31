@@ -149,7 +149,6 @@ export const navGroups: NavGroup[] = [
               { label: "Competições", href: "/competicoes", icon: Medal },
             ],
           },
-          { label: "Solicitações", href: "/solicitacoes", icon: MessagesSquare },
           {
             label: "Fotos do Treino",
             icon: Camera,
@@ -197,6 +196,14 @@ export const navGroups: NavGroup[] = [
         label: "Administrativo",
         icon: Briefcase,
         children: [
+          { label: "Solicitações", href: "/solicitacoes", icon: MessagesSquare },
+          {
+            label: "Avisos",
+            href: "/avisos",
+            icon: Megaphone,
+            adminOnly: true,
+            modulo: "relacionamento",
+          },
           {
             label: "Calendário",
             href: "/calendario",
@@ -334,6 +341,9 @@ export const navGroups: NavGroup[] = [
         ],
       },
 
+      // ── Loja: opção geral (gestão de produtos) ───────────────────────────
+      { label: "Loja", href: "/produtos", icon: ShoppingBag, adminOnly: true },
+
       // ── Configurações: administração do sistema ──────────────────────────
       {
         label: "Configurações",
@@ -341,14 +351,6 @@ export const navGroups: NavGroup[] = [
         children: [
           { label: "Usuários", href: "/usuarios", icon: UserCog, adminOnly: true },
           { label: "Auditoria", href: "/auditoria", icon: ShieldCheck, adminOnly: true },
-          { label: "Loja (produtos)", href: "/produtos", icon: ShoppingBag, adminOnly: true },
-          {
-            label: "Avisos",
-            href: "/avisos",
-            icon: Megaphone,
-            adminOnly: true,
-            modulo: "relacionamento",
-          },
           {
             label: "Padrões",
             icon: SlidersHorizontal,
