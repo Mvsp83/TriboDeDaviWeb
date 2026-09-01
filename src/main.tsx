@@ -14,7 +14,10 @@ import "@/index.css";
 // essas chaves são gravadas — dados administrativos/financeiros não vão para
 // o disco.
 const CHAVES_OFFLINE = ["alunos", "aulas", "polos", "presencas"];
-const SETE_DIAS = 1000 * 60 * 60 * 24 * 7;
+// LGPD (minimização): o snapshot offline — que inclui dados de menores — expira
+// em 48 h. Cobre o uso real (abrir online e usar sem internet na aula no mesmo
+// dia ou no dia seguinte); passado o prazo, é descartado e refeito com rede.
+const MAX_IDADE_CACHE = 1000 * 60 * 60 * 48;
 
 const persister = createSyncStoragePersister({
   storage: window.localStorage,
@@ -27,7 +30,7 @@ createRoot(document.getElementById("root")!).render(
       client={queryClient}
       persistOptions={{
         persister,
-        maxAge: SETE_DIAS,
+        maxAge: MAX_IDADE_CACHE,
         dehydrateOptions: {
           shouldDehydrateQuery: (q) =>
             q.state.status === "success" &&
