@@ -19,7 +19,6 @@ import {
   temImpacto,
   temFinanceiro,
   temGovernanca,
-  temPoliticas,
   type DocumentoPublico,
 } from "@/features/transparencia/conteudoTransparencia";
 import { SITE } from "@/features/site/conteudoSite";
@@ -441,42 +440,37 @@ export function TransparenciaPage() {
       )}
 
       {/* Políticas institucionais */}
-      {temPoliticas() && (
-        <section className="mx-auto max-w-3xl px-4 py-12 md:py-16">
-          <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
-            <ShieldCheck className="size-6 text-primary" />
-            Políticas
-          </h2>
-          <ul className="mt-6 flex flex-col gap-2">
-            {politicas.politicaPrivacidade && (
-              <li>
-                <a
-                  href={urlSegura(politicas.politicaPrivacidade)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
-                >
-                  <ShieldCheck className="size-4 shrink-0 text-primary" />
-                  Política de Privacidade
-                </a>
-              </li>
-            )}
-            {politicas.codigoEtica && (
-              <li>
-                <a
-                  href={urlSegura(politicas.codigoEtica)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
-                >
-                  <FileText className="size-4 shrink-0 text-primary" />
-                  Código de Ética
-                </a>
-              </li>
-            )}
-          </ul>
-        </section>
-      )}
+      <section className="mx-auto max-w-3xl px-4 py-12 md:py-16">
+        <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
+          <ShieldCheck className="size-6 text-primary" />
+          Políticas
+        </h2>
+        <ul className="mt-6 flex flex-col gap-2">
+          {/* Política de Privacidade: página própria do site. */}
+          <li>
+            <Link
+              to="/politica-privacidade"
+              className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
+            >
+              <ShieldCheck className="size-4 shrink-0 text-primary" />
+              Política de Privacidade
+            </Link>
+          </li>
+          {politicas.codigoEtica && (
+            <li>
+              <a
+                href={urlSegura(politicas.codigoEtica)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
+              >
+                <FileText className="size-4 shrink-0 text-primary" />
+                Código de Ética
+              </a>
+            </li>
+          )}
+        </ul>
+      </section>
 
       {/* Balanços por ano (cadastrados na contabilidade) */}
       {balancos.length > 0 && (
