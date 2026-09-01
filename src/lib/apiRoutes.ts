@@ -168,6 +168,10 @@ export const ApiRotas = {
   inscricaoFotoRevisao: (id: number) => `/api/Inscricao/${id}/foto`,
   inscricaoAprovar: (id: number) => `/api/Inscricao/${id}/aprovar`,
   inscricaoRecusar: (id: number) => `/api/Inscricao/${id}/recusar`,
+  // Retenção/LGPD: candidatas ao expurgo e anonimização (admin).
+  inscricaoRetencao: "/api/Inscricao/retencao",
+  inscricaoRetencaoAnonimizar: (id: number) =>
+    `/api/Inscricao/retencao/${id}/anonimizar`,
   matriculasDoAno: (ano: number) => `/api/Inscricao/matriculas/${ano}`,
   matriculaAtiva: (id: number, ativa: boolean) =>
     `/api/Inscricao/matriculas/${id}/ativa?ativa=${ativa}`,

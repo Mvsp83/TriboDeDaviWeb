@@ -387,6 +387,12 @@ export const navGroups: NavGroup[] = [
                 icon: RefreshCw,
                 adminOnly: true,
               },
+              {
+                label: "Retenção (LGPD)",
+                href: "/retencao-lgpd",
+                icon: ShieldCheck,
+                adminOnly: true,
+              },
             ],
           },
         ],
