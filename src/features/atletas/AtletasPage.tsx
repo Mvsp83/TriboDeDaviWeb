@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toApiError } from "@/lib/api";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import { useAuth } from "@/features/auth/AuthContext";
 import { useAlunos } from "@/features/alunos/alunosApi";
 import { faixaInfo } from "@/features/alunos/faixa";
 import {
@@ -61,6 +62,8 @@ function FaixaChip({ faixa }: { faixa: number }) {
 
 export function AtletasPage() {
   useDocumentTitle("Atletas de alto rendimento");
+  const { sessao } = useAuth();
+  const admin = sessao?.isAdministrador ?? false;
   const { data: atletas = [], isLoading } = useAtletas();
   const criar = useCriarAtleta();
   const remover = useRemoverAtleta();
@@ -69,8 +72,10 @@ export function AtletasPage() {
   const [alunoSel, setAlunoSel] = useState("");
   const [excluir, setExcluir] = useState<Atleta | null>(null);
 
-  // Alunos que ainda não são atletas (para o seletor).
-  const alunos = useAlunos(true);
+  // Alunos que ainda não são atletas (para o seletor). Usa o endpoint conforme
+  // o papel: admin vê todos; professor vê os do próprio polo (get-all é 403
+  // para não-admin).
+  const alunos = useAlunos(admin);
   const jaAtletas = useMemo(
     () => new Set(atletas.map((a) => a.alunoId)),
     [atletas],
