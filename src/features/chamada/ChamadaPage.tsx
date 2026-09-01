@@ -43,6 +43,7 @@ export function ChamadaPage() {
   const [status, setStatus] = useState<FiltroStatus>("pendentes");
   const [turma, setTurma] = useState<string>("todas");
   const [polo, setPolo] = useState<string>("todos");
+  const [ordemData, setOrdemData] = useState<"desc" | "asc">("desc");
 
   const nomePorPolo = useMemo(
     () => new Map((polos ?? []).map((p) => [p.id, p.nome])),
@@ -56,12 +57,13 @@ export function ChamadaPage() {
     if (turma !== "todas") lista = lista.filter((a) => a.turma === Number(turma));
     if (admin && polo !== "todos")
       lista = lista.filter((a) => a.poloId === Number(polo));
-    // Pendentes primeiro, depois as mais recentes no topo.
+    // Pendentes primeiro; dentro disso, pela data na ordem escolhida.
     return lista.sort((a, b) => {
       if (a.presencaSalva !== b.presencaSalva) return a.presencaSalva ? 1 : -1;
-      return new Date(b.data).getTime() - new Date(a.data).getTime();
+      const d = new Date(a.data).getTime() - new Date(b.data).getTime();
+      return ordemData === "asc" ? d : -d;
     });
-  }, [aulas, status, turma, polo, admin]);
+  }, [aulas, status, turma, polo, admin, ordemData]);
 
   return (
     <div className="space-y-5">
@@ -125,6 +127,19 @@ export function ChamadaPage() {
             </Select>
           </div>
         )}
+
+        <div className="w-40">
+          <Label className="mb-1.5">Ordenar</Label>
+          <Select value={ordemData} onValueChange={(v) => setOrdemData(v as "desc" | "asc")}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">Mais recentes</SelectItem>
+              <SelectItem value="asc">Mais antigas</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Lista */}

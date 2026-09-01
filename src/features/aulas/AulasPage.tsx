@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, CheckCircle2, ChevronRight, Clock, Plus, Loader2 } from "lucide-react";
+import { Search, CheckCircle2, ChevronRight, Clock, Plus, Loader2, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas, useCriarAula } from "@/features/aulas/aulasApi";
@@ -36,6 +36,9 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+
+const TODOS = "__todos__";
+type CampoOrdem = "data" | "polo" | "turma" | "inicio";
 
 // Todas as datas do mês da data escolhida que caem no mesmo dia da semana
 // (ex.: escolhendo uma terça, devolve todas as terças daquele mês). Trabalha em
@@ -265,10 +268,21 @@ export function AulasPage() {
   const { data: aulas, isLoading, isError } = useAulas(admin);
   const { data: polos } = usePolos();
 
-  const [filtroPolo, setFiltroPolo] = useState("");
+  const [filtroPolo, setFiltroPolo] = useState(TODOS);
   const [filtroData, setFiltroData] = useState("");
-  const [filtroTurma, setFiltroTurma] = useState("");
+  const [filtroTurma, setFiltroTurma] = useState(TODOS);
   const [novaAula, setNovaAula] = useState(false);
+
+  // Coluna e direção da ordenação (clicar no cabeçalho alterna).
+  const [ordemCampo, setOrdemCampo] = useState<CampoOrdem>("data");
+  const [ordemDir, setOrdemDir] = useState<"asc" | "desc">("desc");
+  const ordenarPor = (campo: CampoOrdem) => {
+    if (ordemCampo === campo) setOrdemDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setOrdemCampo(campo);
+      setOrdemDir("asc");
+    }
+  };
 
   const nomePorPolo = useMemo(() => {
     const m = new Map<number, string>();
@@ -276,18 +290,33 @@ export function AulasPage() {
     return m;
   }, [polos]);
 
+  const nomesPolos = useMemo(
+    () =>
+      [...new Set((polos ?? []).map((p) => p.nome))].sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [polos],
+  );
+
   const filtradas = useMemo(() => {
-    const norm = (s: string) => s.toLocaleLowerCase("pt-BR");
+    const dir = ordemDir === "asc" ? 1 : -1;
     return (aulas ?? [])
       .filter(
-        (a) =>
-          !filtroPolo ||
-          norm(nomePorPolo.get(a.poloId) ?? "").includes(norm(filtroPolo)),
+        (a) => filtroPolo === TODOS || (nomePorPolo.get(a.poloId) ?? "") === filtroPolo,
       )
       .filter((a) => !filtroData || dataBR(a.data).includes(filtroData))
-      .filter((a) => !filtroTurma || String(a.turma) === filtroTurma)
-      .sort((a, b) => +new Date(b.data) - +new Date(a.data));
-  }, [aulas, filtroPolo, filtroData, filtroTurma, nomePorPolo]);
+      .filter((a) => filtroTurma === TODOS || String(a.turma) === filtroTurma)
+      .sort((a, b) => {
+        let cmp = 0;
+        if (ordemCampo === "data") cmp = +new Date(a.data) - +new Date(b.data);
+        else if (ordemCampo === "polo")
+          cmp = (nomePorPolo.get(a.poloId) ?? "").localeCompare(nomePorPolo.get(b.poloId) ?? "");
+        else if (ordemCampo === "turma") cmp = a.turma - b.turma;
+        else if (ordemCampo === "inicio")
+          cmp = (a.horaInicio ?? "").localeCompare(b.horaInicio ?? "");
+        return cmp * dir;
+      });
+  }, [aulas, filtroPolo, filtroData, filtroTurma, nomePorPolo, ordemCampo, ordemDir]);
 
   return (
     <div className="space-y-4">
@@ -308,26 +337,40 @@ export function AulasPage() {
       <Card>
         <CardContent className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3">
           {admin && (
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Polo"
-                value={filtroPolo}
-                onChange={(e) => setFiltroPolo(e.target.value)}
-                className="pl-9"
-              />
-            </div>
+            <Select value={filtroPolo} onValueChange={setFiltroPolo}>
+              <SelectTrigger>
+                <SelectValue placeholder="Polo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TODOS}>Todos os polos</SelectItem>
+                {nomesPolos.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    {p}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
-          <Input
-            placeholder="Data (dd/MM/aaaa)"
-            value={filtroData}
-            onChange={(e) => setFiltroData(e.target.value)}
-          />
-          <Input
-            placeholder="Turma (1, 2 ou 3)"
-            value={filtroTurma}
-            onChange={(e) => setFiltroTurma(e.target.value)}
-          />
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por data (dd/MM/aaaa)"
+              value={filtroData}
+              onChange={(e) => setFiltroData(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Select value={filtroTurma} onValueChange={setFiltroTurma}>
+            <SelectTrigger>
+              <SelectValue placeholder="Turma" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={TODOS}>Todas as turmas</SelectItem>
+              <SelectItem value="1">Turma 1</SelectItem>
+              <SelectItem value="2">Turma 2</SelectItem>
+              <SelectItem value="3">Turma 3</SelectItem>
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
@@ -336,10 +379,27 @@ export function AulasPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Polo</TableHead>
-                <TableHead>Turma</TableHead>
-                <TableHead>Início</TableHead>
+                {([
+                  ["data", "Data"],
+                  ["polo", "Polo"],
+                  ["turma", "Turma"],
+                  ["inicio", "Início"],
+                ] as const).map(([campo, rotulo]) => (
+                  <TableHead key={campo}>
+                    <button
+                      type="button"
+                      onClick={() => ordenarPor(campo)}
+                      className="inline-flex items-center gap-1 hover:text-foreground"
+                    >
+                      {rotulo}
+                      <ArrowUpDown
+                        className={`size-3.5 ${
+                          ordemCampo === campo ? "text-primary" : "text-muted-foreground/40"
+                        }`}
+                      />
+                    </button>
+                  </TableHead>
+                ))}
                 <TableHead>Fim</TableHead>
                 <TableHead>Presença</TableHead>
                 <TableHead className="w-10" aria-label="Abrir" />
