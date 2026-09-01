@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Award, GraduationCap, Loader2, Printer, Trash2, AlertTriangle } from "lucide-react";
+import { Award, GraduationCap, Loader2, Printer, Trash2, AlertTriangle, Search, ArrowUpDown } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAlunos } from "@/features/alunos/alunosApi";
 import { usePolos } from "@/features/polos/polosApi";
@@ -59,6 +59,9 @@ function ChipFaixa({ faixa }: { faixa: number }) {
     </span>
   );
 }
+
+const TODOS = "__todos__";
+type CampoOrdemGrad = "aluno" | "polo" | "data";
 
 // Diálogo de graduação em lote: a turma costuma graduar junta, então o padrão
 // é promover todos os selecionados de uma vez.
@@ -343,8 +346,50 @@ export function GraduacoesPage() {
   const { data: graduacoes, isLoading } = useGraduacoes(Number(ano));
   const excluir = useExcluirGraduacao();
 
+  const [busca, setBusca] = useState("");
+  const [filtroPolo, setFiltroPolo] = useState(TODOS);
+  const [ordemCampo, setOrdemCampo] = useState<CampoOrdemGrad>("data");
+  const [ordemDir, setOrdemDir] = useState<"asc" | "desc">("desc");
+  const ordenarPor = (campo: CampoOrdemGrad) => {
+    if (ordemCampo === campo) setOrdemDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setOrdemCampo(campo);
+      setOrdemDir("asc");
+    }
+  };
+
   const anos = [anoAtual, anoAtual - 1, anoAtual - 2, anoAtual - 3].map(String);
-  const lista = graduacoes ?? [];
+
+  const nomesPolos = useMemo(
+    () =>
+      [
+        ...new Set(
+          (graduacoes ?? [])
+            .map((g) => g.poloNome)
+            .filter((n): n is string => !!n),
+        ),
+      ].sort((a, b) => a.localeCompare(b)),
+    [graduacoes],
+  );
+
+  const norm = (s: string) =>
+    s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+  const lista = useMemo(() => {
+    const q = norm(busca.trim());
+    const dir = ordemDir === "asc" ? 1 : -1;
+    return (graduacoes ?? [])
+      .filter((g) => filtroPolo === TODOS || g.poloNome === filtroPolo)
+      .filter((g) => q === "" || norm(g.nomeAluno ?? "").includes(q))
+      .sort((a, b) => {
+        let cmp = 0;
+        if (ordemCampo === "aluno") cmp = (a.nomeAluno ?? "").localeCompare(b.nomeAluno ?? "");
+        else if (ordemCampo === "polo") cmp = (a.poloNome ?? "").localeCompare(b.poloNome ?? "");
+        else cmp = +new Date(a.data) - +new Date(b.data);
+        return cmp * dir;
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [graduacoes, busca, filtroPolo, ordemCampo, ordemDir]);
 
   async function confirmarExclusao() {
     if (!paraExcluir) return;
@@ -388,6 +433,34 @@ export function GraduacoesPage() {
               </SelectContent>
             </Select>
           </div>
+          <div className="min-w-[10rem] flex-1">
+            <Label className="mb-1.5">Buscar</Label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Nome do aluno"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
+          <div className="w-52">
+            <Label className="mb-1.5">Polo</Label>
+            <Select value={filtroPolo} onValueChange={setFiltroPolo}>
+              <SelectTrigger>
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TODOS}>Todos os polos</SelectItem>
+                {nomesPolos.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    {p}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <p className="text-sm text-muted-foreground">
             {isLoading ? "Carregando..." : `${lista.length} graduação(ões)`}
           </p>
@@ -403,11 +476,41 @@ export function GraduacoesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Aluno</TableHead>
-                <TableHead>Polo</TableHead>
+                {([
+                  ["aluno", "Aluno"],
+                  ["polo", "Polo"],
+                ] as const).map(([campo, rotulo]) => (
+                  <TableHead key={campo}>
+                    <button
+                      type="button"
+                      onClick={() => ordenarPor(campo)}
+                      className="inline-flex items-center gap-1 hover:text-foreground"
+                    >
+                      {rotulo}
+                      <ArrowUpDown
+                        className={`size-3.5 ${
+                          ordemCampo === campo ? "text-primary" : "text-muted-foreground/40"
+                        }`}
+                      />
+                    </button>
+                  </TableHead>
+                ))}
                 <TableHead>De</TableHead>
                 <TableHead>Para</TableHead>
-                <TableHead>Data</TableHead>
+                <TableHead>
+                  <button
+                    type="button"
+                    onClick={() => ordenarPor("data")}
+                    className="inline-flex items-center gap-1 hover:text-foreground"
+                  >
+                    Data
+                    <ArrowUpDown
+                      className={`size-3.5 ${
+                        ordemCampo === "data" ? "text-primary" : "text-muted-foreground/40"
+                      }`}
+                    />
+                  </button>
+                </TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>

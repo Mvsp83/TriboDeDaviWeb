@@ -20,6 +20,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -27,6 +34,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+const TODOS = "__todos__";
 
 export function PresencasPage() {
   const { sessao } = useAuth();
@@ -47,9 +56,10 @@ export function PresencasPage() {
     return m;
   }, [alunos]);
 
-  const [filtroPolo, setFiltroPolo] = useState("");
+  const [filtroPolo, setFiltroPolo] = useState(TODOS);
   const [filtroData, setFiltroData] = useState("");
-  const [filtroTurma, setFiltroTurma] = useState("");
+  const [filtroTurma, setFiltroTurma] = useState(TODOS);
+  const [ordemData, setOrdemData] = useState<"desc" | "asc">("desc");
   const [expandida, setExpandida] = useState<Set<number>>(new Set());
 
   const nomePorPolo = useMemo(() => {
@@ -57,6 +67,14 @@ export function PresencasPage() {
     polos?.forEach((p) => m.set(p.id, p.nome));
     return m;
   }, [polos]);
+
+  const nomesPolos = useMemo(
+    () =>
+      [...new Set((polos ?? []).map((p) => p.nome))].sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [polos],
+  );
 
   const presencasPorAula = useMemo(() => {
     const m = new Map<number, Presenca[]>();
@@ -69,17 +87,15 @@ export function PresencasPage() {
   }, [presencas]);
 
   const filtradas = useMemo(() => {
-    const norm = (s: string) => s.toLocaleLowerCase("pt-BR");
+    const dir = ordemData === "asc" ? 1 : -1;
     return (aulas ?? [])
       .filter(
-        (a) =>
-          !filtroPolo ||
-          norm(nomePorPolo.get(a.poloId) ?? "").includes(norm(filtroPolo)),
+        (a) => filtroPolo === TODOS || (nomePorPolo.get(a.poloId) ?? "") === filtroPolo,
       )
       .filter((a) => !filtroData || dataBR(a.data).includes(filtroData))
-      .filter((a) => !filtroTurma || String(a.turma) === filtroTurma)
-      .sort((a, b) => +new Date(b.data) - +new Date(a.data));
-  }, [aulas, filtroPolo, filtroData, filtroTurma, nomePorPolo]);
+      .filter((a) => filtroTurma === TODOS || String(a.turma) === filtroTurma)
+      .sort((a, b) => (+new Date(a.data) - +new Date(b.data)) * dir);
+  }, [aulas, filtroPolo, filtroData, filtroTurma, nomePorPolo, ordemData]);
 
   function toggle(id: number) {
     setExpandida((prev) => {
@@ -93,28 +109,51 @@ export function PresencasPage() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardContent className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3">
+        <CardContent className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
           {admin && (
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Polo"
-                value={filtroPolo}
-                onChange={(e) => setFiltroPolo(e.target.value)}
-                className="pl-9"
-              />
-            </div>
+            <Select value={filtroPolo} onValueChange={setFiltroPolo}>
+              <SelectTrigger>
+                <SelectValue placeholder="Polo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TODOS}>Todos os polos</SelectItem>
+                {nomesPolos.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    {p}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
-          <Input
-            placeholder="Data (dd/MM/aaaa)"
-            value={filtroData}
-            onChange={(e) => setFiltroData(e.target.value)}
-          />
-          <Input
-            placeholder="Turma (1, 2 ou 3)"
-            value={filtroTurma}
-            onChange={(e) => setFiltroTurma(e.target.value)}
-          />
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por data (dd/MM/aaaa)"
+              value={filtroData}
+              onChange={(e) => setFiltroData(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Select value={filtroTurma} onValueChange={setFiltroTurma}>
+            <SelectTrigger>
+              <SelectValue placeholder="Turma" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={TODOS}>Todas as turmas</SelectItem>
+              <SelectItem value="1">Turma 1</SelectItem>
+              <SelectItem value="2">Turma 2</SelectItem>
+              <SelectItem value="3">Turma 3</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={ordemData} onValueChange={(v) => setOrdemData(v as "desc" | "asc")}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">Mais recentes</SelectItem>
+              <SelectItem value="asc">Mais antigas</SelectItem>
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
