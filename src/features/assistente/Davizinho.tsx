@@ -74,6 +74,8 @@ export function Davizinho() {
   const navigate = useNavigate();
   const [aberto, setAberto] = useState(false);
   const [entrada, setEntrada] = useState("");
+  // Imagem do Davizinho (logo do instituto em /public); cai no ícone se faltar.
+  const [logoOk, setLogoOk] = useState(true);
   const fimRef = useRef<HTMLDivElement>(null);
 
   const saudacao: Mensagem = useMemo(
@@ -183,17 +185,37 @@ export function Davizinho() {
       <button
         onClick={() => setAberto((a) => !a)}
         aria-label={aberto ? "Fechar assistente" : "Abrir assistente Davizinho"}
-        className="fixed bottom-4 right-4 z-50 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-4 right-4 z-50 flex size-14 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105"
       >
-        {aberto ? <X className="size-6" /> : <MessageCircle className="size-6" />}
+        {aberto ? (
+          <X className="size-6" />
+        ) : logoOk ? (
+          <img
+            src="/davizinho.png"
+            alt="Davizinho"
+            className="size-full object-cover"
+            onError={() => setLogoOk(false)}
+          />
+        ) : (
+          <MessageCircle className="size-6" />
+        )}
       </button>
 
       {/* Painel */}
       {aberto && (
         <div className="fixed bottom-20 right-4 z-50 flex max-h-[70vh] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
           <div className="flex items-center gap-2 border-b border-border bg-primary/10 px-4 py-3">
-            <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <Sparkles className="size-4" />
+            <span className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground">
+              {logoOk ? (
+                <img
+                  src="/davizinho.png"
+                  alt="Davizinho"
+                  className="size-full object-cover"
+                  onError={() => setLogoOk(false)}
+                />
+              ) : (
+                <Sparkles className="size-4" />
+              )}
             </span>
             <div>
               <p className="text-sm font-semibold leading-tight">Davizinho</p>
