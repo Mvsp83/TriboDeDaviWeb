@@ -376,7 +376,7 @@ export const navGroups: NavGroup[] = [
             adminOnly: true,
             children: [
               {
-                label: "Importação",
+                label: "Importar alunos",
                 href: "/importacao",
                 icon: Upload,
                 adminOnly: true,
