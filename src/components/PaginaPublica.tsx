@@ -64,9 +64,6 @@ export function PaginaPublica({
           </span>
           <SobreApp className="font-medium transition-colors hover:text-foreground" />
           <div className="flex items-center gap-x-6">
-            <Link to="/politica-privacidade" className="hover:text-foreground">
-              Política de Privacidade
-            </Link>
             <Link to="/responsavel" className="hover:text-foreground">
               Área do Responsável
             </Link>
