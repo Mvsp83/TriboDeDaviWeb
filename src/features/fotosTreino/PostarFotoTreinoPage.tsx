@@ -148,6 +148,7 @@ export function PostarFotoTreinoPage() {
         arquivo: blob,
         turma: ehPolo ? Number(turma) : undefined,
         poloId: ehPolo && admin && poloId ? Number(poloId) : undefined,
+        consentimento,
       });
       toast.success(
         ehPolo

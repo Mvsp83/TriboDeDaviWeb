@@ -54,6 +54,7 @@ export interface DadosUploadFoto {
   arquivo: Blob;
   turma?: number; // só na categoria "polo"
   poloId?: number; // só admin escolhe; professor usa o próprio polo
+  consentimento: boolean; // LGPD: aceite de autorização de imagem (obrigatório)
 }
 
 async function enviarFoto(d: DadosUploadFoto): Promise<FotoTreino> {
@@ -61,6 +62,7 @@ async function enviarFoto(d: DadosUploadFoto): Promise<FotoTreino> {
   form.append("categoria", d.categoria);
   form.append("dataAula", d.dataAula);
   form.append("legenda", d.legenda ?? "");
+  form.append("consentimento", String(d.consentimento));
   if (d.categoria === "polo") {
     form.append("turma", String(d.turma ?? 1));
     if (d.poloId != null) form.append("poloId", String(d.poloId));
