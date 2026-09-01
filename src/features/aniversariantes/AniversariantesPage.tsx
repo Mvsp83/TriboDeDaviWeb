@@ -7,6 +7,13 @@ import { useAniversariantes } from "@/features/aniversariantes/aniversariantesAp
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -22,17 +29,27 @@ const MESES = [
   "Jul", "Ago", "Set", "Out", "Nov", "Dez",
 ];
 
+const TODOS = "__todos__";
+
 export function AniversariantesPage() {
   const { sessao } = useAuth();
   const admin = sessao?.isAdministrador ?? false;
 
   const [mes, setMes] = useState(new Date().getMonth() + 1);
   const [filtroNome, setFiltroNome] = useState("");
-  const [filtroPolo, setFiltroPolo] = useState("");
+  const [filtroPolo, setFiltroPolo] = useState(TODOS);
 
   const { data: aniversariantes, isLoading } = useAniversariantes(mes);
   const { data: alunos } = useAlunos(admin);
   const { data: polos } = usePolos();
+
+  const nomesPolos = useMemo(
+    () =>
+      [...new Set((polos ?? []).map((p) => p.nome))].sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [polos],
+  );
 
   // Casa o aniversariante ao aluno (por nome) para descobrir o polo.
   const linhas = useMemo(() => {
@@ -56,10 +73,7 @@ export function AniversariantesPage() {
         (a) =>
           !filtroNome || norm(a.nome).includes(norm(filtroNome)),
       )
-      .filter(
-        (a) =>
-          !filtroPolo || norm(a.nomePolo).includes(norm(filtroPolo)),
-      )
+      .filter((a) => filtroPolo === TODOS || a.nomePolo === filtroPolo)
       .sort((a, b) => a.mesNasc - b.mesNasc || a.dia - b.dia);
   }, [aniversariantes, alunos, polos, filtroNome, filtroPolo]);
 
@@ -105,11 +119,19 @@ export function AniversariantesPage() {
               />
             </div>
             {admin && (
-              <Input
-                placeholder="Polo"
-                value={filtroPolo}
-                onChange={(e) => setFiltroPolo(e.target.value)}
-              />
+              <Select value={filtroPolo} onValueChange={setFiltroPolo}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Polo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={TODOS}>Todos os polos</SelectItem>
+                  {nomesPolos.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {p}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
         </CardContent>
