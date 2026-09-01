@@ -1,16 +1,30 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Users, UserX, UserCheck, Loader2 } from "lucide-react";
+import { Users, UserX, UserCheck, Loader2, Search } from "lucide-react";
 import { toApiError } from "@/lib/api";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   useMatriculasAno,
   useAlterarAtivaMatricula,
   type MatriculaAno,
 } from "@/features/matriculasAno/matriculasAnoApi";
+
+// Sem acento/maiúscula, para a busca casar "José" com "jose".
+const normalizar = (s: string) =>
+  s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+const TODOS = "__todos__";
 
 export function MatriculasAnoPage() {
   useDocumentTitle("Alunos do ano");
@@ -21,16 +35,38 @@ export function MatriculasAnoPage() {
   const alterar = useAlterarAtivaMatricula();
   const [emAcao, setEmAcao] = useState<number | null>(null);
 
+  const [filtroPolo, setFiltroPolo] = useState(TODOS);
+  const [busca, setBusca] = useState("");
+
+  // Polos disponíveis (para o seletor).
+  const polos = useMemo(
+    () =>
+      [...new Set(matriculas.map((m) => m.poloNome))].sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [matriculas],
+  );
+
+  // Aplica polo + nome antes de agrupar.
+  const filtradas = useMemo(() => {
+    const q = normalizar(busca.trim());
+    return matriculas.filter(
+      (m) =>
+        (filtroPolo === TODOS || m.poloNome === filtroPolo) &&
+        (q === "" || normalizar(m.alunoNome).includes(q)),
+    );
+  }, [matriculas, filtroPolo, busca]);
+
   // Agrupa por polo; dentro do polo, ativos primeiro.
   const porPolo = useMemo(() => {
     const grupos = new Map<string, MatriculaAno[]>();
-    for (const m of matriculas) {
+    for (const m of filtradas) {
       const lista = grupos.get(m.poloNome) ?? [];
       lista.push(m);
       grupos.set(m.poloNome, lista);
     }
     return [...grupos.entries()].sort(([a], [b]) => a.localeCompare(b));
-  }, [matriculas]);
+  }, [filtradas]);
 
   async function alternar(m: MatriculaAno) {
     setEmAcao(m.id);
@@ -70,6 +106,33 @@ export function MatriculasAnoPage() {
         </div>
       </div>
 
+      {!isLoading && matriculas.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={filtroPolo} onValueChange={setFiltroPolo}>
+            <SelectTrigger className="w-full sm:w-56">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={TODOS}>Todos os polos</SelectItem>
+              {polos.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="relative flex-1 sm:max-w-xs">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar aluno pelo nome…"
+              className="pl-8"
+            />
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <p className="py-12 text-center text-sm text-muted-foreground">
           Carregando…
@@ -78,6 +141,12 @@ export function MatriculasAnoPage() {
         <Card>
           <CardContent className="py-12 text-center text-sm text-muted-foreground">
             Nenhuma matrícula em {ano}.
+          </CardContent>
+        </Card>
+      ) : porPolo.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center text-sm text-muted-foreground">
+            Nenhum aluno encontrado com esses filtros.
           </CardContent>
         </Card>
       ) : (
