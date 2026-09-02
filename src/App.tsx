@@ -215,6 +215,11 @@ const RetencaoLgpdPage = lazy(() =>
     default: m.RetencaoLgpdPage,
   })),
 );
+const GovernancaPage = lazy(() =>
+  import("@/features/governanca/GovernancaPage").then((m) => ({
+    default: m.GovernancaPage,
+  })),
+);
 const DocumentosPage = lazy(() =>
   import("@/features/documentos/DocumentosPage").then((m) => ({ default: m.DocumentosPage })),
 );
@@ -387,6 +392,7 @@ export default function App() {
             <Route path="importacao" element={<ImportacaoPage />} />
             <Route path="sincronizacao" element={<SincronizacaoPage />} />
             <Route path="retencao-lgpd" element={<RetencaoLgpdPage />} />
+            <Route path="governanca" element={<GovernancaPage />} />
             <Route path="documentos" element={<DocumentosPage />} />
             <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
             <Route path="config-foto-aluno" element={<ConfigFotoAlunoPage />} />

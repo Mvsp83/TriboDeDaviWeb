@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
@@ -18,11 +18,14 @@ import {
   temIdentificacao,
   temImpacto,
   temFinanceiro,
-  temGovernanca,
   type DocumentoPublico,
 } from "@/features/transparencia/conteudoTransparencia";
 import { SITE } from "@/features/site/conteudoSite";
 import { ApiRotas } from "@/lib/apiRoutes";
+import {
+  useGovernancaPublica,
+  ORGAO,
+} from "@/features/governanca/governancaApi";
 import { moeda } from "@/lib/format";
 import { urlSegura } from "@/lib/utils";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -96,8 +99,14 @@ function Distribuicao({
 // para onde vão os recursos, voltada a doadores, parceiros e editais. Não usa
 // dados ao vivo — o conteúdo é curado em conteudoTransparencia.ts.
 export function TransparenciaPage() {
-  const { intro, identificacao, impacto, financeiro, documentos, governanca, politicas } =
+  const { intro, identificacao, impacto, financeiro, documentos, politicas } =
     TRANSPARENCIA;
+
+  // Governança vem do cadastro (admin), por ano de vigência.
+  const [anoGov, setAnoGov] = useState<number | undefined>(undefined);
+  const { data: gov } = useGovernancaPublica(anoGov);
+  const diretoria = (gov?.membros ?? []).filter((m) => m.orgao === ORGAO.diretoria);
+  const conselho = (gov?.membros ?? []).filter((m) => m.orgao === ORGAO.conselho);
   const anoAtual = new Date().getFullYear();
   useDocumentTitle(`Transparência e impacto — ${SITE.nome}`);
 
@@ -349,23 +358,43 @@ export function TransparenciaPage() {
         </section>
       )}
 
-      {/* Governança */}
-      {temGovernanca() && (
+      {/* Governança — do cadastro, por ano de vigência */}
+      {(gov?.membros.length ?? 0) > 0 && (
         <section className="mx-auto max-w-5xl px-4 py-12 md:py-16">
-          <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
-            <Landmark className="size-6 text-primary" />
-            Governança
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
+              <Landmark className="size-6 text-primary" />
+              Governança
+            </h2>
+            {(gov?.anos.length ?? 0) > 1 && (
+              <div className="flex flex-wrap gap-1.5">
+                {gov!.anos.map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    onClick={() => setAnoGov(a)}
+                    className={`rounded-full border px-3 py-1 text-sm ${
+                      a === gov!.ano
+                        ? "border-primary/40 bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {a}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            Quem dirige e fiscaliza o instituto.
+            Quem dirige e fiscaliza o instituto — gestão {gov?.ano}.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {governanca.diretoria.length > 0 && (
+            {diretoria.length > 0 && (
               <div className="rounded-xl border border-border bg-card p-5">
                 <p className="mb-3 text-sm font-semibold">Diretoria</p>
                 <ul className="space-y-2.5">
-                  {governanca.diretoria.map((m, i) => (
-                    <li key={i} className="flex flex-wrap justify-between gap-x-4 text-sm">
+                  {diretoria.map((m) => (
+                    <li key={m.id} className="flex flex-wrap justify-between gap-x-4 text-sm">
                       <span className="font-medium">{m.nome}</span>
                       <span className="text-muted-foreground">{m.cargo}</span>
                     </li>
@@ -373,12 +402,12 @@ export function TransparenciaPage() {
                 </ul>
               </div>
             )}
-            {governanca.conselhoFiscal.length > 0 && (
+            {conselho.length > 0 && (
               <div className="rounded-xl border border-border bg-card p-5">
                 <p className="mb-3 text-sm font-semibold">Conselho fiscal</p>
                 <ul className="space-y-2.5">
-                  {governanca.conselhoFiscal.map((m, i) => (
-                    <li key={i} className="flex flex-wrap justify-between gap-x-4 text-sm">
+                  {conselho.map((m) => (
+                    <li key={m.id} className="flex flex-wrap justify-between gap-x-4 text-sm">
                       <span className="font-medium">{m.nome}</span>
                       <span className="text-muted-foreground">{m.cargo}</span>
                     </li>
@@ -387,9 +416,6 @@ export function TransparenciaPage() {
               </div>
             )}
           </div>
-          {governanca.observacao && (
-            <p className="mt-6 text-sm text-muted-foreground">{governanca.observacao}</p>
-          )}
         </section>
       )}
 

@@ -252,6 +252,11 @@ export const ApiRotas = {
   balancosPublicos: "/api/DocumentoPublico/balancos",
   balancoPublicoDownload: (fileId: string) =>
     `/api/DocumentoPublico/balanco/${fileId}`,
+  // Governança (diretoria + conselho fiscal por ano).
+  governancaAnos: "/api/Governanca/anos",
+  governancaPorAno: (ano: number) => `/api/Governanca/${ano}`,
+  governancaPublico: (ano?: number) =>
+    `/api/Governanca/publico${ano ? `?ano=${ano}` : ""}`,
 
   // Loja virtual. vitrine/foto são públicas; o resto é admin.
   produtoVitrine: "/api/Produto/vitrine",

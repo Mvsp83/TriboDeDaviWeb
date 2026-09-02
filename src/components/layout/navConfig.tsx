@@ -244,6 +244,12 @@ export const navGroups: NavGroup[] = [
             adminOnly: true,
             modulo: "captacao",
           },
+          {
+            label: "Governança",
+            href: "/governanca",
+            icon: Landmark,
+            adminOnly: true,
+          },
         ],
       },
 
