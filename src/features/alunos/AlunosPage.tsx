@@ -94,7 +94,9 @@ export function AlunosPage() {
   const [filtroPolo, setFiltroPolo] = useState("");
   const [filtroTurma, setFiltroTurma] = useState("");
   const [filtroSemImagem, setFiltroSemImagem] = useState(false);
-  const [filtroPublico, setFiltroPublico] = useState<"todos" | "adultos" | "criancas">("todos");
+  const [filtroPublico, setFiltroPublico] = useState<
+    "todos" | "adultos" | "criancas"
+  >("todos");
 
   const [dialogAberto, setDialogAberto] = useState(false);
   const [alunoEdicao, setAlunoEdicao] = useState<Aluno | null>(null);
@@ -125,7 +127,15 @@ export function AlunosPage() {
       if (filtroPublico === "criancas" && ehAlunoAdulto(a)) return false;
       return true;
     });
-  }, [alunos, filtroNome, filtroPolo, filtroTurma, filtroSemImagem, filtroPublico, nomePorPolo]);
+  }, [
+    alunos,
+    filtroNome,
+    filtroPolo,
+    filtroTurma,
+    filtroSemImagem,
+    filtroPublico,
+    nomePorPolo,
+  ]);
 
   const acessar = useCallback(
     (a: Aluno, key: string): SortValue => {
@@ -146,13 +156,13 @@ export function AlunosPage() {
           return "";
       }
     },
-    [nomePorPolo],
+    [nomePorPolo]
   );
 
   const { sorted, sortKey, sortDir, toggleSort } = useTableSort(
     filtrados,
     acessar,
-    { key: "nome" },
+    { key: "nome" }
   );
 
   function abrirNovo() {
@@ -171,7 +181,9 @@ export function AlunosPage() {
     try {
       const cfg = await apiGet<ConfigFotoAluno>(ApiRotas.alunoConfigFoto);
       if (cfg.mostrarNaCarteirinha && aluno.temFoto) {
-        const r = await apiGet<{ dataUri: string }>(ApiRotas.alunoFoto(aluno.id));
+        const r = await apiGet<{ dataUri: string }>(
+          ApiRotas.alunoFoto(aluno.id)
+        );
         fotoDataUri = r.dataUri;
       }
     } catch {
@@ -190,7 +202,7 @@ export function AlunosPage() {
       toast.success("Aluno excluído.");
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Erro ao excluir o aluno.",
+        err instanceof ApiError ? err.message : "Erro ao excluir o aluno."
       );
     } finally {
       setAlunoExcluir(null);
@@ -216,7 +228,7 @@ export function AlunosPage() {
       toast.success("Dados exportados.");
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Erro ao exportar os dados.",
+        err instanceof ApiError ? err.message : "Erro ao exportar os dados."
       );
     }
   }
@@ -229,7 +241,7 @@ export function AlunosPage() {
       toast.success("Dados pessoais anonimizados.");
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Erro ao anonimizar o aluno.",
+        err instanceof ApiError ? err.message : "Erro ao anonimizar o aluno."
       );
     } finally {
       setAlunoAnonimizar(null);
@@ -249,7 +261,7 @@ export function AlunosPage() {
       }
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Erro ao preparar os códigos.",
+        err instanceof ApiError ? err.message : "Erro ao preparar os códigos."
       );
     }
   }
@@ -363,9 +375,6 @@ export function AlunosPage() {
                     ["nome", "Nome"],
                     ["faixa", "Faixa"],
                     ["polo", "Polo"],
-                    ["cidade", "Cidade"],
-                    ["celular", "Celular"],
-                    ["nascimento", "Nascimento"],
                   ] as const
                 ).map(([key, label]) => (
                   <SortableHead
@@ -384,7 +393,7 @@ export function AlunosPage() {
               {isLoading &&
                 Array.from({ length: 6 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={4}>
                       <Skeleton className="h-6 w-full" />
                     </TableCell>
                   </TableRow>
@@ -392,7 +401,10 @@ export function AlunosPage() {
 
               {!isLoading && isError && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-10 text-center text-destructive">
+                  <TableCell
+                    colSpan={4}
+                    className="py-10 text-center text-destructive"
+                  >
                     Erro ao carregar os alunos. Tente novamente.
                   </TableCell>
                 </TableRow>
@@ -400,7 +412,10 @@ export function AlunosPage() {
 
               {!isLoading && !isError && filtrados.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                  <TableCell
+                    colSpan={4}
+                    className="py-10 text-center text-muted-foreground"
+                  >
                     Nenhum aluno encontrado.
                   </TableCell>
                 </TableRow>
@@ -419,32 +434,36 @@ export function AlunosPage() {
                           ampliavel
                         />
                         <span>
-                      <IdRef id={a.id} />
-                      {a.nome}
-                      {a.autorizaImagem !== true && (
-                        <span title="Sem autorização de uso de imagem">
-                          <CameraOff
-                            className="ml-1.5 inline size-4 align-text-bottom text-destructive"
-                            aria-label="Sem autorização de imagem"
-                          />
+                          <IdRef id={a.id} />
                         </span>
-                      )}
-                      {aptidao.get(a.id) && (
-                        <span
-                          title={`Apto ao exame — ${aptidao.get(a.id)!.exame}`}
-                          className="ml-1.5 inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 align-middle text-[11px] font-semibold text-emerald-600"
-                        >
-                          <Award className="size-3.5" /> Apto
-                        </span>
-                      )}
-                      {ehAlunoAdulto(a) && (
-                        <span
-                          title="Inscrito como adulto (ou 18+)"
-                          className="ml-1.5 inline-flex items-center rounded-md bg-sky-500/15 px-1.5 py-0.5 align-middle text-[11px] font-semibold text-sky-600"
-                        >
-                          Adulto
-                        </span>
-                      )}
+                        <span>
+                          {a.nome}
+                          {a.autorizaImagem !== true && (
+                            <span title="Sem autorização de uso de imagem">
+                              <CameraOff
+                                className="ml-1.5 inline size-4 align-text-bottom text-destructive"
+                                aria-label="Sem autorização de imagem"
+                              />
+                            </span>
+                          )}
+                          {aptidao.get(a.id) && (
+                            <span
+                              title={`Apto ao exame — ${
+                                aptidao.get(a.id)!.exame
+                              }`}
+                              className="ml-1.5 inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 align-middle text-[11px] font-semibold text-emerald-600"
+                            >
+                              <Award className="size-3.5" /> Apto
+                            </span>
+                          )}
+                          {ehAlunoAdulto(a) && (
+                            <span
+                              title="Inscrito como adulto (ou 18+)"
+                              className="ml-1.5 inline-flex items-center rounded-md bg-sky-500/15 px-1.5 py-0.5 align-middle text-[11px] font-semibold text-sky-600"
+                            >
+                              Adulto
+                            </span>
+                          )}
                         </span>
                       </div>
                     </TableCell>
@@ -453,17 +472,6 @@ export function AlunosPage() {
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {nomePorPolo.get(a.poloId) ?? "-"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {a.cidade ?? "-"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {a.celular ?? "-"}
-                    </TableCell>
-                    <TableCell className="tabular-nums text-muted-foreground">
-                      {a.dataNascimento
-                        ? new Date(a.dataNascimento).toLocaleDateString("pt-BR")
-                        : "-"}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
@@ -510,13 +518,13 @@ export function AlunosPage() {
                             size="icon"
                             onClick={() => exportarDados(a)}
                             disabled={
-                              exportar.isPending &&
-                              exportar.variables === a.id
+                              exportar.isPending && exportar.variables === a.id
                             }
                             aria-label="Exportar dados (LGPD)"
                             title="Exportar dados do aluno (LGPD)"
                           >
-                            {exportar.isPending && exportar.variables === a.id ? (
+                            {exportar.isPending &&
+                            exportar.variables === a.id ? (
                               <Loader2 className="size-4 animate-spin" />
                             ) : (
                               <Download className="size-4" />
@@ -608,17 +616,14 @@ export function AlunosPage() {
                 <p>
                   O histórico de presença, matrícula e graduação{" "}
                   <strong>é preservado de forma anonimizada</strong> para a
-                  prestação de contas. A ação não pode ser desfeita. Para exportar
-                  os dados antes, use o botão de download.
+                  prestação de contas. A ação não pode ser desfeita. Para
+                  exportar os dados antes, use o botão de download.
                 </p>
               </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setAlunoAnonimizar(null)}
-            >
+            <Button variant="outline" onClick={() => setAlunoAnonimizar(null)}>
               Cancelar
             </Button>
             <Button
