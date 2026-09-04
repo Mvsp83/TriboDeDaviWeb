@@ -13,6 +13,20 @@ export function login(request: LoginRequest): Promise<LoginResposta> {
   return apiPost<LoginResposta>(ApiRotas.login, request);
 }
 
+export interface PrimeiroAcessoRequest {
+  login: string;
+  password: string;
+  email: string;
+  // Só exigido quando a API tem "Setup:Token" configurado (produção).
+  token?: string;
+}
+
+// Cria o primeiro administrador (bootstrap). Só funciona enquanto não existe
+// nenhum usuário no sistema.
+export function primeiroAcesso(request: PrimeiroAcessoRequest): Promise<unknown> {
+  return apiPost(ApiRotas.usuarioSetup, request);
+}
+
 // Renova a sessão a partir do refresh token (rotação no servidor).
 export function refresh(refreshToken: string): Promise<AuthData> {
   return apiPost<AuthData>(ApiRotas.refresh, { refreshToken });

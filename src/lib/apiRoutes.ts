@@ -61,6 +61,7 @@ export const ApiRotas = {
   poloDelete: (id: number) => `/api/Polo/delete/${id}`,
 
   usuariosGetAll: "/api/Usuario/get-all",
+  usuarioSetup: "/api/Usuario/setup",
   usuarioCreate: "/api/Usuario/create",
   usuarioUpdate: "/api/Usuario/update",
   usuarioDelete: (id: number) => `/api/Usuario/delete/${id}`,

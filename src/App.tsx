@@ -34,6 +34,11 @@ const PoliticaPrivacidadePage = lazy(() =>
     default: m.PoliticaPrivacidadePage,
   })),
 );
+const PrimeiroAcessoPage = lazy(() =>
+  import("@/features/auth/PrimeiroAcessoPage").then((m) => ({
+    default: m.PrimeiroAcessoPage,
+  })),
+);
 
 // Fallback enquanto um chunk carrega (público, fora do AppLayout).
 function CarregandoTela() {
@@ -327,6 +332,7 @@ export default function App() {
     <ScrollToTop />
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/primeiro-acesso" element={<PrimeiroAcessoPage />} />
       {/* Públicas: divulgadas fora do sistema, não exigem login. */}
       <Route path="/" element={<Raiz />} />
       <Route path="/site" element={<SitePublico />} />
