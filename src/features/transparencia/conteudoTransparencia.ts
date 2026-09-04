@@ -84,10 +84,7 @@ export const TRANSPARENCIA = {
   // interno (não uma pessoa só). Listas vazias escondem a seção.
   governanca: {
     // PREENCHER: diretoria (ex.: { nome: "Fulano de Tal", cargo: "Presidente" }).
-    diretoria: [
-      { nome: "Valdeci da Silva", cargo: "Presidente" },
-      { nome: "Vinícius Negão", cargo: "Vice-Presidente" },
-    ] as MembroGovernanca[],
+    diretoria: [] as MembroGovernanca[],
     // PREENCHER: conselho fiscal, se houver.
     conselhoFiscal: [] as MembroGovernanca[],
     // Texto opcional sobre como as contas são conferidas (contador, auditoria,

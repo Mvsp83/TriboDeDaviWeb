@@ -77,13 +77,14 @@ export const SITE = {
   // AJUSTE com a história real do instituto. Cada item é um parágrafo.
   // Lista vazia esconde a seção "Nossa história".
   historia: [
-    "O Instituto Tribo de Davi usa o jiu-jitsu como ferramenta de transformação social, oferecendo aulas gratuitas a crianças e adolescentes. Mais do que ensinar uma arte marcial, o projeto forma caráter — disciplina, respeito e fé caminham junto com a técnica no tatame.",
-    "Cada faixa conquistada é também uma conquista pessoal: autoconfiança, rotina e pertencimento. É assim que formamos campeões dentro e fora do tatame.",
+    "Fundado em 2013, na cidade de Blumenau (SC), o Instituto Tribo de Davi, que na época se chamava Instituto Elo Vital, nasceu através de um sonho de fazer a diferença e transformar vidas, com a missão de oferecer alternativas por meio do esporte, da cultura e da assistência social.",
+    "Desde o início, o Instituto se dedicou a oferecer oportunidades para crianças, adolescentes e adultos, principalmente aos em situação de vulnerabilidade social, fortalecendo valores como respeito, disciplina, amor ao próximo e cidadania.",
+    "Ao longo dos anos, a prática do jiu-jitsu se tornou a principal ferramenta de inclusão e desenvolvimento utilizada pela instituição. Mais do que ensinar técnicas de luta, o objetivo sempre foi formar cidadãos conscientes, capazes de enfrentar desafios com determinação, respeito ao próximo e resiliência. O Instituto busca ser uma alternativa saudável e transformadora ao caminho das drogas, oferecendo um ambiente seguro, de aprendizado e crescimento, pautado em princípios cristãos.",
+    "Com sede em Blumenau, o Instituto ao longo dos anos evoluiu e expandiu suas atividades para diferentes polos na cidade, como Itoupavazinha, Guarapari, Araranguá e Eça de Queiroz, proporcionando aulas seguindo o calendário escolar e mantendo as atividades durante todo o ano, sem pausa entre os semestres. A metodologia de ensino do jiu-jitsu adotada prioriza o crescimento técnico, físico e emocional, aliando fundamentos esportivos a valores humanos e espirituais.",
+    "Além do trabalho esportivo, o Instituto Tribo de Davi também atua em frentes socioeducativas, atendendo pessoas em cumprimento de medidas socioeducativas. Essa atuação multifacetada reforça o compromisso com a transformação social e o fortalecimento da comunidade, sempre guiados pelos valores cristãos.",
+    "Desde sua fundação, centenas de alunos já passaram pelos tatames do Instituto, carregando consigo não apenas novas habilidades esportivas, mas também lições de vida e fé. A cada troca de faixa, celebra-se mais do que um avanço técnico — celebra-se a superação, a perseverança e o potencial humano que floresce quando guiado por valores eternos.",
+    "Hoje, mais de uma década após seu início, o Instituto Tribo de Davi continua firme em sua missão, expandindo seu alcance e consolidando-se como referência em projetos sociais que unem esporte, fé e cidadania.",
   ] as string[],
-
-  // PREENCHER: fotos das aulas, eventos e graduações.
-  // Enquanto a lista estiver vazia, a galeria mostra "em breve".
-  fotos: [] as Foto[],
 
   // Prestação de contas. O texto pode ser ajustado; os documentos aparecem
   // como links para download (relatórios, balancetes, etc.).
@@ -240,8 +241,7 @@ export const SITE = {
           },
           {
             pergunta: "Vocês têm vídeos?",
-            resposta:
-              "Sim, há uma galeria de vídeos no site, junto das fotos.",
+            resposta: "Sim, há uma galeria de vídeos no site, junto das fotos.",
             link: { label: "Ver galeria", para: "/galeria" },
           },
         ],
@@ -294,11 +294,11 @@ export const SITE = {
     // PREENCHER: telefone só com números, com DDD (ex.: "47999998888").
     whatsapp: "",
     // PREENCHER: e-mail institucional.
-    email: "",
+    email: "institutotribodedavi@gmail.com",
     // PREENCHER: usuário do Instagram, sem o "@".
-    instagram: "",
+    instagram: "institutotribodedavi",
     // PREENCHER: cidade/estado de atuação.
-    cidade: "",
+    cidade: "Blumenau/SC",
   },
 };
 
