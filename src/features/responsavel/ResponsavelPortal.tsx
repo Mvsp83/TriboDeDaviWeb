@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -21,6 +22,7 @@ import {
   Lock,
   AlertTriangle,
   MessageSquare,
+  ClipboardList,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import {
@@ -74,7 +76,11 @@ function FaixaBadge({ faixa }: { faixa: number }) {
   return (
     <span
       className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium"
-      style={{ backgroundColor: info.cor, color: info.texto, borderColor: "rgba(0,0,0,0.15)" }}
+      style={{
+        backgroundColor: info.cor,
+        color: info.texto,
+        borderColor: "rgba(0,0,0,0.15)",
+      }}
     >
       {info.nome}
     </span>
@@ -97,7 +103,10 @@ const ICONE_SELO = {
 
 function SeloCard({ selo }: { selo: Selo }) {
   const Icone = ICONE_SELO[selo.icone];
-  const pct = selo.meta > 0 ? Math.min(100, Math.round((selo.atual * 100) / selo.meta)) : 0;
+  const pct =
+    selo.meta > 0
+      ? Math.min(100, Math.round((selo.atual * 100) / selo.meta))
+      : 0;
   return (
     <div
       className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-center ${
@@ -108,17 +117,28 @@ function SeloCard({ selo }: { selo: Selo }) {
     >
       <div
         className={`flex size-11 items-center justify-center rounded-full ${
-          selo.conquistado ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"
+          selo.conquistado
+            ? "bg-primary/15 text-primary"
+            : "bg-secondary text-muted-foreground"
         }`}
       >
-        {selo.conquistado ? <Icone className="size-6" /> : <Lock className="size-4" />}
+        {selo.conquistado ? (
+          <Icone className="size-6" />
+        ) : (
+          <Lock className="size-4" />
+        )}
       </div>
       <div className="text-xs font-semibold leading-tight">{selo.nome}</div>
-      <div className="text-[11px] leading-tight text-muted-foreground">{selo.descricao}</div>
+      <div className="text-[11px] leading-tight text-muted-foreground">
+        {selo.descricao}
+      </div>
       {!selo.conquistado && (
         <div className="mt-0.5 w-full">
           <div className="h-1 overflow-hidden rounded-full bg-secondary">
-            <div className="h-full rounded-full bg-primary/60" style={{ width: `${pct}%` }} />
+            <div
+              className="h-full rounded-full bg-primary/60"
+              style={{ width: `${pct}%` }}
+            />
           </div>
           <div className="mt-0.5 text-[10px] tabular-nums text-muted-foreground">
             {selo.atual}/{selo.meta}
@@ -154,7 +174,8 @@ function ConquistasCard({
           </p>
         ) : (
           <p className="text-sm text-muted-foreground">
-            {conquistados.length} selo{conquistados.length > 1 ? "s" : ""} conquistado
+            {conquistados.length} selo{conquistados.length > 1 ? "s" : ""}{" "}
+            conquistado
             {conquistados.length > 1 ? "s" : ""}.
             {proximo && ` Falta pouco para "${proximo.nome}".`}
           </p>
@@ -193,7 +214,7 @@ export function ResponsavelPortal() {
       toast.success(
         enviados.length === 1
           ? "Justificativa pendente enviada."
-          : `${enviados.length} justificativas pendentes enviadas.`,
+          : `${enviados.length} justificativas pendentes enviadas.`
       );
     }
     setPainel(await obterPainel());
@@ -216,7 +237,7 @@ export function ResponsavelPortal() {
       setErro(
         err instanceof ApiError && err.status
           ? "Código ou data de nascimento incorretos."
-          : "Erro ao conectar. Tente novamente em instantes.",
+          : "Erro ao conectar. Tente novamente em instantes."
       );
       setCarregando(false);
       return;
@@ -228,7 +249,9 @@ export function ResponsavelPortal() {
       await recarregar();
     } catch {
       clearRespToken();
-      setErro("Entrada confirmada, mas houve um erro ao carregar seus dados. Tente novamente em instantes.");
+      setErro(
+        "Entrada confirmada, mas houve um erro ao carregar seus dados. Tente novamente em instantes."
+      );
     } finally {
       setCarregando(false);
     }
@@ -288,9 +311,13 @@ export function ResponsavelPortal() {
         });
         atualizarPendentes();
         setFaltaAlvo(null);
-        toast.message("Sem conexão agora — a justificativa será enviada assim que a internet voltar.");
+        toast.message(
+          "Sem conexão agora — a justificativa será enviada assim que a internet voltar."
+        );
       } else {
-        toast.error(err instanceof ApiError ? err.message : "Não foi possível justificar.");
+        toast.error(
+          err instanceof ApiError ? err.message : "Não foi possível justificar."
+        );
       }
     } finally {
       setSalvandoJustif(false);
@@ -307,11 +334,13 @@ export function ResponsavelPortal() {
       await autorizarImagem(autoriza);
       setPainel(await obterPainel());
       toast.success(
-        autoriza ? "Uso de imagem autorizado." : "Autorização de imagem revogada.",
+        autoriza
+          ? "Uso de imagem autorizado."
+          : "Autorização de imagem revogada."
       );
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Não foi possível salvar.",
+        err instanceof ApiError ? err.message : "Não foi possível salvar."
       );
     } finally {
       setSalvandoImagem(false);
@@ -321,69 +350,91 @@ export function ResponsavelPortal() {
   if (!painel) {
     return (
       <PaginaPublica larguraMax="max-w-lg">
-      <div className="flex items-center justify-center p-4 py-12">
-        <div className="w-full max-w-sm">
-          <div className="mb-8 text-center">
-            <p className="text-sm font-medium text-muted-foreground">
-              Portal do Responsável
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-xl">
-            <form onSubmit={entrar} className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="codigo">Código de acesso</Label>
-                <Input
-                  id="codigo"
-                  value={codigo}
-                  onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-                  placeholder="Ex.: ABCD2345"
-                  autoComplete="off"
-                  disabled={carregando}
-                  className="text-center text-lg tracking-[0.2em]"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="nascimento">
-                  Data de nascimento do aluno
-                </Label>
-                <Input
-                  id="nascimento"
-                  type="date"
-                  value={nascimento}
-                  onChange={(e) => setNascimento(e.target.value)}
-                  disabled={carregando}
-                />
-              </div>
-
-              {erro && (
-                <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  {erro}
-                </div>
-              )}
-
-              <Button type="submit" size="lg" className="w-full" disabled={carregando}>
-                {carregando ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Entrando...
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="size-4" />
-                    Acessar
-                  </>
-                )}
-              </Button>
-
-              <p className="text-center text-xs text-muted-foreground">
-                O código é fornecido pelo professor do polo.
+        <div className="flex items-center justify-center p-4 py-12">
+          <div className="w-full max-w-sm">
+            <div className="mb-8 text-center">
+              <p className="text-sm font-medium text-muted-foreground">
+                Portal do Responsável
               </p>
-            </form>
+            </div>
+
+            <div className="flex flex-col gap-6">
+              <div className="rounded-2xl border border-border bg-card p-8 shadow-xl">
+                <form onSubmit={entrar} className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="codigo">Código de acesso</Label>
+                    <Input
+                      id="codigo"
+                      value={codigo}
+                      onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+                      placeholder="Ex.: ABCD2345"
+                      autoComplete="off"
+                      disabled={carregando}
+                      className="text-center text-lg tracking-[0.2em]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="nascimento">
+                      Data de nascimento do aluno
+                    </Label>
+                    <Input
+                      id="nascimento"
+                      type="date"
+                      value={nascimento}
+                      onChange={(e) => setNascimento(e.target.value)}
+                      disabled={carregando}
+                    />
+                  </div>
+
+                  {erro && (
+                    <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                      {erro}
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full"
+                    disabled={carregando}
+                  >
+                    {carregando ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        Entrando...
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="size-4" />
+                        Acessar
+                      </>
+                    )}
+                  </Button>
+
+                  <p className="text-center text-xs text-muted-foreground">
+                    O código é fornecido pelo professor do polo.
+                  </p>
+                </form>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-card p-8 shadow-xl">
+                <form onSubmit={entrar} className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-2">
+                    <Label>Ainda não fez a inscrição?</Label>
+                  </div>
+
+                  <Button asChild size="lg">
+                    <Link to="/matricula">
+                      <ClipboardList className="size-5" />
+                      Fazer inscrição
+                    </Link>
+                  </Button>
+                </form>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
       </PaginaPublica>
     );
   }
@@ -466,7 +517,9 @@ export function ResponsavelPortal() {
             ) : (
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
-                  <div className="text-2xl font-bold">{frequencia.percentual}%</div>
+                  <div className="text-2xl font-bold">
+                    {frequencia.percentual}%
+                  </div>
                   <div className="text-xs text-muted-foreground">Presença</div>
                 </div>
                 <div>
@@ -487,7 +540,8 @@ export function ResponsavelPortal() {
               <div className="mt-4 flex flex-col divide-y divide-border/60">
                 {presencas.slice(0, 10).map((p) => {
                   const pendente = pendentes.has(p.id);
-                  const justificada = Boolean(p.justificadaEm) || Boolean(p.justificativa);
+                  const justificada =
+                    Boolean(p.justificadaEm) || Boolean(p.justificativa);
                   return (
                     <div key={p.id} className="py-2 text-sm">
                       <div className="flex items-center justify-between gap-2">
@@ -531,11 +585,13 @@ export function ResponsavelPortal() {
                         )}
                       </div>
                       {/* Texto da justificativa (enviada ou aguardando envio). */}
-                      {!p.presente && (justificada || pendente) && p.justificativa && (
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          “{p.justificativa}”
-                        </p>
-                      )}
+                      {!p.presente &&
+                        (justificada || pendente) &&
+                        p.justificativa && (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            “{p.justificativa}”
+                          </p>
+                        )}
                     </div>
                   );
                 })}
@@ -565,16 +621,16 @@ export function ResponsavelPortal() {
                           titulo: "text-amber-600 dark:text-amber-400",
                         }
                       : tom === "positivo"
-                        ? {
-                            card: "border-emerald-500/30 bg-emerald-500/5",
-                            badge: "bg-emerald-500/15",
-                            titulo: "text-emerald-600 dark:text-emerald-400",
-                          }
-                        : {
-                            card: "border-border",
-                            badge: "bg-muted",
-                            titulo: "text-foreground",
-                          };
+                      ? {
+                          card: "border-emerald-500/30 bg-emerald-500/5",
+                          badge: "bg-emerald-500/15",
+                          titulo: "text-emerald-600 dark:text-emerald-400",
+                        }
+                      : {
+                          card: "border-border",
+                          badge: "bg-muted",
+                          titulo: "text-foreground",
+                        };
                   return (
                     <div
                       key={i}
@@ -596,7 +652,9 @@ export function ResponsavelPortal() {
                           </span>
                         </div>
                         {r.texto && (
-                          <p className="mt-0.5 text-sm text-muted-foreground">{r.texto}</p>
+                          <p className="mt-0.5 text-sm text-muted-foreground">
+                            {r.texto}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -628,12 +686,16 @@ export function ResponsavelPortal() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-destructive">Advertência</span>
+                        <span className="font-semibold text-destructive">
+                          Advertência
+                        </span>
                         <span className="shrink-0 text-xs text-muted-foreground">
                           {dataBR(a.data)}
                         </span>
                       </div>
-                      <p className="mt-0.5 text-sm text-muted-foreground">{a.motivo}</p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {a.motivo}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -686,7 +748,9 @@ export function ResponsavelPortal() {
                     {a.titulo && (
                       <p className="text-sm font-medium">{a.titulo}</p>
                     )}
-                    <p className="text-sm text-muted-foreground">{a.mensagem}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {a.mensagem}
+                    </p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {dataBR(a.data)}
                     </p>
@@ -733,8 +797,8 @@ export function ResponsavelPortal() {
               {aluno.autorizaImagem === true
                 ? `Você autorizou o uso da imagem e voz de ${aluno.nome} nos canais do instituto.`
                 : aluno.autorizaImagem === false
-                  ? "Você não autorizou o uso da imagem e voz."
-                  : "Você ainda não definiu a autorização de uso de imagem."}
+                ? "Você não autorizou o uso da imagem e voz."
+                : "Você ainda não definiu a autorização de uso de imagem."}
             </p>
             {aluno.autorizaImagemEm && (
               <p className="mt-1 text-xs text-muted-foreground">
@@ -772,11 +836,16 @@ export function ResponsavelPortal() {
       </main>
 
       {/* Confirmar mudança de autorização de imagem (LGPD) */}
-      <Dialog open={imagemAlvo !== null} onOpenChange={(v) => !v && setImagemAlvo(null)}>
+      <Dialog
+        open={imagemAlvo !== null}
+        onOpenChange={(v) => !v && setImagemAlvo(null)}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {imagemAlvo ? "Autorizar uso de imagem?" : "Não autorizar uso de imagem?"}
+              {imagemAlvo
+                ? "Autorizar uso de imagem?"
+                : "Não autorizar uso de imagem?"}
             </DialogTitle>
             <DialogDescription>
               {imagemAlvo
@@ -785,7 +854,11 @@ export function ResponsavelPortal() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setImagemAlvo(null)} disabled={salvandoImagem}>
+            <Button
+              variant="outline"
+              onClick={() => setImagemAlvo(null)}
+              disabled={salvandoImagem}
+            >
               Cancelar
             </Button>
             <Button
@@ -806,7 +879,10 @@ export function ResponsavelPortal() {
       </Dialog>
 
       {/* Justificar falta */}
-      <Dialog open={faltaAlvo !== null} onOpenChange={(v) => !v && setFaltaAlvo(null)}>
+      <Dialog
+        open={faltaAlvo !== null}
+        onOpenChange={(v) => !v && setFaltaAlvo(null)}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Justificar falta</DialogTitle>
@@ -825,7 +901,11 @@ export function ResponsavelPortal() {
             autoFocus
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setFaltaAlvo(null)} disabled={salvandoJustif}>
+            <Button
+              variant="outline"
+              onClick={() => setFaltaAlvo(null)}
+              disabled={salvandoJustif}
+            >
               Cancelar
             </Button>
             <Button onClick={enviarJustificativa} disabled={salvandoJustif}>
