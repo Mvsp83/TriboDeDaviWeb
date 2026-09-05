@@ -52,7 +52,7 @@ export function PaginaPublica({
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-border">
+      <footer className="border-t border-border bg-card">
         <div
           className={cn(
             "mx-auto flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 text-xs text-muted-foreground",
@@ -63,14 +63,6 @@ export function PaginaPublica({
             © {anoAtual} {SITE.nome}
           </span>
           <SobreApp className="font-medium transition-colors hover:text-foreground" />
-          <div className="flex items-center gap-x-6">
-            <Link to="/responsavel" className="hover:text-foreground">
-              Área do Responsável
-            </Link>
-            <Link to="/login" className="hover:text-foreground">
-              Acesso da equipe
-            </Link>
-          </div>
         </div>
       </footer>
 
