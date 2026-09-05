@@ -181,31 +181,32 @@ export function Davizinho() {
 
   return (
     <>
-      {/* Botão flutuante */}
+      {/* Botão flutuante — dourado e chamativo (com pulso) quando fechado. */}
       <button
         onClick={() => setAberto((a) => !a)}
         aria-label={aberto ? "Fechar assistente" : "Abrir assistente Davizinho"}
-        className="fixed bottom-4 right-4 z-50 flex size-14 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-4 right-4 z-50 flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/40 transition-transform hover:scale-105"
       >
-        {aberto ? (
-          <X className="size-6" />
-        ) : logoOk ? (
-          <img
-            src="/davizinho.png"
-            alt="Davizinho"
-            className="size-full object-cover"
-            onError={() => setLogoOk(false)}
+        {!aberto && (
+          <span
+            aria-hidden="true"
+            className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-40"
           />
-        ) : (
-          <MessageCircle className="size-6" />
         )}
+        <span className="relative flex items-center justify-center">
+          {aberto ? (
+            <X className="size-7" />
+          ) : (
+            <MessageCircle className="size-8" />
+          )}
+        </span>
       </button>
 
       {/* Painel */}
       {aberto && (
         <div className="fixed bottom-20 right-4 z-50 flex max-h-[70vh] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
-          <div className="flex items-center gap-2 border-b border-border bg-primary/10 px-4 py-3">
-            <span className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground">
+          <div className="flex items-center gap-3 border-b border-border bg-primary/10 px-4 py-3">
+            <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground ring-2 ring-primary/30">
               {logoOk ? (
                 <img
                   src="/davizinho.png"
@@ -214,7 +215,7 @@ export function Davizinho() {
                   onError={() => setLogoOk(false)}
                 />
               ) : (
-                <Sparkles className="size-4" />
+                <Sparkles className="size-6" />
               )}
             </span>
             <div>
