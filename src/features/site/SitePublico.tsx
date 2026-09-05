@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   HeartHandshake,
@@ -5,6 +6,8 @@ import {
   ArrowRight,
   Users,
   BookOpen,
+  Menu,
+  X,
 } from "lucide-react";
 import { SITE, temInformacoes } from "@/features/site/conteudoSite";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
@@ -84,11 +87,50 @@ export function SitePublico() {
   const anoAtual = new Date().getFullYear();
   useDocumentTitle(`${SITE.nome} — Jiu-jitsu gratuito para crianças`);
 
+  // Menu do topo no mobile (hamburger). No desktop os links ficam inline.
+  const [menuAberto, setMenuAberto] = useState(false);
+
   // Links de navegação — só aparecem para seções que têm conteúdo.
   // "Prestação de contas" saiu do menu: o assunto vive em Transparência.
   const secoes = [
     { id: "historia", label: "História", on: historia.length > 0 },
   ].filter((s) => s.on);
+
+  // Lista única de links, usada tanto no menu do desktop quanto no do mobile.
+  // `rota: false` => âncora para uma seção da própria página (#id).
+  const linksNav: { label: string; para: string; rota: boolean }[] = [
+    ...secoes.map((s) => ({ label: s.label, para: `#${s.id}`, rota: false })),
+    { label: "Galeria", para: "/galeria", rota: true },
+    { label: "Loja", para: "/loja", rota: true },
+    ...(temInformacoes()
+      ? [{ label: "Informações", para: "/informacoes", rota: true }]
+      : []),
+    { label: "Transparência", para: "/transparencia", rota: true },
+  ];
+
+  const renderLink = (
+    l: { label: string; para: string; rota: boolean },
+    className: string,
+  ) =>
+    l.rota ? (
+      <Link
+        key={l.para}
+        to={l.para}
+        className={className}
+        onClick={() => setMenuAberto(false)}
+      >
+        {l.label}
+      </Link>
+    ) : (
+      <a
+        key={l.para}
+        href={l.para}
+        className={className}
+        onClick={() => setMenuAberto(false)}
+      >
+        {l.label}
+      </a>
+    );
 
   return (
     <div className="min-h-svh bg-background text-foreground">
@@ -101,47 +143,15 @@ export function SitePublico() {
       </a>
 
       {/* Topo */}
-      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-5">
+      <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-5">
         <img src="/logo.png" alt={SITE.nome} className="h-14 w-auto md:h-20" />
 
-        {/* Menu e acessos no mesmo grupo, alinhados à direita e na mesma linha. */}
-        <div className="flex flex-1 flex-wrap items-center justify-center-safe gap-x-3 gap-y-2 md:flex-nowrap">
-          <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground md:flex-nowrap md:whitespace-nowrap">
-            {secoes.map((s) => (
-              <a
-                key={s.id}
-                href={`#${s.id}`}
-                className="transition-colors hover:text-foreground"
-              >
-                {s.label}
-              </a>
-            ))}
-            <Link
-              to="/galeria"
-              className="transition-colors hover:text-foreground"
-            >
-              Galeria
-            </Link>
-            <Link
-              to="/loja"
-              className="transition-colors hover:text-foreground"
-            >
-              Loja
-            </Link>
-            {temInformacoes() && (
-              <Link
-                to="/informacoes"
-                className="transition-colors hover:text-foreground"
-              >
-                Informações
-              </Link>
+        {/* Desktop: menu e acessos inline, alinhados à direita. */}
+        <div className="hidden flex-1 items-center justify-end gap-x-3 md:flex md:flex-nowrap">
+          <nav className="flex items-center gap-x-4 text-sm text-muted-foreground md:whitespace-nowrap">
+            {linksNav.map((l) =>
+              renderLink(l, "transition-colors hover:text-foreground"),
             )}
-            <Link
-              to="/transparencia"
-              className="transition-colors hover:text-foreground"
-            >
-              Transparência
-            </Link>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -161,7 +171,46 @@ export function SitePublico() {
             </Button>
           </div>
         </div>
+
+        {/* Mobile: botão do menu (hamburger). */}
+        <button
+          type="button"
+          onClick={() => setMenuAberto((v) => !v)}
+          className="inline-flex size-11 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary md:hidden"
+          aria-label="Abrir menu"
+          aria-expanded={menuAberto}
+        >
+          {menuAberto ? <X className="size-6" /> : <Menu className="size-6" />}
+        </button>
       </header>
+
+      {/* Painel do menu no mobile — links empilhados + acessos em destaque. */}
+      {menuAberto && (
+        <div className="border-b border-border bg-background md:hidden">
+          <nav className="mx-auto flex max-w-5xl flex-col gap-1 px-4 pb-4 pt-1 text-sm">
+            {linksNav.map((l) =>
+              renderLink(
+                l,
+                "rounded-md px-2 py-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+              ),
+            )}
+            <div className="mt-3 flex flex-col gap-2">
+              <Button asChild size="lg">
+                <Link to="/responsavel" onClick={() => setMenuAberto(false)}>
+                  <Users className="size-4" />
+                  Área do Responsável
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link to="/login" onClick={() => setMenuAberto(false)}>
+                  <LogIn className="size-4" />
+                  Acesso da equipe
+                </Link>
+              </Button>
+            </div>
+          </nav>
+        </div>
+      )}
 
       {/* Herói */}
       <section
@@ -295,15 +344,8 @@ export function SitePublico() {
           <span>
             © {anoAtual} {SITE.nome}
           </span>
+          {/* Os acessos (Responsável/Equipe) ficam no topo — aqui só o essencial. */}
           <SobreApp className="font-medium transition-colors hover:text-foreground" />
-          <div className="flex items-center gap-x-6">
-            <Link to="/responsavel" className="hover:text-foreground">
-              Área do Responsável
-            </Link>
-            <Link to="/login" className="hover:text-foreground">
-              Acesso da equipe
-            </Link>
-          </div>
         </div>
       </footer>
 
