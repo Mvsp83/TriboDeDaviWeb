@@ -26,6 +26,28 @@ export interface Produto {
   variacoes: VariacaoProduto[];
 }
 
+// ── Vitrine pública ──────────────────────────────────────────────────────────
+// Formato do endpoint anônimo: sem estoque exato (só "disponivel"), sem
+// "ativo"/"dataCriacao". Separado do Produto (admin) para não vazar estoque.
+export interface VariacaoVitrine {
+  id?: number;
+  tamanho: string;
+  cor: string;
+  disponivel: boolean;
+}
+
+export interface ProdutoVitrine {
+  id: number;
+  nome: string;
+  descricao: string;
+  preco: number;
+  fotoArquivoId?: string;
+  temFoto: boolean;
+  formasPagamento: string;
+  informacoes: string;
+  variacoes: VariacaoVitrine[];
+}
+
 // Payload de cadastro/edição (id ausente = novo).
 export interface SalvarProduto {
   id?: number;
@@ -52,8 +74,10 @@ export const estoqueTotal = (p: Produto) =>
 export function useVitrine() {
   return useQuery({
     queryKey: ["vitrine"],
-    queryFn: async (): Promise<Produto[]> => {
-      const lista = await apiGet<Produto[] | null>(ApiRotas.produtoVitrine);
+    queryFn: async (): Promise<ProdutoVitrine[]> => {
+      const lista = await apiGet<ProdutoVitrine[] | null>(
+        ApiRotas.produtoVitrine,
+      );
       return lista ?? [];
     },
   });

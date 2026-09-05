@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ShoppingBag,
   CreditCard,
@@ -16,8 +16,7 @@ import { COMPRA_WHATSAPP_HABILITADA } from "@/features/loja/lojaConfig";
 import {
   useVitrine,
   produtoFotoUrl,
-  estoqueTotal,
-  type Produto,
+  type ProdutoVitrine,
 } from "@/features/loja/produtosApi";
 
 // Distintos e não-vazios, preservando a ordem de cadastro.
@@ -33,7 +32,7 @@ function BotaoComprar({
   cores,
   whatsapp,
 }: {
-  produto: Produto;
+  produto: ProdutoVitrine;
   tamanhos: string[];
   cores: string[];
   whatsapp: string;
@@ -42,17 +41,12 @@ function BotaoComprar({
   const [cor, setCor] = useState(cores[0] ?? "");
   const [qtd, setQtd] = useState(1);
 
-  // Estoque da combinação escolhida (tamanho + cor). 0 = indisponível.
+  // Disponibilidade da combinação escolhida (tamanho + cor). A vitrine não
+  // expõe o estoque exato — só o sinal "disponível".
   const norm = (s: string) => (s ?? "").trim();
-  const estoqueCombo = (produto.variacoes ?? [])
-    .filter((v) => norm(v.tamanho) === tam && norm(v.cor) === cor)
-    .reduce((s, v) => s + Math.max(0, v.quantidade || 0), 0);
-  const indisponivel = estoqueCombo === 0;
-
-  // Ao trocar de combinação, mantém a quantidade dentro do estoque disponível.
-  useEffect(() => {
-    setQtd((q) => Math.min(Math.max(1, q), Math.max(1, estoqueCombo)));
-  }, [estoqueCombo]);
+  const indisponivel = !(produto.variacoes ?? []).some(
+    (v) => norm(v.tamanho) === tam && norm(v.cor) === cor && v.disponivel,
+  );
 
   const msg =
     `Olá! Tenho interesse no produto: ${produto.nome} (${moeda(produto.preco)})` +
@@ -98,26 +92,16 @@ function BotaoComprar({
         <input
           type="number"
           min={1}
-          max={estoqueCombo || undefined}
           value={qtd}
           disabled={indisponivel}
-          onChange={(e) =>
-            setQtd(
-              Math.min(
-                Math.max(1, Number(e.target.value) || 1),
-                Math.max(1, estoqueCombo),
-              ),
-            )
-          }
+          onChange={(e) => setQtd(Math.max(1, Number(e.target.value) || 1))}
           className={`w-16 ${campoClass} disabled:opacity-50`}
           aria-label="Quantidade"
         />
       </div>
 
       <p className="text-xs text-muted-foreground">
-        {indisponivel
-          ? "Combinação indisponível no momento."
-          : `${estoqueCombo} em estoque`}
+        {indisponivel ? "Combinação indisponível no momento." : "Disponível"}
       </p>
 
       {indisponivel ? (
@@ -137,11 +121,11 @@ function BotaoComprar({
   );
 }
 
-function CartaoProduto({ produto }: { produto: Produto }) {
-  const emEstoque = (produto.variacoes ?? []).filter((v) => v.quantidade > 0);
+function CartaoProduto({ produto }: { produto: ProdutoVitrine }) {
+  const emEstoque = (produto.variacoes ?? []).filter((v) => v.disponivel);
   const tamanhos = distintos(emEstoque.map((v) => v.tamanho));
   const cores = distintos(emEstoque.map((v) => v.cor));
-  const esgotado = estoqueTotal(produto) === 0;
+  const esgotado = emEstoque.length === 0;
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card">
