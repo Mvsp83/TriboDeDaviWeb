@@ -43,9 +43,10 @@ export interface CategoriaFaq {
 export const SITE = {
   nome: "Instituto Tribo de Davi",
   // Frase de efeito do topo.
-  chamada: "Jiu-jitsu que forma campeões dentro e fora do tatame",
+  chamada:
+    "Transformando vidas através do Jiu-jitsu, formando campeões dentro e fora do tatame",
   subChamada:
-    "Aulas gratuitas de jiu-jitsu para crianças e adolescentes, com disciplina, respeito e acompanhamento de perto.",
+    "Aulas de jiu-jitsu para crianças, adolescentes e adultos, com princípios cristãos, disciplina e respeito. Sendo uma opção saudável às drogas e fortalecendo a cidadania.",
 
   // Números do projeto. Deixe 0 para esconder o item.
   numeros: {
@@ -71,6 +72,11 @@ export const SITE = {
       titulo: "Acompanhamento de perto",
       texto:
         "Presença é registrada aula a aula. Quando um aluno começa a faltar, a família é procurada antes que ele desista.",
+    },
+    {
+      titulo: "Valores cristãos",
+      texto:
+        "Dinâmicas e ensinamentos pautados em princípios cristãos, fortalecendo a fé e a cidadania. Parceria com Instituições de Assistência Social, Combate às drogas e Escolas da região.",
     },
   ],
 
@@ -125,6 +131,21 @@ export const SITE = {
             pergunta: "Em quais valores o projeto se baseia?",
             resposta:
               "Disciplina, respeito, cidadania e princípios cristãos — usando o esporte como um caminho saudável de crescimento e uma alternativa firme frente às drogas.",
+          },
+        ],
+      },
+      {
+        titulo: "Polos e Endereços",
+        perguntas: [
+          {
+            pergunta: "Em quais bairros vocês atuam?",
+            resposta:
+              "Com sede em Blumenau (SC), o instituto mantém polos em bairros como Itoupavazinha, Guarapari, Araranguá e Eça de Queiroz.",
+          },
+          {
+            pergunta: "Como falo com a equipe?",
+            resposta:
+              "Fale com a gente pelos canais no rodapé do site (WhatsApp, e-mail ou Instagram). Teremos prazer em ajudar.",
           },
         ],
       },
@@ -265,21 +286,6 @@ export const SITE = {
             pergunta: "Posso ajudar de outras formas?",
             resposta:
               "Sim. Doação de materiais, voluntariado e parcerias ajudam muito o projeto a seguir. Fale com a equipe pelos nossos canais.",
-          },
-        ],
-      },
-      {
-        titulo: "Polos e Endereços",
-        perguntas: [
-          {
-            pergunta: "Em quais bairros vocês atuam?",
-            resposta:
-              "Com sede em Blumenau (SC), o instituto mantém polos em bairros como Itoupavazinha, Guarapari, Araranguá e Eça de Queiroz.",
-          },
-          {
-            pergunta: "Como falo com a equipe?",
-            resposta:
-              "Fale com a gente pelos canais no rodapé do site (WhatsApp, e-mail ou Instagram). Teremos prazer em ajudar.",
           },
         ],
       },
