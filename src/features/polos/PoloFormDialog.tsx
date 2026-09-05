@@ -63,6 +63,24 @@ const HORARIO_NOVO: HorarioTurma = {
   horaFim: "",
 };
 
+// Opções de horário em passos de 15 min (06:00–22:00). Usar um dropdown evita
+// o seletor de hora nativo do celular, que aparecia cortado fora da tela.
+const HORARIOS: string[] = (() => {
+  const out: string[] = [];
+  for (let h = 6; h <= 22; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      if (h === 22 && m > 0) break;
+      out.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+    }
+  }
+  return out;
+})();
+
+// Mantém um valor já salvo fora da grade de 15 min na lista, para não sumir.
+function opcoesHorario(valor: string): string[] {
+  return valor && !HORARIOS.includes(valor) ? [valor, ...HORARIOS] : HORARIOS;
+}
+
 interface Props {
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
@@ -240,25 +258,43 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="w-24">
+                    <div className="w-28">
                       <Label className="mb-1 text-xs">Início</Label>
-                      <Input
-                        type="time"
-                        value={h.horaInicio}
-                        onChange={(e) =>
-                          atualizarHorario(i, "horaInicio", e.target.value)
+                      <Select
+                        value={h.horaInicio || undefined}
+                        onValueChange={(v) =>
+                          atualizarHorario(i, "horaInicio", v)
                         }
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="--:--" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {opcoesHorario(h.horaInicio).map((t) => (
+                            <SelectItem key={t} value={t}>
+                              {t}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div className="w-24">
+                    <div className="w-28">
                       <Label className="mb-1 text-xs">Fim</Label>
-                      <Input
-                        type="time"
-                        value={h.horaFim}
-                        onChange={(e) =>
-                          atualizarHorario(i, "horaFim", e.target.value)
-                        }
-                      />
+                      <Select
+                        value={h.horaFim || undefined}
+                        onValueChange={(v) => atualizarHorario(i, "horaFim", v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="--:--" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {opcoesHorario(h.horaFim).map((t) => (
+                            <SelectItem key={t} value={t}>
+                              {t}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <Button
                       type="button"
