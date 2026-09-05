@@ -45,26 +45,28 @@
 }
 
 .dark {
-  --background: #0a0a0b;
+  /* Preto profundo no fundo e superfícies (card/seções) mais claras, para dar
+     hierarquia e separar as áreas — antes tudo se fundia no preto. */
+  --background: #08080a;
   --foreground: #f4f4f5;
-  --card: #161618;
+  --card: #1b1b1f;
   --card-foreground: #f4f4f5;
-  --popover: #161618;
+  --popover: #1b1b1f;
   --popover-foreground: #f4f4f5;
   --primary: #f5c518;
   --primary-foreground: #0a0a0a;
-  --secondary: #1e1e21;
+  --secondary: #26262b;
   --secondary-foreground: #f4f4f5;
-  --muted: #1e1e21;
-  --muted-foreground: #a1a1aa;
+  --muted: #26262b;
+  --muted-foreground: #a8a8b3;
   --accent: #f5c5181f;
   --accent-foreground: #f5c518;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --success: #22c55e;
   --warning: #f59e0b;
-  --border: #27272a;
-  --input: #2a2a2e;
+  --border: #313138;
+  --input: #313138;
   --ring: #f5c518;
 
   --sidebar: #0f0f10;

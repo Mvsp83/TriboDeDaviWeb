@@ -142,7 +142,8 @@ export function SitePublico() {
         Pular para o conteúdo
       </a>
 
-      {/* Topo */}
+      {/* Topo — faixa fixa, com tom próprio para separar do conteúdo. */}
+      <div className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur">
       <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-5">
         <img src="/logo.png" alt={SITE.nome} className="h-14 w-auto md:h-20" />
 
@@ -186,7 +187,7 @@ export function SitePublico() {
 
       {/* Painel do menu no mobile — links empilhados + acessos em destaque. */}
       {menuAberto && (
-        <div className="border-b border-border bg-background md:hidden">
+        <div className="border-t border-border md:hidden">
           <nav className="mx-auto flex max-w-5xl flex-col gap-1 px-4 pb-4 pt-1 text-sm">
             {linksNav.map((l) =>
               renderLink(
@@ -211,6 +212,7 @@ export function SitePublico() {
           </nav>
         </div>
       )}
+      </div>
 
       {/* Herói */}
       <section
@@ -339,7 +341,7 @@ export function SitePublico() {
       </section>
 
       {/* Rodapé: só a linha e os dizeres. */}
-      <footer className="border-t border-border">
+      <footer className="border-t border-border bg-card">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 text-xs text-muted-foreground">
           <span>
             © {anoAtual} {SITE.nome}
