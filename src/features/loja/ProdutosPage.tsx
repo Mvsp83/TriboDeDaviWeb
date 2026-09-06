@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Package } from "lucide-react";
+import { Plus, Pencil, Trash2, Package, Settings } from "lucide-react";
 import { toast } from "sonner";
 import {
   useProdutos,
@@ -9,6 +9,7 @@ import {
   type Produto,
 } from "@/features/loja/produtosApi";
 import { ProdutoFormDialog } from "@/features/loja/ProdutoFormDialog";
+import { ConfigLojaDialog } from "@/features/loja/ConfigLojaDialog";
 import { ApiError } from "@/lib/api";
 import { moeda } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ export function ProdutosPage() {
   const excluir = useExcluirProduto();
 
   const [dialogAberto, setDialogAberto] = useState(false);
+  const [configAberto, setConfigAberto] = useState(false);
   const [edicao, setEdicao] = useState<Produto | null>(null);
   const [excluirAlvo, setExcluirAlvo] = useState<Produto | null>(null);
 
@@ -43,15 +45,21 @@ export function ProdutosPage() {
         <p className="text-sm text-muted-foreground">
           {isLoading ? "Carregando..." : `${produtos?.length ?? 0} produto(s)`}
         </p>
-        <Button
-          onClick={() => {
-            setEdicao(null);
-            setDialogAberto(true);
-          }}
-        >
-          <Plus className="size-4" />
-          Novo produto
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setConfigAberto(true)}>
+            <Settings className="size-4" />
+            Configuração
+          </Button>
+          <Button
+            onClick={() => {
+              setEdicao(null);
+              setDialogAberto(true);
+            }}
+          >
+            <Plus className="size-4" />
+            Novo produto
+          </Button>
+        </div>
       </div>
 
       {isLoading && (
@@ -146,6 +154,8 @@ export function ProdutosPage() {
         onOpenChange={setDialogAberto}
         produto={edicao}
       />
+
+      <ConfigLojaDialog aberto={configAberto} onOpenChange={setConfigAberto} />
 
       <ConfirmDialog
         aberto={excluirAlvo !== null}

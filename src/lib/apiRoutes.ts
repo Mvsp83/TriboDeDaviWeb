@@ -105,6 +105,9 @@ export const ApiRotas = {
   configDocumentoObter: "/api/ConfiguracaoDocumento/obter",
   configDocumentoSalvar: "/api/ConfiguracaoDocumento/salvar",
 
+  configLojaObter: "/api/ConfiguracaoLoja/obter",
+  configLojaSalvar: "/api/ConfiguracaoLoja/salvar",
+
   dashboardConfigObter: "/api/ConfiguracaoDashboard/obter",
   dashboardConfigSalvar: "/api/ConfiguracaoDashboard/salvar",
 

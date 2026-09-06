@@ -48,6 +48,13 @@ export interface ProdutoVitrine {
   variacoes: VariacaoVitrine[];
 }
 
+// Configuração da loja (admin): número de WhatsApp + liga/desliga a compra.
+export interface ConfiguracaoLoja {
+  id?: number;
+  compraWhatsappHabilitada: boolean;
+  whatsappNumero: string;
+}
+
 // Payload de cadastro/edição (id ausente = novo).
 export interface SalvarProduto {
   id?: number;
@@ -83,7 +90,25 @@ export function useVitrine() {
   });
 }
 
+// Config da loja — leitura pública (a vitrine usa para o botão de compra).
+export function useConfigLoja() {
+  return useQuery({
+    queryKey: ["config-loja"],
+    queryFn: () => apiGet<ConfiguracaoLoja>(ApiRotas.configLojaObter),
+  });
+}
+
 // ── Hooks admin ──────────────────────────────────────────────────────────────
+
+// Salva a config da loja (admin) e atualiza a leitura pública.
+export function useSalvarConfigLoja() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (c: ConfiguracaoLoja) =>
+      apiPut<ConfiguracaoLoja>(ApiRotas.configLojaSalvar, c),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["config-loja"] }),
+  });
+}
 
 export function useProdutos() {
   return useQuery({

@@ -12,9 +12,9 @@ import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PaginaPublica } from "@/components/PaginaPublica";
-import { COMPRA_WHATSAPP_HABILITADA } from "@/features/loja/lojaConfig";
 import {
   useVitrine,
+  useConfigLoja,
   produtoFotoUrl,
   type ProdutoVitrine,
 } from "@/features/loja/produtosApi";
@@ -127,6 +127,12 @@ function CartaoProduto({ produto }: { produto: ProdutoVitrine }) {
   const cores = distintos(emEstoque.map((v) => v.cor));
   const esgotado = emEstoque.length === 0;
 
+  // Config da loja (número + liga/desliga a compra) vem do cadastro do admin.
+  const { data: config } = useConfigLoja();
+  const whatsapp = config?.whatsappNumero ?? "";
+  const compraHabilitada =
+    (config?.compraWhatsappHabilitada ?? false) && !!whatsapp;
+
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card">
       <div className="relative aspect-square w-full bg-secondary/40">
@@ -195,12 +201,12 @@ function CartaoProduto({ produto }: { produto: ProdutoVitrine }) {
           </p>
         )}
 
-        {COMPRA_WHATSAPP_HABILITADA && SITE.contato.whatsapp && !esgotado && (
+        {compraHabilitada && !esgotado && (
           <BotaoComprar
             produto={produto}
             tamanhos={tamanhos}
             cores={cores}
-            whatsapp={SITE.contato.whatsapp}
+            whatsapp={whatsapp}
           />
         )}
       </div>
