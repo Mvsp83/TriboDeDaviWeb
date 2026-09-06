@@ -14,6 +14,7 @@ import {
   CameraOff,
   Award,
   MoreVertical,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -27,6 +28,7 @@ import {
   usePrepararCodigosResponsavel,
 } from "@/features/alunos/alunosApi";
 import { AlunoFormDialog } from "@/features/alunos/AlunoFormDialog";
+import { AlunoDetalheDialog } from "@/features/alunos/AlunoDetalheDialog";
 import { CodigoResponsavelDialog } from "@/features/responsavel/CodigoResponsavelDialog";
 import { OcorrenciasDialog } from "@/features/ocorrencias/OcorrenciasDialog";
 import { imprimirCodigos } from "@/features/responsavel/imprimirCodigos";
@@ -49,6 +51,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuCheck,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { IdRef } from "@/components/IdRef";
@@ -120,6 +124,7 @@ export function AlunosPage() {
 
   const [dialogAberto, setDialogAberto] = useState(false);
   const [alunoEdicao, setAlunoEdicao] = useState<Aluno | null>(null);
+  const [alunoDetalhe, setAlunoDetalhe] = useState<Aluno | null>(null);
   const [alunoExcluir, setAlunoExcluir] = useState<Aluno | null>(null);
   const [alunoAnonimizar, setAlunoAnonimizar] = useState<Aluno | null>(null);
   const [alunoCodigo, setAlunoCodigo] = useState<Aluno | null>(null);
@@ -329,19 +334,46 @@ export function AlunosPage() {
           {isLoading ? "Carregando..." : `${filtrados.length} aluno(s)`}
         </p>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={imprimirTodosCodigos}
-            disabled={prepararCodigos.isPending}
-            title="Gera os códigos faltantes e abre a folha para imprimir"
-          >
-            {prepararCodigos.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Printer className="size-4" />
-            )}
-            Imprimir códigos
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Mais ações">
+                <MoreVertical className="size-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[16rem]">
+              <DropdownMenuItem
+                onClick={imprimirTodosCodigos}
+                disabled={prepararCodigos.isPending}
+                className="py-2.5"
+              >
+                {prepararCodigos.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Printer className="size-4" />
+                )}
+                Imprimir códigos
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={imprimirListaSemImagem}
+                className="py-2.5"
+              >
+                <Printer className="size-4" />
+                Imprimir lista (sem autorização)
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setFiltroSemImagem((v) => !v)}
+                className="py-2.5"
+              >
+                {filtroSemImagem ? (
+                  <DropdownMenuCheck className="size-4" />
+                ) : (
+                  <CameraOff className="size-4" />
+                )}
+                Só sem autorização de imagem
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {admin && (
             <Button onClick={abrirNovo}>
               <Plus className="size-4" />
@@ -394,18 +426,18 @@ export function AlunosPage() {
               </Button>
             ))}
           </div>
-          <Button
-            variant={filtroSemImagem ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFiltroSemImagem((v) => !v)}
-          >
-            <CameraOff className="size-4" />
-            Sem autorização de imagem
-          </Button>
-          <Button variant="ghost" size="sm" onClick={imprimirListaSemImagem}>
-            <Printer className="size-4" />
-            Imprimir lista
-          </Button>
+          {filtroSemImagem && (
+            <button
+              type="button"
+              onClick={() => setFiltroSemImagem(false)}
+              className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary"
+              title="Remover filtro"
+            >
+              <CameraOff className="size-3.5" />
+              Só sem autorização
+              <X className="size-3.5" />
+            </button>
+          )}
         </div>
       </Card>
 
@@ -482,7 +514,13 @@ export function AlunosPage() {
                           <IdRef id={a.id} />
                         </span>
                         <span>
-                          {a.nome}
+                          <button
+                            type="button"
+                            onClick={() => setAlunoDetalhe(a)}
+                            className="text-left hover:underline"
+                          >
+                            {a.nome}
+                          </button>
                           {a.autorizaImagem !== true && (
                             <span title="Sem autorização de uso de imagem">
                               <CameraOff
@@ -597,7 +635,13 @@ export function AlunosPage() {
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="truncate font-medium">{a.nome}</span>
+                    <button
+                      type="button"
+                      onClick={() => setAlunoDetalhe(a)}
+                      className="truncate text-left font-medium hover:underline"
+                    >
+                      {a.nome}
+                    </button>
                     {a.autorizaImagem !== true && (
                       <span title="Sem autorização de uso de imagem">
                         <CameraOff
@@ -677,6 +721,15 @@ export function AlunosPage() {
         aluno={alunoEdicao}
         polos={polos ?? []}
         poloPadrao={sessao?.poloId}
+      />
+
+      <AlunoDetalheDialog
+        aluno={alunoDetalhe}
+        nomePolo={
+          alunoDetalhe ? (nomePorPolo.get(alunoDetalhe.poloId) ?? "-") : "-"
+        }
+        onOpenChange={(o) => !o && setAlunoDetalhe(null)}
+        onEditar={admin ? abrirEdicao : undefined}
       />
 
       <Dialog
