@@ -13,6 +13,8 @@ import {
   Printer,
   CameraOff,
   Award,
+  MoreVertical,
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -42,6 +44,13 @@ import type { Aluno } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import { IdRef } from "@/components/IdRef";
 import { AlunoAvatar } from "@/features/alunos/AlunoAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -61,6 +70,17 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+
+// Uma ação da linha/card do aluno. A mesma lista alimenta os botões-ícone da
+// tabela (desktop) e o menu ⋮ (mobile), evitando duplicar a lógica.
+interface AcaoAluno {
+  chave: string;
+  rotulo: string;
+  Icone: LucideIcon;
+  onClick: () => void;
+  tom?: "aviso" | "perigo";
+  carregando?: boolean;
+}
 
 function FaixaBadge({ faixa }: { faixa: number }) {
   const info = faixaInfo(faixa);
@@ -278,9 +298,33 @@ export function AlunosPage() {
     }
   }
 
+  // Ações disponíveis para um aluno, já filtradas pelo papel do usuário.
+  function acoesDoAluno(a: Aluno): AcaoAluno[] {
+    const acoes: AcaoAluno[] = [
+      { chave: "carteirinha", rotulo: "Carteirinha com QR", Icone: QrCode, onClick: () => gerarCarteirinha(a) },
+      { chave: "editar", rotulo: "Editar", Icone: Pencil, onClick: () => abrirEdicao(a) },
+      { chave: "codigo", rotulo: "Código do responsável", Icone: KeyRound, onClick: () => setAlunoCodigo(a) },
+      { chave: "recados", rotulo: "Comportamento e recados", Icone: MessageSquare, onClick: () => setAlunoOcorrencias(a) },
+    ];
+    if (admin) {
+      acoes.push(
+        {
+          chave: "exportar",
+          rotulo: "Exportar dados (LGPD)",
+          Icone: Download,
+          onClick: () => exportarDados(a),
+          carregando: exportar.isPending && exportar.variables === a.id,
+        },
+        { chave: "anonimizar", rotulo: "Anonimizar (LGPD)", Icone: ShieldX, onClick: () => setAlunoAnonimizar(a), tom: "aviso" },
+        { chave: "excluir", rotulo: "Excluir", Icone: Trash2, onClick: () => setAlunoExcluir(a), tom: "perigo" },
+      );
+    }
+    return acoes;
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           {isLoading ? "Carregando..." : `${filtrados.length} aluno(s)`}
         </p>
@@ -365,7 +409,8 @@ export function AlunosPage() {
         </div>
       </Card>
 
-      <Card>
+      {/* Desktop: tabela completa */}
+      <Card className="hidden md:block">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -475,84 +520,29 @@ export function AlunosPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => gerarCarteirinha(a)}
-                          aria-label="Carteirinha"
-                          title="Carteirinha com QR"
-                        >
-                          <QrCode className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => abrirEdicao(a)}
-                          aria-label="Editar"
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        {/* Código do responsável: professor+ (a família pode
-                            ter perdido) — não é exclusivo de admin. */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setAlunoCodigo(a)}
-                          aria-label="Acesso do responsável"
-                          title="Código de acesso do responsável"
-                        >
-                          <KeyRound className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setAlunoOcorrencias(a)}
-                          aria-label="Comportamento e recados"
-                          title="Comportamento e recados (aparecem no portal da família)"
-                        >
-                          <MessageSquare className="size-4" />
-                        </Button>
-                        {admin && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => exportarDados(a)}
-                            disabled={
-                              exportar.isPending && exportar.variables === a.id
-                            }
-                            aria-label="Exportar dados (LGPD)"
-                            title="Exportar dados do aluno (LGPD)"
-                          >
-                            {exportar.isPending &&
-                            exportar.variables === a.id ? (
-                              <Loader2 className="size-4 animate-spin" />
-                            ) : (
-                              <Download className="size-4" />
-                            )}
-                          </Button>
-                        )}
-                        {admin && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setAlunoAnonimizar(a)}
-                            aria-label="Anonimizar (LGPD)"
-                            title="Anonimizar dados pessoais (LGPD)"
-                            className="text-amber-600 hover:text-amber-600"
-                          >
-                            <ShieldX className="size-4" />
-                          </Button>
-                        )}
-                        {admin && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setAlunoExcluir(a)}
-                            aria-label="Excluir"
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
+                        {acoesDoAluno(a).map(
+                          ({ chave, rotulo, Icone, onClick, tom, carregando }) => (
+                            <Button
+                              key={chave}
+                              variant="ghost"
+                              size="icon"
+                              onClick={onClick}
+                              disabled={carregando}
+                              aria-label={rotulo}
+                              title={rotulo}
+                              className={cn(
+                                tom === "aviso" && "text-amber-600 hover:text-amber-600",
+                                tom === "perigo" &&
+                                  "text-destructive hover:text-destructive",
+                              )}
+                            >
+                              {carregando ? (
+                                <Loader2 className="size-4 animate-spin" />
+                              ) : (
+                                <Icone className="size-4" />
+                              )}
+                            </Button>
+                          ),
                         )}
                       </div>
                     </TableCell>
@@ -562,6 +552,124 @@ export function AlunosPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Mobile: lista de cards com menu de ações (⋮) */}
+      <div className="space-y-2 md:hidden">
+        {isLoading &&
+          Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="flex items-center gap-3 p-3">
+                <Skeleton className="size-11 shrink-0 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+        {!isLoading && isError && (
+          <Card>
+            <CardContent className="py-10 text-center text-destructive">
+              Erro ao carregar os alunos. Tente novamente.
+            </CardContent>
+          </Card>
+        )}
+
+        {!isLoading && !isError && filtrados.length === 0 && (
+          <Card>
+            <CardContent className="py-10 text-center text-muted-foreground">
+              Nenhum aluno encontrado.
+            </CardContent>
+          </Card>
+        )}
+
+        {!isLoading &&
+          sorted.map((a) => (
+            <Card key={a.id}>
+              <CardContent className="flex items-center gap-3 p-3">
+                <AlunoAvatar
+                  alunoId={a.id}
+                  nome={a.nome}
+                  temFoto={a.temFoto ?? false}
+                  size={44}
+                  ampliavel
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate font-medium">{a.nome}</span>
+                    {a.autorizaImagem !== true && (
+                      <span title="Sem autorização de uso de imagem">
+                        <CameraOff
+                          className="inline size-4 shrink-0 text-destructive"
+                          aria-label="Sem autorização de imagem"
+                        />
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    <FaixaBadge faixa={a.faixa} />
+                    <span className="text-xs text-muted-foreground">
+                      {nomePorPolo.get(a.poloId) ?? "-"}
+                    </span>
+                    {aptidao.get(a.id) && (
+                      <span
+                        title={`Apto ao exame — ${aptidao.get(a.id)!.exame}`}
+                        className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-600"
+                      >
+                        <Award className="size-3.5" /> Apto
+                      </span>
+                    )}
+                    {ehAlunoAdulto(a) && (
+                      <span
+                        title="Inscrito como adulto (ou 18+)"
+                        className="inline-flex items-center rounded-md bg-sky-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-sky-600"
+                      >
+                        Adulto
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0"
+                      aria-label={`Ações de ${a.nome}`}
+                    >
+                      <MoreVertical className="size-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-[13rem]">
+                    {acoesDoAluno(a).map(
+                      ({ chave, rotulo, Icone, onClick, tom, carregando }) => (
+                        <DropdownMenuItem
+                          key={chave}
+                          onClick={onClick}
+                          disabled={carregando}
+                          className={cn(
+                            "py-2.5",
+                            tom === "aviso" && "text-amber-600 focus:text-amber-600",
+                            tom === "perigo" &&
+                              "text-destructive focus:text-destructive",
+                          )}
+                        >
+                          {carregando ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <Icone />
+                          )}
+                          {rotulo}
+                        </DropdownMenuItem>
+                      ),
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </CardContent>
+            </Card>
+          ))}
+      </div>
 
       <AlunoFormDialog
         aberto={dialogAberto}

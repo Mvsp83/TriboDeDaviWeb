@@ -66,7 +66,12 @@ function NavLeafItem({ node, depth, cor, onNavigate }: NodeProps & { node: NavLe
       className={({ isActive }) =>
         cn(
           "flex items-center rounded-lg transition-colors",
-          raiz ? "gap-3 px-3 py-2.5 text-sm font-medium" : "gap-2.5 px-2.5 py-1.5 text-[13px]",
+          // No mobile, alvos de toque maiores (>=44px) e fonte legível; no
+          // desktop (md:) volta ao compacto original.
+          "min-h-[44px] md:min-h-0",
+          raiz
+            ? "gap-3 px-3 py-2.5 text-[15px] font-medium md:text-sm"
+            : "gap-2.5 px-3 py-2 text-sm md:px-2.5 md:py-1.5 md:text-[13px]",
           isActive
             ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
             : raiz
@@ -78,7 +83,7 @@ function NavLeafItem({ node, depth, cor, onNavigate }: NodeProps & { node: NavLe
       {({ isActive }) => (
         <>
           <node.icon
-            className={cn("shrink-0", raiz ? "size-[18px]" : "size-4")}
+            className={cn("shrink-0", raiz ? "size-[18px]" : "size-[18px] md:size-4")}
             style={{ color: isActive ? undefined : cor }}
           />
           {node.label}
@@ -111,7 +116,10 @@ function NavBranchItem({
         onClick={alternar}
         className={cn(
           "flex w-full items-center rounded-lg transition-colors",
-          raiz ? "gap-3 px-3 py-2.5 text-sm font-medium" : "gap-2.5 px-2.5 py-1.5 text-[13px] font-medium",
+          "min-h-[44px] md:min-h-0",
+          raiz
+            ? "gap-3 px-3 py-2.5 text-[15px] font-medium md:text-sm"
+            : "gap-2.5 px-3 py-2 text-sm font-medium md:px-2.5 md:py-1.5 md:text-[13px]",
           ativo
             ? "text-sidebar-foreground"
             : raiz
@@ -121,13 +129,13 @@ function NavBranchItem({
         aria-expanded={aberto}
       >
         <node.icon
-          className={cn("shrink-0", raiz ? "size-[18px]" : "size-4")}
+          className={cn("shrink-0", raiz ? "size-[18px]" : "size-[18px] md:size-4")}
           style={{ color: cor }}
         />
         <span className="flex-1 text-left">{node.label}</span>
         <ChevronRight
           className={cn(
-            "size-4 shrink-0 text-sidebar-foreground/40 transition-transform",
+            "size-5 shrink-0 text-sidebar-foreground/40 transition-transform md:size-4",
             aberto && "rotate-90",
           )}
         />
@@ -169,7 +177,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   );
 
   return (
-    <div className="flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground">
+    <div className="flex h-full w-[86vw] max-w-sm flex-col bg-sidebar text-sidebar-foreground md:w-64">
       <div className="flex h-20 items-center justify-between border-b border-sidebar-border px-5">
         <LogoLockup className="h-14" />
         {onNavigate && (
