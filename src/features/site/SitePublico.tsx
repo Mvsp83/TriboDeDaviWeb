@@ -220,11 +220,12 @@ export function SitePublico() {
         tabIndex={-1}
         className="mx-auto max-w-5xl px-4 pb-14 pt-6 outline-none md:pb-20 md:pt-10"
       >
-        <div className="max-w-2xl">
-          <h1 className="text-balance text-3xl font-bold leading-tight tracking-tight md:text-5xl">
+        {/* No desktop o texto ocupa mais largura e cresce; no mobile fica igual. */}
+        <div className="max-w-2xl md:max-w-4xl">
+          <h1 className="text-balance text-3xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl">
             {SITE.chamada}
           </h1>
-          <p className="mt-4 text-pretty text-base text-muted-foreground md:text-lg">
+          <p className="mt-4 max-w-2xl text-pretty text-base text-muted-foreground md:mt-6 md:text-xl">
             {SITE.subChamada}
           </p>
 
