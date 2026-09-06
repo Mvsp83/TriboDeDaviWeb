@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { useAuth } from "@/features/auth/AuthContext";
 import { navGroups, coletarFolhas } from "@/components/layout/navConfig";
 import { useDocumentoPadraoRemoto } from "@/features/configuracoes/configuracaoDocumentoApi";
 import { AvisosPendentes } from "@/features/avisos/AvisosPendentes";
@@ -21,11 +22,15 @@ function tituloDaRota(pathname: string): string {
 
 export function AppLayout() {
   const location = useLocation();
+  const { sessao } = useAuth();
+  const admin = sessao?.isAdministrador ?? false;
   const [mobileOpen, setMobileOpen] = useState(false);
   const titulo = tituloDaRota(location.pathname);
-  // Na chamada em andamento (/chamada/:id) já há barra fixa de "Salvar", então
-  // escondemos a navegação inferior para não conflitar.
-  const mostrarBottomNav = !location.pathname.startsWith("/chamada/");
+  // A barra inferior traz atalhos do dia a dia do PROFESSOR (Aulas/Chamada/
+  // Alunos). O admin navega pelo menu lateral, então não a mostramos para ele.
+  // Também some na chamada em andamento (/chamada/:id), que já tem barra fixa.
+  const mostrarBottomNav =
+    !admin && !location.pathname.startsWith("/chamada/");
 
   // Prima o cache do padrão de documentos (compartilhado via API) para que a
   // exportação de PDF em qualquer tela use o valor mais recente.
