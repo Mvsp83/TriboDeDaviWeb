@@ -12,6 +12,17 @@
 :root {
   --radius: 0.65rem;
 
+  /* Movimento: tokens de duração e easing (iguais nos dois temas — movimento
+     não muda entre light/dark, por isso ficam só aqui e não em .dark). Banda
+     140–260ms para um toque premium sem parecer lento. */
+  --ease-out-premium: cubic-bezier(0.22, 1, 0.36, 1); /* curva "da casa" (entradas) */
+  --ease-out-soft: cubic-bezier(0.33, 1, 0.68, 1); /* trajetos maiores (drawer) */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* estados reversíveis (hover) */
+  --dur-fast: 140ms; /* micro-interações: hover, rotação do chevron */
+  --dur-base: 200ms; /* estrutural: submenu, drawer */
+  --dur-page: 220ms; /* entrada de tela ao trocar de rota */
+  --dur-slow: 260ms; /* ênfase pontual */
+
   --background: #f7f7f8;
   --foreground: #17171a;
   --card: #ffffff;
@@ -156,5 +167,107 @@
     border-radius: 9999px;
     border: 2px solid transparent;
     background-clip: content-box;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Movimento / animações. Sistema único e enxuto, sem bibliotecas (o stack já
+   traz tw-animate-css): entrada de tela ao trocar de rota, loading e menu
+   lateral. Movimento em transform/opacity — compositado na GPU, fora da main
+   thread — para 60fps no celular simples. Única exceção: a altura do submenu
+   (grid-rows), de custo baixo. Ver tokens de duração/easing no :root.
+--------------------------------------------------------------------------- */
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes page-enter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Entrada de conteúdo ao trocar de rota. `backwards` pinta o quadro inicial
+   (sem flash antes de começar) mas devolve transform:none ao terminar — nada de
+   containing block permanente que quebraria elementos position:fixed dentro da
+   página. Dispara sozinha ao montar; o AppLayout re-monta via key={pathname}. */
+.animate-page-enter {
+  animation: page-enter var(--dur-page) var(--ease-out-premium) backwards;
+}
+
+/* Variante só-opacidade: telas com filhos fixed/sticky (ex.: chamada em
+   andamento) onde um transform no wrapper faria a barra "saltar". */
+.animate-page-enter-fade {
+  animation: page-enter-fade var(--dur-page) var(--ease-out-premium) backwards;
+}
+
+/* Skeleton premium: varredura de luz no tom do tema (nada de branco fixo, que
+   ficaria errado no light). Usar só em áreas grandes; blocos pequenos seguem
+   com animate-pulse (mais barato). Não combine as duas no mesmo elemento. A
+   faixa é uma pseudo-camada que desliza por transform (compositada), não por
+   background-position (que repintaria a cada quadro). */
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--muted);
+}
+.animate-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--foreground) 8%, transparent) 50%,
+    transparent 100%
+  );
+  animation: skeleton-shimmer 1.5s var(--ease-standard) infinite;
+}
+
+/* Acessibilidade: quem pede menos movimento não vê deslizes/escalas. Zeramos as
+   entradas com deslocamento e encurtamos as transições, mas mantemos os fades
+   de opacidade e o pulse/shimmer do skeleton (não causam enjoo e o pulse é o
+   sinal de "carregando"). 0.01ms — e não 0 — preserva os eventos *end que algum
+   código possa aguardar. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-page-enter,
+  .animate-in,
+  [class*="slide-in-from"],
+  [class*="slide-out-to"],
+  [class*="zoom-in"],
+  [class*="zoom-out"] {
+    animation: none !important;
+  }
+
+  /* A varredura do skeleton é movimento contínuo — para de vez (fica um bloco
+     estático no tom --muted, ainda legível como "carregando"). */
+  .animate-shimmer::after {
+    animation: none !important;
   }
 }
