@@ -135,28 +135,45 @@ function NavBranchItem({
         <span className="flex-1 text-left">{node.label}</span>
         <ChevronRight
           className={cn(
-            "size-5 shrink-0 text-sidebar-foreground/40 transition-transform md:size-4",
+            "size-5 shrink-0 text-sidebar-foreground/40 transition-transform duration-[var(--dur-fast)] ease-[var(--ease-standard)] md:size-4",
             aberto && "rotate-90",
           )}
         />
       </button>
 
-      {aberto && (
-        <div
-          className="mt-0.5 space-y-0.5 border-l pl-2.5"
-          style={{ marginLeft: raiz ? 22 : 14, borderColor: `${cor}55` }}
-        >
-          {node.children.map((child) => (
-            <NavNodeItem
-              key={isBranch(child) ? child.label : child.href}
-              node={child}
-              depth={depth + 1}
-              cor={cor}
-              onNavigate={onNavigate}
-            />
-          ))}
+      {/* Expansão suave via grid-template-rows 0fr→1fr (altura auto animável).
+          Três divs: wrapper que anima a grade > clipe overflow-hidden "pelado"
+          (qualquer margem/borda nele vazaria altura fechado) > conteúdo com o
+          espaçamento. Os filhos ficam SEMPRE montados (a grade só interpola
+          entre dois estados presentes) e `inert` quando fechado, para não serem
+          tabuláveis/lidos por leitor de tela enquanto invisíveis. */}
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows] duration-[var(--dur-base)] ease-[var(--ease-out-premium)]",
+          aberto ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+        )}
+      >
+        <div className="overflow-hidden">
+          <div
+            className={cn(
+              "mt-0.5 space-y-0.5 border-l pl-2.5 transition-opacity duration-[var(--dur-base)]",
+              aberto ? "opacity-100" : "opacity-0",
+            )}
+            style={{ marginLeft: raiz ? 22 : 14, borderColor: `${cor}55` }}
+            inert={!aberto || undefined}
+          >
+            {node.children.map((child) => (
+              <NavNodeItem
+                key={isBranch(child) ? child.label : child.href}
+                node={child}
+                depth={depth + 1}
+                cor={cor}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
