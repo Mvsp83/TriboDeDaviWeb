@@ -13,9 +13,15 @@ import { cn } from "@/lib/utils";
 export function PaginaPublica({
   children,
   larguraMax = "max-w-5xl",
+  voltarPara,
 }: {
   children: ReactNode;
   larguraMax?: string;
+  // Destino fixo do "Voltar". Use quando o replay do histórico não serve — a
+  // tela de login, por exemplo, é alcançada por `replace` após o logout, então
+  // as entradas anteriores são rotas protegidas que só redirecionam de volta ao
+  // login; nesse caso "voltar" deve significar "sair para a home".
+  voltarPara?: string;
 }) {
   const navigate = useNavigate();
   const anoAtual = new Date().getFullYear();
@@ -25,6 +31,10 @@ export function PaginaPublica({
   // React Router (idx) — critério confiável: idx === 0 = primeira entrada, então
   // navigate(-1) seria um no-op e vamos para a home.
   const voltar = () => {
+    if (voltarPara !== undefined) {
+      navigate(voltarPara);
+      return;
+    }
     const idx =
       (typeof window !== "undefined" &&
         (window.history.state as { idx?: number } | null)?.idx) ||

@@ -84,7 +84,9 @@ export function LoginPage() {
   }
 
   return (
-    <PaginaPublica>
+    // "Voltar" sempre vai à home: após o logout chega-se aqui por `replace`, e o
+    // histórico anterior são rotas protegidas que só redirecionariam de volta.
+    <PaginaPublica voltarPara="/">
       <div className="relative flex min-h-[75svh] items-center justify-center overflow-hidden p-4">
         {/* Brilho dourado de fundo */}
         <div
