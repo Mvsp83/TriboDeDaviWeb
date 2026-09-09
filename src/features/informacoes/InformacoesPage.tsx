@@ -172,6 +172,45 @@ function LinkResposta({ link }: { link: LinkFaq }) {
   );
 }
 
+// Item de pergunta do FAQ (acordeão). Fica no escopo do módulo — de propósito:
+// se for definido dentro de InformacoesPage, cada clique recria a função e o
+// React remonta a lista inteira, o que perde a posição de rolagem (a tela
+// "pula"). O estado de aberto/fechado entra por props.
+function ItemPergunta({
+  pergunta,
+  aberta,
+  onAlternar,
+  children,
+}: {
+  pergunta: string;
+  aberta: boolean;
+  onAlternar: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <button
+        type="button"
+        onClick={onAlternar}
+        aria-expanded={aberta}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left font-medium hover:text-primary"
+      >
+        <span>{pergunta}</span>
+        <ChevronDown
+          className={`size-4 shrink-0 text-muted-foreground transition-transform ${
+            aberta ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      {aberta && (
+        <div className="border-t border-border px-4 py-3 text-sm text-muted-foreground">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Página pública de Informações em formato de FAQ. A categoria de polos ganha,
 // no fim, uma pergunta com a lista dos polos cadastrados (dados do cadastro).
 export function InformacoesPage() {
@@ -195,40 +234,6 @@ export function InformacoesPage() {
     id: idCategoria(i),
     label: c.titulo,
   }));
-
-  function ItemPergunta({
-    chave,
-    pergunta,
-    children,
-  }: {
-    chave: string;
-    pergunta: string;
-    children: React.ReactNode;
-  }) {
-    const aberta = abertas.has(chave);
-    return (
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <button
-          type="button"
-          onClick={() => alternar(chave)}
-          aria-expanded={aberta}
-          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left font-medium hover:text-primary"
-        >
-          <span>{pergunta}</span>
-          <ChevronDown
-            className={`size-4 shrink-0 text-muted-foreground transition-transform ${
-              aberta ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-        {aberta && (
-          <div className="border-t border-border px-4 py-3 text-sm text-muted-foreground">
-            {children}
-          </div>
-        )}
-      </div>
-    );
-  }
 
   return (
     <PaginaPublica larguraMax="max-w-4xl">
@@ -275,7 +280,12 @@ export function InformacoesPage() {
                 </h2>
                 <div className="mt-4 flex flex-col gap-2">
                   {cat.perguntas.map((p, qi) => (
-                    <ItemPergunta key={qi} chave={`${ci}-${qi}`} pergunta={p.pergunta}>
+                    <ItemPergunta
+                      key={qi}
+                      pergunta={p.pergunta}
+                      aberta={abertas.has(`${ci}-${qi}`)}
+                      onAlternar={() => alternar(`${ci}-${qi}`)}
+                    >
                       <p className="whitespace-pre-line">{p.resposta}</p>
                       {p.link && <LinkResposta link={p.link} />}
                     </ItemPergunta>
@@ -284,8 +294,9 @@ export function InformacoesPage() {
                   {/* Lista dinâmica dos polos, na categoria de polos. */}
                   {ehCategoriaPolos(cat.titulo) && (
                     <ItemPergunta
-                      chave={`polos-${ci}`}
                       pergunta="Quais são os polos e seus endereços?"
+                      aberta={abertas.has(`polos-${ci}`)}
+                      onAlternar={() => alternar(`polos-${ci}`)}
                     >
                       <PolosCadastrados />
                     </ItemPergunta>
