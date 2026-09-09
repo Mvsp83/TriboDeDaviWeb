@@ -22,7 +22,7 @@ import {
   useBuscarRematricula,
   type DadosPreMatricula,
 } from "@/features/matricula/matriculaApi";
-import { BAIRROS } from "@/features/matricula/bairros";
+import { SeletorBairro } from "@/features/matricula/SeletorBairro";
 import { comprimirImagem } from "@/features/fotosTreino/fotosTreinoApi";
 import { enviarFotoInscricao } from "@/features/alunos/fotoAlunoApi";
 import { ORIENTACAO_FOTO } from "@/features/matricula/FotoInscricao";
@@ -772,17 +772,7 @@ export function MatriculaPage() {
                   />
                 </Campo>
                 <Campo label="Bairro" obrigatorio>
-                  <Input
-                    list="lista-bairros"
-                    value={bairro}
-                    onChange={(e) => setBairro(e.target.value)}
-                    placeholder="Comece a digitar…"
-                  />
-                  <datalist id="lista-bairros">
-                    {BAIRROS.map((b) => (
-                      <option key={b} value={b} />
-                    ))}
-                  </datalist>
+                  <SeletorBairro value={bairro} onChange={setBairro} />
                 </Campo>
                 <Campo label="Cidade" obrigatorio>
                   <Input value={cidade} onChange={(e) => setCidade(e.target.value)} />

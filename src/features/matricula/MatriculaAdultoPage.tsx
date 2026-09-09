@@ -39,6 +39,7 @@ import {
   PRAZO_FILIACAO,
 } from "@/features/matricula/termos";
 import { PaginaPublica } from "@/components/PaginaPublica";
+import { SeletorBairro } from "@/features/matricula/SeletorBairro";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -429,7 +430,7 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
                   <Input value={complemento} onChange={(e) => setComplemento(e.target.value)} />
                 </Campo>
                 <Campo label="Bairro" obrigatorio>
-                  <Input value={bairro} onChange={(e) => setBairro(e.target.value)} />
+                  <SeletorBairro value={bairro} onChange={setBairro} />
                 </Campo>
                 <Campo label="Cidade" obrigatorio>
                   <Input value={cidade} onChange={(e) => setCidade(e.target.value)} />
