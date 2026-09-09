@@ -45,11 +45,14 @@ function Campo({ label, valor }: { label: string; valor?: string | null }) {
 export function AlunoDetalheDialog({
   aluno,
   nomePolo,
+  mostrarPolo = true,
   onOpenChange,
   onEditar,
 }: {
   aluno: Aluno | null;
   nomePolo: string;
+  // O professor só tem o próprio polo; esconder deixa a ficha mais limpa.
+  mostrarPolo?: boolean;
   onOpenChange: (aberto: boolean) => void;
   onEditar?: (aluno: Aluno) => void;
 }) {
@@ -109,7 +112,7 @@ export function AlunoDetalheDialog({
         </div>
 
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
-          <Campo label="Polo" valor={nomePolo} />
+          {mostrarPolo && <Campo label="Polo" valor={nomePolo} />}
           <Campo label="Turma" valor={String(aluno.turma)} />
           <Campo
             label="Nascimento"

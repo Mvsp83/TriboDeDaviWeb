@@ -121,6 +121,10 @@ export function FrequenciaPage() {
   // clicar num cabeçalho.
   const { sorted, sortKey, sortDir, toggleSort } = useTableSort(linhas, acessar);
 
+  // Total de colunas do cabeçalho (para os colSpan de "carregando"/"vazio"):
+  // Aluno, [Polo se admin], Aulas, Presenças, Faltas, Frequência, menu ⋮.
+  const nColunas = admin ? 7 : 6;
+
   return (
     <div className="space-y-4">
       <Card>
@@ -165,7 +169,10 @@ export function FrequenciaPage() {
                     ["faltas", "Faltas", "hidden sm:table-cell"],
                     ["frequencia", "Frequência"],
                   ] as const
-                ).map(([key, label, className]) => (
+                )
+                  // Polo só faz sentido para o admin; o professor só tem o dele.
+                  .filter(([key]) => admin || key !== "polo")
+                  .map(([key, label, className]) => (
                   <SortableHead
                     key={key}
                     label={label}
@@ -184,7 +191,7 @@ export function FrequenciaPage() {
               {carregando &&
                 Array.from({ length: 6 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={nColunas}>
                       <Skeleton className="h-6 w-full" />
                     </TableCell>
                   </TableRow>
@@ -192,7 +199,7 @@ export function FrequenciaPage() {
 
               {!carregando && linhas.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={nColunas} className="py-10 text-center text-muted-foreground">
                     Nenhum dado encontrado.
                   </TableCell>
                 </TableRow>
@@ -202,9 +209,11 @@ export function FrequenciaPage() {
                 sorted.map((l) => (
                   <TableRow key={l.alunoId}>
                     <TableCell className="font-medium">{l.nomeAluno}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {l.nomePolo}
-                    </TableCell>
+                    {admin && (
+                      <TableCell className="text-muted-foreground">
+                        {l.nomePolo}
+                      </TableCell>
+                    )}
                     <TableCell className="tabular-nums">{l.totalAulas}</TableCell>
                     <TableCell className="hidden tabular-nums sm:table-cell">
                       {l.presencas}

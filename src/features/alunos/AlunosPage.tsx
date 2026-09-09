@@ -105,6 +105,8 @@ function FaixaBadge({ faixa }: { faixa: number }) {
 export function AlunosPage() {
   const { sessao } = useAuth();
   const admin = sessao?.isAdministrador ?? false;
+  // Colunas da tabela: Nome, Faixa, [Polo se admin], Ações.
+  const nColunas = admin ? 4 : 3;
 
   const { data: alunos, isLoading, isError } = useAlunos(admin);
   const { data: polos } = usePolos();
@@ -453,7 +455,10 @@ export function AlunosPage() {
                     ["faixa", "Faixa"],
                     ["polo", "Polo"],
                   ] as const
-                ).map(([key, label]) => (
+                )
+                  // Polo só para o admin; o professor só tem o dele.
+                  .filter(([key]) => admin || key !== "polo")
+                  .map(([key, label]) => (
                   <SortableHead
                     key={key}
                     label={label}
@@ -470,7 +475,7 @@ export function AlunosPage() {
               {isLoading &&
                 Array.from({ length: 6 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={4}>
+                    <TableCell colSpan={nColunas}>
                       <Skeleton className="h-6 w-full" />
                     </TableCell>
                   </TableRow>
@@ -479,7 +484,7 @@ export function AlunosPage() {
               {!isLoading && isError && (
                 <TableRow>
                   <TableCell
-                    colSpan={4}
+                    colSpan={nColunas}
                     className="py-10 text-center text-destructive"
                   >
                     Erro ao carregar os alunos. Tente novamente.
@@ -490,7 +495,7 @@ export function AlunosPage() {
               {!isLoading && !isError && filtrados.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={4}
+                    colSpan={nColunas}
                     className="py-10 text-center text-muted-foreground"
                   >
                     Nenhum aluno encontrado.
@@ -553,9 +558,11 @@ export function AlunosPage() {
                     <TableCell>
                       <FaixaBadge faixa={a.faixa} />
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {nomePorPolo.get(a.poloId) ?? "-"}
-                    </TableCell>
+                    {admin && (
+                      <TableCell className="text-muted-foreground">
+                        {nomePorPolo.get(a.poloId) ?? "-"}
+                      </TableCell>
+                    )}
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         {acoesDoAluno(a).map(
@@ -653,9 +660,11 @@ export function AlunosPage() {
                   </div>
                   <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                     <FaixaBadge faixa={a.faixa} />
-                    <span className="text-xs text-muted-foreground">
-                      {nomePorPolo.get(a.poloId) ?? "-"}
-                    </span>
+                    {admin && (
+                      <span className="text-xs text-muted-foreground">
+                        {nomePorPolo.get(a.poloId) ?? "-"}
+                      </span>
+                    )}
                     {aptidao.get(a.id) && (
                       <span
                         title={`Apto ao exame — ${aptidao.get(a.id)!.exame}`}
@@ -728,6 +737,7 @@ export function AlunosPage() {
         nomePolo={
           alunoDetalhe ? (nomePorPolo.get(alunoDetalhe.poloId) ?? "-") : "-"
         }
+        mostrarPolo={admin}
         onOpenChange={(o) => !o && setAlunoDetalhe(null)}
         onEditar={admin ? abrirEdicao : undefined}
       />
