@@ -60,7 +60,11 @@ export function PaginaPublica({
         </Button>
       </header>
 
-      <main className="flex-1">{children}</main>
+      {/* pb reserva a "zona segura" dos flutuantes do canto inferior direito
+          (assistente em bottom-4 e "voltar ao topo" em bottom-20), para que a
+          última linha de conteúdo — normalmente a barra Anterior/Próximo dos
+          formulários — nunca fique escondida atrás deles. */}
+      <main className="flex-1 pb-28">{children}</main>
 
       <footer className="border-t border-border bg-card">
         <div
