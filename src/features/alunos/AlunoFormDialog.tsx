@@ -8,6 +8,7 @@ import { useSalvarAluno } from "@/features/alunos/alunosApi";
 import { useConfigFotoAluno } from "@/features/alunos/fotoAlunoApi";
 import { FotoAlunoCadastro } from "@/features/alunos/FotoAlunoCadastro";
 import { OPCOES_FAIXA_BASE } from "@/features/alunos/faixa";
+import { SeletorBairro } from "@/features/matricula/SeletorBairro";
 import { ApiError } from "@/lib/api";
 import { formatarTelefone } from "@/lib/format";
 import type { Aluno, Polo } from "@/types";
@@ -283,7 +284,13 @@ export function AlunoFormDialog({
               <Input {...register("complemento")} />
             </Campo>
             <Campo label="Bairro">
-              <Input {...register("bairro")} />
+              <Controller
+                control={control}
+                name="bairro"
+                render={({ field }) => (
+                  <SeletorBairro value={field.value ?? ""} onChange={field.onChange} />
+                )}
+              />
             </Campo>
             <Campo label="Cidade">
               <Input {...register("cidade")} />

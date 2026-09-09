@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSalvarPolo } from "@/features/polos/polosApi";
+import { SeletorBairro } from "@/features/matricula/SeletorBairro";
 import { ApiError } from "@/lib/api";
 import type { HorarioTurma, Polo } from "@/types";
 import {
@@ -103,6 +104,7 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -174,7 +176,13 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
             </div>
             <div>
               <Label className="mb-1.5">Bairro</Label>
-              <Input {...register("bairro")} />
+              <Controller
+                control={control}
+                name="bairro"
+                render={({ field }) => (
+                  <SeletorBairro value={field.value ?? ""} onChange={field.onChange} />
+                )}
+              />
             </div>
             <div className="sm:col-span-2">
               <Label className="mb-1.5">Limite de alunos (0 = sem limite)</Label>

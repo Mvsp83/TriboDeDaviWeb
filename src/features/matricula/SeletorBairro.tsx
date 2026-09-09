@@ -25,23 +25,27 @@ export function SeletorBairro({
   value: string;
   onChange: (v: string) => void;
 }) {
-  // Monta em "Outro" quando já vem um valor que não está na lista (rascunho
-  // restaurado, edição). O inicializador roda uma vez, no mount — que aqui só
-  // acontece quando a etapa de endereço aparece, depois do rascunho carregado.
-  const [outro, setOutro] = useState(
-    () => value.trim() !== "" && !BAIRROS.includes(value),
-  );
+  const listado = BAIRROS.includes(value);
+
+  // "Outro" é derivado do próprio valor (robusto a valor preenchido depois do
+  // mount — rascunho restaurado, edição de registro com bairro fora da lista):
+  //  - valor preenchido e fora da lista  -> Outro, com o texto visível;
+  //  - valor vazio                        -> normalmente é "nada selecionado",
+  //    exceto logo após clicar em "Outro", quando ainda não digitou nada — esse
+  //    caso transitório é o único que precisa de estado.
+  const [outroVazio, setOutroVazio] = useState(false);
+  const outro = value.trim() !== "" ? !listado : outroVazio;
 
   return (
     <div className="space-y-2">
       <Select
-        value={outro ? OUTRO : BAIRROS.includes(value) ? value : ""}
+        value={outro ? OUTRO : listado ? value : ""}
         onValueChange={(v) => {
           if (v === OUTRO) {
-            setOutro(true);
+            setOutroVazio(true);
             onChange("");
           } else {
-            setOutro(false);
+            setOutroVazio(false);
             onChange(v);
           }
         }}
@@ -64,7 +68,7 @@ export function SeletorBairro({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Digite o nome do bairro"
-          autoFocus
+          autoFocus={outroVazio}
         />
       )}
     </div>
