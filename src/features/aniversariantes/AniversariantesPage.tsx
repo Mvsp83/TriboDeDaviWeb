@@ -1,5 +1,12 @@
 import { useMemo, useState } from "react";
-import { Search, CheckCircle2, XCircle } from "lucide-react";
+import {
+  Search,
+  CheckCircle2,
+  XCircle,
+  ArrowUp,
+  ArrowDown,
+  ChevronsUpDown,
+} from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAlunos } from "@/features/alunos/alunosApi";
 import { usePolos } from "@/features/polos/polosApi";
@@ -31,6 +38,8 @@ const MESES = [
 
 const TODOS = "__todos__";
 
+type CampoOrdem = "nome" | "nascimento" | "polo" | "comemorado";
+
 export function AniversariantesPage() {
   const { sessao } = useAuth();
   const admin = sessao?.isAdministrador ?? false;
@@ -38,6 +47,18 @@ export function AniversariantesPage() {
   const [mes, setMes] = useState(new Date().getMonth() + 1);
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroPolo, setFiltroPolo] = useState(TODOS);
+  const [ordem, setOrdem] = useState<{ campo: CampoOrdem; dir: "asc" | "desc" }>(
+    { campo: "nascimento", dir: "asc" },
+  );
+
+  // Alterna a ordenação ao clicar num cabeçalho: primeiro clique ordena
+  // crescente; clicar de novo no mesmo campo inverte a direção.
+  const ordenarPor = (campo: CampoOrdem) =>
+    setOrdem((o) =>
+      o.campo === campo
+        ? { campo, dir: o.dir === "asc" ? "desc" : "asc" }
+        : { campo, dir: "asc" },
+    );
 
   const { data: aniversariantes, isLoading } = useAniversariantes(mes);
   const { data: alunos } = useAlunos(admin);
@@ -74,8 +95,54 @@ export function AniversariantesPage() {
           !filtroNome || norm(a.nome).includes(norm(filtroNome)),
       )
       .filter((a) => filtroPolo === TODOS || a.nomePolo === filtroPolo)
-      .sort((a, b) => a.mesNasc - b.mesNasc || a.dia - b.dia);
-  }, [aniversariantes, alunos, polos, filtroNome, filtroPolo]);
+      .sort((a, b) => {
+        const dir = ordem.dir === "asc" ? 1 : -1;
+        // Critério secundário sempre por data, para um desempate estável.
+        const porData = a.mesNasc - b.mesNasc || a.dia - b.dia;
+        switch (ordem.campo) {
+          case "nome":
+            return a.nome.localeCompare(b.nome, "pt-BR") * dir || porData;
+          case "polo":
+            return (
+              a.nomePolo.localeCompare(b.nomePolo, "pt-BR") * dir || porData
+            );
+          case "comemorado":
+            return (
+              (Number(a.jaComemorado) - Number(b.jaComemorado)) * dir || porData
+            );
+          case "nascimento":
+          default:
+            return porData * dir;
+        }
+      });
+  }, [aniversariantes, alunos, polos, filtroNome, filtroPolo, ordem]);
+
+  const nColunas = admin ? 4 : 3;
+
+  // Célula de cabeçalho clicável para ordenar. Não é um componente separado (é
+  // só uma função que devolve JSX) para não criar fronteira de remontagem.
+  const cabecalho = (campo: CampoOrdem, rotulo: string) => {
+    const ativo = ordem.campo === campo;
+    const Icone = !ativo ? ChevronsUpDown : ordem.dir === "asc" ? ArrowUp : ArrowDown;
+    return (
+      <TableHead>
+        <button
+          type="button"
+          onClick={() => ordenarPor(campo)}
+          aria-label={`Ordenar por ${rotulo}`}
+          className="inline-flex items-center gap-1 whitespace-nowrap font-medium hover:text-foreground"
+        >
+          {rotulo}
+          <Icone
+            className={cn(
+              "size-3.5",
+              ativo ? "text-primary" : "text-muted-foreground/50",
+            )}
+          />
+        </button>
+      </TableHead>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -142,17 +209,17 @@ export function AniversariantesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Nascimento</TableHead>
-                <TableHead>Polo</TableHead>
-                <TableHead>Comemorado</TableHead>
+                {cabecalho("nome", "Nome")}
+                {cabecalho("nascimento", "Nascimento")}
+                {admin && cabecalho("polo", "Polo")}
+                {cabecalho("comemorado", "Comemorado")}
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading &&
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={4}>
+                    <TableCell colSpan={nColunas}>
                       <Skeleton className="h-6 w-full" />
                     </TableCell>
                   </TableRow>
@@ -160,7 +227,7 @@ export function AniversariantesPage() {
 
               {!isLoading && linhas.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={nColunas} className="py-10 text-center text-muted-foreground">
                     Nenhum aniversariante encontrado.
                   </TableCell>
                 </TableRow>
@@ -176,9 +243,11 @@ export function AniversariantesPage() {
                         month: "2-digit",
                       })}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {a.nomePolo}
-                    </TableCell>
+                    {admin && (
+                      <TableCell className="text-muted-foreground">
+                        {a.nomePolo}
+                      </TableCell>
+                    )}
                     <TableCell>
                       {a.jaComemorado ? (
                         <span className="inline-flex items-center gap-1.5 text-success">
