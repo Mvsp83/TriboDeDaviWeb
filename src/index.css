@@ -128,6 +128,9 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  /* Site público: títulos condensados (Oswald) + vermelho da faixa como acento. */
+  --font-display: "Oswald", "Arial Narrow", system-ui, sans-serif;
+  --color-brand-red: #e11d2a;
 }
 
 @layer base {
@@ -147,6 +150,36 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+
+  /* Escopo do site público: corpo em Archivo (o painel admin segue em Inter). */
+  .site-publico {
+    font-family: "Archivo", system-ui, sans-serif;
+  }
+  /* Símbolo do instituto (simbolo.png) recolorável pela cor do texto (currentColor). */
+  .marca-tribo {
+    display: inline-block;
+    background: currentColor;
+    -webkit-mask: url("/simbolo.png") center / contain no-repeat;
+    mask: url("/simbolo.png") center / contain no-repeat;
+  }
+  /* Leve flutuação do símbolo no herói. */
+  @keyframes flutua-marca {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  .marca-flutua {
+    animation: flutua-marca 6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marca-flutua {
+      animation: none;
+    }
   }
 
   ::selection {

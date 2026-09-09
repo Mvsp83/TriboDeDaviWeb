@@ -1,17 +1,10 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  HeartHandshake,
-  LogIn,
-  ArrowRight,
-  Users,
-  BookOpen,
-  Menu,
-  X,
-} from "lucide-react";
-import { SITE, temInformacoes } from "@/features/site/conteudoSite";
+import { HeartHandshake, ArrowRight, BookOpen } from "lucide-react";
+import { SITE } from "@/features/site/conteudoSite";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
-import { SobreApp } from "@/components/SobreApp";
+import { CabecalhoSite } from "@/components/site/CabecalhoSite";
+import { RodapeSite } from "@/components/site/RodapeSite";
+import { MarcaTribo } from "@/components/site/MarcaTribo";
 import { BotaoVoltarAoTopo } from "@/components/BotaoVoltarAoTopo";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
@@ -87,53 +80,8 @@ export function SitePublico() {
   const anoAtual = new Date().getFullYear();
   useDocumentTitle(`${SITE.nome} — Jiu-jitsu gratuito para crianças`);
 
-  // Menu do topo no mobile (hamburger). No desktop os links ficam inline.
-  const [menuAberto, setMenuAberto] = useState(false);
-
-  // Links de navegação — só aparecem para seções que têm conteúdo.
-  // "Prestação de contas" saiu do menu: o assunto vive em Transparência.
-  const secoes = [
-    { id: "historia", label: "História", on: historia.length > 0 },
-  ].filter((s) => s.on);
-
-  // Lista única de links, usada tanto no menu do desktop quanto no do mobile.
-  // `rota: false` => âncora para uma seção da própria página (#id).
-  const linksNav: { label: string; para: string; rota: boolean }[] = [
-    ...secoes.map((s) => ({ label: s.label, para: `#${s.id}`, rota: false })),
-    { label: "Galeria", para: "/galeria", rota: true },
-    { label: "Loja", para: "/loja", rota: true },
-    ...(temInformacoes()
-      ? [{ label: "Informações", para: "/informacoes", rota: true }]
-      : []),
-    { label: "Transparência", para: "/transparencia", rota: true },
-  ];
-
-  const renderLink = (
-    l: { label: string; para: string; rota: boolean },
-    className: string,
-  ) =>
-    l.rota ? (
-      <Link
-        key={l.para}
-        to={l.para}
-        className={className}
-        onClick={() => setMenuAberto(false)}
-      >
-        {l.label}
-      </Link>
-    ) : (
-      <a
-        key={l.para}
-        href={l.para}
-        className={className}
-        onClick={() => setMenuAberto(false)}
-      >
-        {l.label}
-      </a>
-    );
-
   return (
-    <div className="min-h-svh bg-background text-foreground">
+    <div className="site-publico min-h-svh bg-background text-foreground">
       {/* Pular para o conteúdo — visível só ao navegar por teclado. */}
       <a
         href="#conteudo"
@@ -142,106 +90,89 @@ export function SitePublico() {
         Pular para o conteúdo
       </a>
 
-      {/* Topo — faixa fixa, com tom próprio para separar do conteúdo. */}
-      <div className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur">
-      <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-5">
-        <img src="/logo.png" alt={SITE.nome} className="h-14 w-auto md:h-20" />
-
-        {/* Desktop: menu e acessos inline, alinhados à direita. */}
-        <div className="hidden flex-1 items-center justify-end gap-x-3 md:flex md:flex-nowrap">
-          <nav className="flex items-center gap-x-4 text-sm text-muted-foreground md:whitespace-nowrap">
-            {linksNav.map((l) =>
-              renderLink(l, "transition-colors hover:text-foreground"),
-            )}
-          </nav>
-
-          <div className="flex items-center gap-2">
-            {/* Famílias: acompanham o aluno com código + nascimento. */}
-            <Button asChild size="sm">
-              <Link to="/responsavel">
-                <Users className="size-4" />
-                Área do Responsável
-              </Link>
-            </Button>
-            {/* Equipe: login com senha (admin/professor/supervisor). */}
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/login">
-                <LogIn className="size-4" />
-                Acesso da equipe
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile: botão do menu (hamburger). */}
-        <button
-          type="button"
-          onClick={() => setMenuAberto((v) => !v)}
-          className="inline-flex size-11 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary md:hidden"
-          aria-label="Abrir menu"
-          aria-expanded={menuAberto}
-        >
-          {menuAberto ? <X className="size-6" /> : <Menu className="size-6" />}
-        </button>
-      </header>
-
-      {/* Painel do menu no mobile — links empilhados + acessos em destaque. */}
-      {menuAberto && (
-        <div className="border-t border-border md:hidden">
-          <nav className="mx-auto flex max-w-5xl flex-col gap-1 px-4 pb-4 pt-1 text-sm">
-            {linksNav.map((l) =>
-              renderLink(
-                l,
-                "rounded-md px-2 py-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
-              ),
-            )}
-            <div className="mt-3 flex flex-col gap-2">
-              <Button asChild size="lg">
-                <Link to="/responsavel" onClick={() => setMenuAberto(false)}>
-                  <Users className="size-4" />
-                  Área do Responsável
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/login" onClick={() => setMenuAberto(false)}>
-                  <LogIn className="size-4" />
-                  Acesso da equipe
-                </Link>
-              </Button>
-            </div>
-          </nav>
-        </div>
-      )}
-      </div>
+      <CabecalhoSite />
 
       {/* Herói */}
       <section
         id="conteudo"
         tabIndex={-1}
-        className="mx-auto max-w-5xl px-4 pb-14 pt-6 outline-none md:pb-20 md:pt-10"
+        className="relative overflow-hidden outline-none"
+        style={{
+          background:
+            "linear-gradient(115deg, var(--color-background) 58%, color-mix(in oklab, var(--color-brand-red) 14%, var(--color-background)) 100%)",
+        }}
       >
-        {/* No desktop o texto ocupa mais largura e cresce; no mobile fica igual. */}
-        <div className="max-w-2xl md:max-w-4xl">
-          <h1 className="text-balance text-3xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl">
-            {SITE.chamada}
-          </h1>
-          <p className="mt-4 max-w-2xl text-pretty text-base text-muted-foreground md:mt-6 md:text-xl">
-            {SITE.subChamada}
-          </p>
+        {/* Barra diagonal dourado → vermelho da faixa */}
+        <div className="absolute left-0 top-20 hidden h-56 w-1.5 bg-gradient-to-b from-primary to-brand-red md:block" />
 
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link to="/doar">
-                <HeartHandshake className="size-5" />
-                Fazer uma doação
-              </Link>
-            </Button>
+        <div className="mx-auto grid max-w-5xl items-center gap-8 px-4 py-10 md:grid-cols-[1.1fr_0.9fr] md:py-16">
+          <div className="animate-page-enter">
+            <span className="inline-flex bg-primary px-3 py-1.5 font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground">
+              Projeto social cristão · Jiu-jitsu · Desde {numeros.desde || 2013}
+            </span>
+            <h1 className="mt-5 font-display text-4xl font-bold uppercase leading-[0.98] md:text-6xl lg:text-7xl">
+              {SITE.chamada}
+            </h1>
+            <p className="mt-5 max-w-xl text-pretty text-base text-muted-foreground md:text-lg">
+              {SITE.subChamada}
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <Link to="/doar">
+                  <HeartHandshake className="size-5" />
+                  Fazer uma doação
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link to="/informacoes">Conheça os polos</Link>
+              </Button>
+            </div>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <div className="border-l-4 border-primary bg-card px-4 py-3">
+                <div className="font-display text-3xl font-bold leading-none text-primary">
+                  {numeros.alunos}
+                </div>
+                <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
+                  crianças
+                </div>
+              </div>
+              <div className="border-l-4 border-brand-red bg-card px-4 py-3">
+                <div className="font-display text-3xl font-bold leading-none">
+                  {numeros.polos}
+                </div>
+                <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
+                  polos
+                </div>
+              </div>
+              {numeros.desde > 0 && (
+                <div className="border-l-4 border-brand-red bg-card px-4 py-3">
+                  <div className="font-display text-3xl font-bold leading-none">
+                    +{anoAtual - numeros.desde}
+                  </div>
+                  <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
+                    anos
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Símbolo do instituto como marca central (desktop) */}
+          <div className="relative hidden min-h-[360px] items-center justify-center md:flex">
+            <div
+              className="absolute size-[420px] rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(225,29,42,0.28), rgba(245,197,24,0.10) 45%, transparent 70%)",
+              }}
+            />
+            <MarcaTribo className="marca-flutua relative w-[320px] text-primary" />
           </div>
         </div>
 
-        {/* Faixas: centralizadas na seção. */}
-        <div className="mt-12 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {/* Faixas: da branca à preta */}
+        <div className="mx-auto max-w-5xl px-4 pb-14 text-center md:pb-20">
+          <p className="mb-3 font-display text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Da faixa branca à preta
           </p>
           <div className="mx-auto grid max-w-3xl grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-x-1.5">
@@ -280,7 +211,7 @@ export function SitePublico() {
 
       {/* Pilares */}
       <section className="mx-auto max-w-5xl px-4 py-14 md:py-20">
-        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+        <h2 className="font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
           O que o projeto faz
         </h2>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
@@ -300,7 +231,7 @@ export function SitePublico() {
       {historia.length > 0 && (
         <section id="historia" className="scroll-mt-6 border-t border-border">
           <div className="mx-auto max-w-3xl px-4 py-14 md:py-20">
-            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
+            <h2 className="flex items-center gap-2 font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
               <BookOpen className="size-6 text-primary" />
               Nossa história
             </h2>
@@ -322,7 +253,7 @@ export function SitePublico() {
       <section className="border-t border-border bg-secondary/20">
         <div className="mx-auto max-w-5xl px-4 py-14 md:py-20">
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 md:p-10">
-            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+            <h2 className="font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
               Ajude a manter as aulas gratuitas
             </h2>
             <p className="mt-3 max-w-2xl text-muted-foreground">
@@ -341,16 +272,7 @@ export function SitePublico() {
         </div>
       </section>
 
-      {/* Rodapé: só a linha e os dizeres. */}
-      <footer className="border-t border-border bg-card">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 text-xs text-muted-foreground">
-          <span>
-            © {anoAtual} {SITE.nome}
-          </span>
-          {/* Os acessos (Responsável/Equipe) ficam no topo — aqui só o essencial. */}
-          <SobreApp className="font-medium transition-colors hover:text-foreground" />
-        </div>
-      </footer>
+      <RodapeSite />
 
       {/* Fica acima do assistente flutuante (bottom-4). */}
       <BotaoVoltarAoTopo className="bottom-20" />

@@ -14,6 +14,7 @@ import {
 import { primeiroAcesso } from "@/features/auth/authApi";
 import { ApiError } from "@/lib/api";
 import { PaginaPublica } from "@/components/PaginaPublica";
+import { MarcaTribo } from "@/components/site/MarcaTribo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,13 +80,16 @@ export function PrimeiroAcessoPage() {
 
         <div className="relative z-10 w-full max-w-md">
           <div className="mb-8 flex flex-col items-center gap-2 text-center">
-            <p className="text-sm text-muted-foreground">Primeiro acesso</p>
-            <h1 className="text-xl font-semibold text-foreground">
+            <MarcaTribo className="mb-1 w-11 text-primary" />
+            <p className="font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Primeiro acesso
+            </p>
+            <h1 className="font-display text-2xl font-bold uppercase text-foreground">
               Criar administrador
             </h1>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-xl">
+          <div className="rounded-2xl border border-border border-t-4 border-t-primary bg-card p-8 shadow-xl">
             {pronto ? (
               <div className="flex flex-col items-center gap-4 text-center">
                 <CheckCircle2 className="size-12 text-primary" />

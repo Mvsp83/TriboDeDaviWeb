@@ -1,15 +1,15 @@
 import type { ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { SITE } from "@/features/site/conteudoSite";
-import { SobreApp } from "@/components/SobreApp";
+import { CabecalhoSite } from "@/components/site/CabecalhoSite";
+import { RodapeSite } from "@/components/site/RodapeSite";
 import { BotaoVoltarAoTopo } from "@/components/BotaoVoltarAoTopo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Casca padrão das páginas públicas (fora da home): cabeçalho com o logo à
-// esquerda e "Voltar" à direita, e o rodapé único do site. A home tem cabeçalho
-// próprio (menu + botões) e não usa esta casca.
+// Casca padrão das páginas públicas (fora da home): o cabeçalho e o rodapé
+// únicos do site + uma linha de "Voltar". A home tem seu próprio herói e usa os
+// mesmos cabeçalho/rodapé por dentro.
 export function PaginaPublica({
   children,
   larguraMax = "max-w-5xl",
@@ -24,7 +24,6 @@ export function PaginaPublica({
   voltarPara?: string;
 }) {
   const navigate = useNavigate();
-  const anoAtual = new Date().getFullYear();
 
   // Volta para a página anterior; se não houver histórico interno (link direto,
   // recarga ou redirecionamento), cai na home. Usa o índice do histórico do
@@ -44,21 +43,20 @@ export function PaginaPublica({
   };
 
   return (
-    <div className="flex min-h-svh flex-col bg-background text-foreground">
-      <header
-        className={cn(
-          "mx-auto flex w-full flex-wrap items-center justify-between gap-3 px-4 py-5",
-          larguraMax,
-        )}
-      >
-        <Link to="/" className="inline-flex items-center" aria-label={SITE.nome}>
-          <img src="/logo.png" alt={SITE.nome} className="h-12 w-auto md:h-14" />
-        </Link>
-        <Button variant="ghost" size="sm" onClick={voltar}>
+    <div className="site-publico flex min-h-svh flex-col bg-background text-foreground">
+      <CabecalhoSite />
+
+      <div className={cn("mx-auto w-full px-4 pt-3", larguraMax)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={voltar}
+          className="text-muted-foreground"
+        >
           <ArrowLeft className="size-4" />
           Voltar
         </Button>
-      </header>
+      </div>
 
       {/* pb reserva a "zona segura" dos flutuantes do canto inferior direito
           (assistente em bottom-4 e "voltar ao topo" em bottom-20), para que a
@@ -66,19 +64,7 @@ export function PaginaPublica({
           formulários — nunca fique escondida atrás deles. */}
       <main className="flex-1 pb-28">{children}</main>
 
-      <footer className="border-t border-border bg-card">
-        <div
-          className={cn(
-            "mx-auto flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 text-xs text-muted-foreground",
-            larguraMax,
-          )}
-        >
-          <span>
-            © {anoAtual} {SITE.nome}
-          </span>
-          <SobreApp className="font-medium transition-colors hover:text-foreground" />
-        </div>
-      </footer>
+      <RodapeSite />
 
       {/* Fica acima do assistente flutuante (bottom-4). */}
       <BotaoVoltarAoTopo className="bottom-20" />

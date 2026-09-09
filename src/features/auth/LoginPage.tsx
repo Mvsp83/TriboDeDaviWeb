@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/features/auth/AuthContext";
 import { ApiError } from "@/lib/api";
 import { PaginaPublica } from "@/components/PaginaPublica";
+import { MarcaTribo } from "@/components/site/MarcaTribo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -106,13 +107,14 @@ export function LoginPage() {
         />
 
         <div className="relative z-10 w-full max-w-md">
-          <div className="mb-8 flex flex-col items-center gap-4 text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="mb-8 flex flex-col items-center gap-3 text-center">
+            <MarcaTribo className="w-11 text-primary" />
+            <p className="font-display text-sm uppercase tracking-[0.18em] text-muted-foreground">
               Portal Administrativo
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-xl">
+          <div className="rounded-2xl border border-border border-t-4 border-t-primary bg-card p-8 shadow-xl">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               {!etapa2fa ? (
                 <>
