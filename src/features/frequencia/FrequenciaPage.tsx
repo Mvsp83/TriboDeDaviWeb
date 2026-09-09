@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, MoreVertical } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAulas } from "@/features/aulas/aulasApi";
 import { useAlunos } from "@/features/alunos/alunosApi";
@@ -14,9 +14,17 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Linha {
   alunoId: number;
@@ -151,11 +159,13 @@ export function FrequenciaPage() {
                     ["aluno", "Aluno"],
                     ["polo", "Polo"],
                     ["aulas", "Aulas"],
-                    ["presencas", "Presenças"],
-                    ["faltas", "Faltas"],
+                    // Presenças/Faltas ficam ocultas no celular (vão para o
+                    // menu ⋮ de cada linha); reaparecem como colunas em sm+.
+                    ["presencas", "Presenças", "hidden sm:table-cell"],
+                    ["faltas", "Faltas", "hidden sm:table-cell"],
                     ["frequencia", "Frequência"],
                   ] as const
-                ).map(([key, label]) => (
+                ).map(([key, label, className]) => (
                   <SortableHead
                     key={key}
                     label={label}
@@ -163,15 +173,18 @@ export function FrequenciaPage() {
                     sortKey={sortKey}
                     sortDir={sortDir}
                     onSort={toggleSort}
+                    className={className}
                   />
                 ))}
+                {/* Coluna do menu ⋮ — só no celular. */}
+                <TableHead className="w-10 sm:hidden" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {carregando &&
                 Array.from({ length: 6 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={7}>
                       <Skeleton className="h-6 w-full" />
                     </TableCell>
                   </TableRow>
@@ -179,7 +192,7 @@ export function FrequenciaPage() {
 
               {!carregando && linhas.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                     Nenhum dado encontrado.
                   </TableCell>
                 </TableRow>
@@ -193,8 +206,12 @@ export function FrequenciaPage() {
                       {l.nomePolo}
                     </TableCell>
                     <TableCell className="tabular-nums">{l.totalAulas}</TableCell>
-                    <TableCell className="tabular-nums">{l.presencas}</TableCell>
-                    <TableCell className="tabular-nums">{l.faltas}</TableCell>
+                    <TableCell className="hidden tabular-nums sm:table-cell">
+                      {l.presencas}
+                    </TableCell>
+                    <TableCell className="hidden tabular-nums sm:table-cell">
+                      {l.faltas}
+                    </TableCell>
                     <TableCell
                       className={
                         l.percentual >= 75
@@ -203,6 +220,36 @@ export function FrequenciaPage() {
                       }
                     >
                       {l.percentual.toFixed(1)}%
+                    </TableCell>
+                    {/* Menu ⋮ (só no celular): mostra Presenças e Faltas. */}
+                    <TableCell className="p-1 sm:hidden">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label={`Presenças e faltas de ${l.nomeAluno}`}
+                            className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                          >
+                            <MoreVertical className="size-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="min-w-[9rem]">
+                          <DropdownMenuLabel className="truncate">
+                            {l.nomeAluno}
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <div className="px-2 py-1.5 text-sm">
+                            <div className="flex items-center justify-between gap-6">
+                              <span className="text-muted-foreground">Presenças</span>
+                              <span className="font-medium tabular-nums">{l.presencas}</span>
+                            </div>
+                            <div className="mt-1 flex items-center justify-between gap-6">
+                              <span className="text-muted-foreground">Faltas</span>
+                              <span className="font-medium tabular-nums">{l.faltas}</span>
+                            </div>
+                          </div>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
