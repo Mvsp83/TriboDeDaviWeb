@@ -93,7 +93,7 @@ export function ProdutosPage() {
               <div className="size-20 shrink-0 overflow-hidden rounded-lg bg-secondary/40">
                 {p.temFoto ? (
                   <img
-                    src={produtoFotoUrl(p.id)}
+                    src={produtoFotoUrl(p.id, true)}
                     alt={p.nome}
                     className="size-full object-cover"
                   />

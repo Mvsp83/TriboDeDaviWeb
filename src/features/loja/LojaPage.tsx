@@ -138,7 +138,7 @@ function CartaoProduto({ produto }: { produto: ProdutoVitrine }) {
       <div className="relative aspect-square w-full bg-secondary/40">
         {produto.temFoto ? (
           <img
-            src={produtoFotoUrl(produto.id)}
+            src={produtoFotoUrl(produto.id, true)}
             alt={produto.nome}
             loading="lazy"
             className="size-full object-cover"

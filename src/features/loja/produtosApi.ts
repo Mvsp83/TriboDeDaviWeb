@@ -69,8 +69,11 @@ export interface SalvarProduto {
 }
 
 // URL pública da imagem do produto — vai direto no <img src> (endpoint anônimo).
-export const produtoFotoUrl = (id: number) =>
-  `${import.meta.env.VITE_API_BASE_URL || ""}${ApiRotas.produtoFoto(id)}`;
+// mini = true traz a miniatura (grade); use a cheia no detalhe/preview.
+export const produtoFotoUrl = (id: number, mini = false) =>
+  `${import.meta.env.VITE_API_BASE_URL || ""}${ApiRotas.produtoFoto(id)}${
+    mini ? "?mini=true" : ""
+  }`;
 
 // Estoque total somando as variações.
 export const estoqueTotal = (p: Produto) =>
