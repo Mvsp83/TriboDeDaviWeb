@@ -27,14 +27,21 @@ export function useSalvarConfigFotoAluno() {
 }
 
 // Foto do aluno em data URI (base64). Só busca quando `habilitado` (ex.: a tela
-// está configurada para mostrar e o aluno tem foto).
-export function useAlunoFoto(alunoId: number | null, habilitado = true) {
+// está configurada para mostrar e o aluno tem foto). `mini` traz a miniatura
+// (avatar/grade) — muito menor; use a cheia só ao ampliar.
+export function useAlunoFoto(
+  alunoId: number | null,
+  habilitado = true,
+  mini = false,
+) {
   return useQuery({
-    queryKey: ["aluno-foto", alunoId],
+    queryKey: ["aluno-foto", alunoId, mini],
     enabled: alunoId != null && habilitado,
     staleTime: 10 * 60 * 1000,
     queryFn: () =>
-      apiGet<{ dataUri: string }>(ApiRotas.alunoFoto(alunoId!)).then((r) => r.dataUri),
+      apiGet<{ dataUri: string }>(
+        `${ApiRotas.alunoFoto(alunoId!)}${mini ? "?mini=true" : ""}`,
+      ).then((r) => r.dataUri),
   });
 }
 

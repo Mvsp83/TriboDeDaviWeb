@@ -32,9 +32,15 @@ export function AlunoAvatar({
   ampliavel?: boolean;
   className?: string;
 }) {
-  const { data: dataUri } = useAlunoFoto(alunoId, habilitado && temFoto);
-  const mostrarFoto = habilitado && temFoto && !!dataUri;
   const [ampliada, setAmpliada] = useState(false);
+  // Avatar usa a miniatura (bem menor); a foto cheia só carrega ao ampliar.
+  const { data: miniUri } = useAlunoFoto(alunoId, habilitado && temFoto, true);
+  const { data: cheiaUri } = useAlunoFoto(
+    alunoId,
+    habilitado && temFoto && ampliada,
+    false,
+  );
+  const mostrarFoto = habilitado && temFoto && !!miniUri;
 
   const conteudo = (
     <span
@@ -46,7 +52,7 @@ export function AlunoAvatar({
       aria-hidden={!mostrarFoto}
     >
       {mostrarFoto ? (
-        <img src={dataUri} alt={nome} className="h-full w-full object-cover" />
+        <img src={miniUri} alt={nome} className="h-full w-full object-cover" />
       ) : (
         iniciais(nome)
       )}
@@ -95,7 +101,7 @@ export function AlunoAvatar({
           </button>
           <figure className="max-h-[90svh] max-w-lg" onClick={(e) => e.stopPropagation()}>
             <img
-              src={dataUri}
+              src={cheiaUri ?? miniUri}
               alt={nome}
               className="max-h-[80svh] w-auto rounded-lg object-contain"
             />
