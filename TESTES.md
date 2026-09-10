@@ -26,7 +26,7 @@ Foco na **lógica pura e de alto risco**, sem depender de rede/DOM completo:
 
 `.github/workflows/ci.yml` roda, a cada push no `master` e em PRs: `npm ci`,
 `lint` (oxlint), `test` (Vitest) e `build` (tsc + vite). O deploy do front
-(estático — Cloudflare Pages/Netlify) fica pendente da decisão de hospedagem.
+(estático) é feito no **Render** (`tribodedavi-web`), com auto-deploy no push.
 
 ## E2E de navegador (Playwright)
 
