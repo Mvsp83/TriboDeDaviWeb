@@ -43,10 +43,9 @@ export interface CategoriaFaq {
 export const SITE = {
   nome: "Instituto Tribo de Davi",
   // Frase de efeito do topo.
-  chamada:
-    "Transformando vidas através do Jiu-jitsu, formando campeões dentro e fora do tatame",
+  chamada: "Transformando vidas, formando campeões dentro e fora do tatame",
   subChamada:
-    "Aulas de jiu-jitsu para crianças, adolescentes e adultos, com princípios cristãos, disciplina e respeito. Sendo uma opção saudável às drogas e fortalecendo a cidadania.",
+    "Aulas de jiu-jitsu para crianças, adolescentes e adultos, com princípios cristãos, disciplina e respeito. Sendo uma opção no combate às drogas e fortalecendo a cidadania.",
 
   // Números do projeto. Deixe 0 para esconder o item.
   numeros: {
@@ -58,11 +57,6 @@ export const SITE = {
 
   // O que o projeto entrega. Editável à vontade.
   pilares: [
-    {
-      titulo: "Aulas gratuitas",
-      texto:
-        "Treinos de jiu-jitsu sem mensalidade, com quimono e faixa emprestados pelo instituto a quem precisa.",
-    },
     {
       titulo: "Disciplina e respeito",
       texto:
@@ -106,7 +100,7 @@ export const SITE = {
   informacoes: {
     // Texto de abertura da página (opcional; vazio esconde).
     intro:
-      "Reunimos aqui as dúvidas mais comuns das famílias e dos alunos. Toque em uma pergunta para ver a resposta.",
+      "Reunimos aqui as dúvidas mais comuns. Toque em uma pergunta para ver a resposta.",
     categorias: [
       {
         titulo: "Sobre o projeto",
@@ -119,12 +113,12 @@ export const SITE = {
           {
             pergunta: "O projeto é realmente gratuito?",
             resposta:
-              "Sim. As aulas são 100% gratuitas, sem mensalidade. O quimono e a faixa são emprestados pelo instituto a quem precisar.",
+              "Sim. As aulas são 100% gratuitas, sem mensalidade. O quimono e a faixa são emprestados pelo instituto conforme a disponibilidade.",
           },
           {
             pergunta: "Quem pode participar?",
             resposta:
-              "Crianças, adolescentes e adultos. Há turmas para o público infantil e uma ficha específica para adultos.",
+              "Qualquer pessoa: crianças a partir dos 5 (cinco) anos, adolescentes e adultos.",
             link: { label: "Fazer inscrição", para: "/matricula" },
           },
           {
@@ -138,14 +132,9 @@ export const SITE = {
         titulo: "Polos e Endereços",
         perguntas: [
           {
-            pergunta: "Em quais bairros vocês atuam?",
-            resposta:
-              "Com sede em Blumenau (SC), o instituto mantém polos em bairros como Itoupavazinha, Guarapari, Araranguá e Eça de Queiroz.",
-          },
-          {
             pergunta: "Como falo com a equipe?",
             resposta:
-              "Fale com a gente pelos canais no rodapé do site (WhatsApp, e-mail ou Instagram). Teremos prazer em ajudar.",
+              "Fale com a gente através do e-mail: institutotribodedavi@gmail.com ou diretamente nos horários de aulas de cada polo. Teremos prazer em ajudar.",
           },
         ],
       },
@@ -189,22 +178,22 @@ export const SITE = {
           {
             pergunta: "Preciso ter quimono para começar?",
             resposta:
-              "Não. O instituto empresta quimono e faixa a quem precisar — é só chegar com vontade de treinar.",
+              "Não. O instituto empresta quimono e faixa a quem precisar conforme disponibilidade — é só chegar com vontade de treinar.",
           },
           {
             pergunta: "Quais são os horários das aulas?",
             resposta:
-              "Os horários variam conforme o polo e a turma. Confira com a equipe do polo mais próximo pelos nossos canais de contato.",
+              "Os horários variam conforme o polo e a turma. Confira no polo mais próximo.",
           },
           {
-            pergunta: "O projeto para nas férias escolares?",
+            pergunta: "O projeto pára nas férias escolares?",
             resposta:
               "Não. Seguimos o calendário escolar, mas mantemos as atividades ao longo de todo o ano, sem pausa entre os semestres.",
           },
           {
             pergunta: "O que acontece se o aluno faltar?",
             resposta:
-              "A presença é registrada em toda aula. Quando um aluno começa a faltar, a família é procurada antes que ele desista.",
+              "A presença é registrada em toda aula. Quando um aluno começa a faltar, a família é procurada antes que ele desista e também por termos vagas limitadas.",
           },
         ],
       },
@@ -214,7 +203,7 @@ export const SITE = {
           {
             pergunta: "Como funciona a graduação?",
             resposta:
-              "O jiu-jitsu infantil vai da faixa branca à preta, com graus intermediários. A troca de faixa reconhece a evolução técnica, a frequência e o comportamento do aluno no tatame.",
+              "O jiu-jitsu infantil vai da faixa branca à verde, com graus intermediários. A troca de faixa reconhece a evolução técnica, a frequência e o comportamento do aluno dentro e fora do tatame.",
           },
           {
             pergunta: "Quando o aluno troca de faixa?",
@@ -247,7 +236,7 @@ export const SITE = {
           {
             pergunta: "Onde consigo o código de acesso?",
             resposta:
-              "O código é fornecido pela equipe do polo. Fale com o professor responsável pela turma do aluno.",
+              "O código é fornecido ao término da inscrição. Caso não tenha anotado, fale com o professor responsável pela turma do aluno.",
           },
         ],
       },
@@ -257,7 +246,7 @@ export const SITE = {
           {
             pergunta: "Onde vejo fotos das aulas e eventos?",
             resposta:
-              "Na nossa Galeria, com coleções de treinos, graduações e eventos do projeto.",
+              "Na nossa Galeria, com coleções de treinos, graduações e eventos do projeto. Além do nosso instragram @institutotribodedavi.",
             link: { label: "Ver galeria", para: "/galeria" },
           },
           {
@@ -285,7 +274,7 @@ export const SITE = {
           {
             pergunta: "Posso ajudar de outras formas?",
             resposta:
-              "Sim. Doação de materiais, voluntariado e parcerias ajudam muito o projeto a seguir. Fale com a equipe pelos nossos canais.",
+              "Sim. Doação de materiais, voluntariado e parcerias ajudam muito o projeto a seguir. Fale com a equipe administrativa pelo e-mail: institutotribodedavi@gmail.com ",
           },
         ],
       },
