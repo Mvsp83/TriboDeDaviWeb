@@ -23,6 +23,7 @@ import {
   type DadosPreMatricula,
 } from "@/features/matricula/matriculaApi";
 import { SeletorBairro } from "@/features/matricula/SeletorBairro";
+import { useRastrearEtapaInscricao } from "@/features/metricas/metricaApi";
 import { comprimirImagem } from "@/features/fotosTreino/fotosTreinoApi";
 import { enviarFotoInscricao } from "@/features/alunos/fotoAlunoApi";
 import { ORIENTACAO_FOTO } from "@/features/matricula/FotoInscricao";
@@ -179,6 +180,7 @@ export function MatriculaPage() {
   useDocumentTitle(`Inscrição ${ano} — Instituto Tribo de Davi`);
 
   const [etapa, setEtapa] = useState(0);
+  useRastrearEtapaInscricao(ETAPAS[etapa]);
   const [enviada, setEnviada] = useState(false);
   const [codigoGerado, setCodigoGerado] = useState<string | null>(null);
 

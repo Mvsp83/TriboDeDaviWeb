@@ -40,6 +40,7 @@ import {
 } from "@/features/matricula/termos";
 import { PaginaPublica } from "@/components/PaginaPublica";
 import { SeletorBairro } from "@/features/matricula/SeletorBairro";
+import { useRastrearEtapaInscricao } from "@/features/metricas/metricaApi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,6 +152,7 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
   const ano = new Date().getFullYear();
 
   const [etapa, setEtapa] = useState(0);
+  useRastrearEtapaInscricao(ETAPAS[etapa]);
 
   const [poloId, setPoloId] = useState<number | null>(null);
   const [possuiKimono, setPossuiKimono] = useState<boolean | null>(null);

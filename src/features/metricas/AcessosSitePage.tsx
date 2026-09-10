@@ -198,6 +198,45 @@ export function AcessosSitePage() {
         </CardContent>
       </Card>
 
+      {/* Origem e dispositivo lado a lado */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardContent className="p-4">
+            <p className="mb-3 text-sm font-semibold">Origem do tráfego</p>
+            {isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : (
+              <BarrasTop itens={data?.origem ?? []} />
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="mb-3 text-sm font-semibold">Dispositivo</p>
+            {isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : (
+              <BarrasTop itens={data?.dispositivos ?? []} />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Funil de inscrição */}
+      <Card>
+        <CardContent className="p-4">
+          <p className="mb-1 text-sm font-semibold">Funil de inscrição</p>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Quantos alcançaram cada etapa até concluir a inscrição.
+          </p>
+          {isLoading ? (
+            <Skeleton className="h-24 w-full" />
+          ) : (
+            <BarrasTop itens={data?.funilInscricao ?? []} />
+          )}
+        </CardContent>
+      </Card>
+
       {/* Perguntas ao Davizinho (só se houver) */}
       {!isLoading && (data?.topDavizinho?.length ?? 0) > 0 && (
         <Card>
