@@ -4,6 +4,7 @@ import { MessageCircle, X, Send, ArrowRight, Sparkles } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import type { LinkFaq } from "@/features/site/conteudoSite";
 import { Button } from "@/components/ui/button";
+import { registrarEvento } from "@/features/metricas/metricaApi";
 
 // Páginas públicas onde o assistente aparece.
 const ROTAS_PUBLICAS = new Set([
@@ -166,10 +167,12 @@ export function Davizinho() {
     const q = texto.trim();
     if (!q) return;
     setEntrada("");
+    registrarEvento("davizinho", q); // alimenta "perguntas mais feitas"
     setMensagens((m) => [...m, { autor: "voce", texto: q }, melhorResposta(q)]);
   }
 
   function irPara(link: LinkFaq) {
+    if (link.para === "/doar") registrarEvento("doar_click");
     if (link.externo) window.open(link.para, "_blank", "noopener,noreferrer");
     else {
       navigate(link.para);

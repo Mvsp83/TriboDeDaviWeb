@@ -8,8 +8,11 @@ import { getToken } from "@/lib/token";
 const base = import.meta.env.VITE_API_BASE_URL || "";
 
 // Envia um evento de métrica (fire-and-forget). Nunca lança: métrica jamais
-// pode atrapalhar a navegação do visitante.
+// pode atrapalhar a navegação do visitante. Ignora a equipe logada (token de
+// admin) — as métricas medem o público do site, não o uso interno. O portal do
+// responsável usa outro token (sessionStorage), então continua contando.
 export function registrarEvento(evento: string, dimensao?: string) {
+  if (getToken()) return;
   try {
     const body = JSON.stringify({ evento, dimensao: dimensao ?? null });
     void fetch(`${base}${ApiRotas.metricaEvento}`, {
@@ -29,7 +32,7 @@ export function registrarEvento(evento: string, dimensao?: string) {
 export function useRastrearAcessos() {
   const location = useLocation();
   useEffect(() => {
-    if (getToken()) return; // equipe logada não conta como acesso ao site
+    // registrarEvento já ignora a equipe logada.
     registrarEvento("pageview", location.pathname);
   }, [location.pathname]);
 }

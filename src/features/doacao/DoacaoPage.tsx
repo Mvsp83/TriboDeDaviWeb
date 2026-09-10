@@ -5,6 +5,7 @@ import { Copy, Check, HeartHandshake, QrCode } from "lucide-react";
 import { gerarPixBrCode } from "@/lib/pixBrCode";
 import { DOACAO, doacaoConfigurada } from "@/features/doacao/configDoacao";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import { registrarEvento } from "@/features/metricas/metricaApi";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ export function DoacaoPage() {
     try {
       await navigator.clipboard.writeText(codigo);
       setCopiado(true);
+      registrarEvento("doar_click"); // copiar o Pix = intenção de doar
       toast.success("Código Pix copiado!");
     } catch {
       toast.error("Não foi possível copiar. Selecione o código e copie manualmente.");
