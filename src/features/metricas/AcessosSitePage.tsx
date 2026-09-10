@@ -4,17 +4,50 @@ import {
   MousePointerClick,
   ClipboardCheck,
   UserCheck,
+  Download,
   type LucideIcon,
 } from "lucide-react";
 import {
   useMetricaResumo,
+  type MetricaResumo,
   type ItemContagem,
   type SerieDia,
 } from "@/features/metricas/metricaApi";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+
+// Exporta o resumo carregado como CSV (gerado no navegador, sem chamar a API).
+// BOM (﻿) para o Excel abrir os acentos corretamente.
+function baixarCsv(resumo: MetricaResumo) {
+  const linhas: (string | number)[][] = [["secao", "rotulo", "valor"]];
+  const add = (secao: string, rotulo: string, valor: number) =>
+    linhas.push([secao, rotulo, valor]);
+  add("Resumo", "Visitas", resumo.visitas);
+  add("Resumo", "Cliques em Doar", resumo.doarCliques);
+  add("Resumo", "Inscrições concluídas", resumo.inscricoesConcluidas);
+  add("Resumo", "Acessos do responsável", resumo.acessosResponsavel);
+  resumo.visitasPorDia.forEach((s) =>
+    add("Visitas por dia", s.data.slice(0, 10), s.valor),
+  );
+  resumo.topPaginas.forEach((i) => add("Páginas", i.rotulo, i.valor));
+  resumo.origem.forEach((i) => add("Origem", i.rotulo, i.valor));
+  resumo.dispositivos.forEach((i) => add("Dispositivo", i.rotulo, i.valor));
+  resumo.funilInscricao.forEach((i) => add("Funil", i.rotulo, i.valor));
+  resumo.topDavizinho.forEach((i) => add("Davizinho", i.rotulo, i.valor));
+
+  const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+  const csv = linhas.map((l) => l.map(esc).join(",")).join("\r\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `acessos-site-${resumo.dias}dias.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 const PERIODOS = [
   { label: "7 dias", dias: 7 },
@@ -144,22 +177,33 @@ export function AcessosSitePage() {
 
   return (
     <div className="space-y-4">
-      {/* Período */}
-      <div className="flex flex-wrap gap-1.5">
-        {PERIODOS.map((p) => (
-          <button
-            key={p.dias}
-            onClick={() => setDias(p.dias)}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-              dias === p.dias
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground hover:bg-secondary/70",
-            )}
-          >
-            {p.label}
-          </button>
-        ))}
+      {/* Período + exportação */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-1.5">
+          {PERIODOS.map((p) => (
+            <button
+              key={p.dias}
+              onClick={() => setDias(p.dias)}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                dias === p.dias
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/70",
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => data && baixarCsv(data)}
+          disabled={!data}
+        >
+          <Download className="size-4" />
+          Exportar CSV
+        </Button>
       </div>
 
       {/* Cartões */}
