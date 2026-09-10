@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { HeartHandshake, ArrowRight, BookOpen } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
+import { useEstatisticasSite } from "@/features/site/siteApi";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { CabecalhoSite } from "@/components/site/CabecalhoSite";
 import { RodapeSite } from "@/components/site/RodapeSite";
@@ -61,24 +62,18 @@ function FaixaBelt({
   );
 }
 
-function Numero({ valor, rotulo }: { valor: number; rotulo: string }) {
-  if (!valor) return null;
-  return (
-    <div className="text-center">
-      <div className="text-3xl font-bold tabular-nums text-primary md:text-4xl">
-        {valor}
-      </div>
-      <div className="text-sm text-muted-foreground">{rotulo}</div>
-    </div>
-  );
-}
-
 // Site público do instituto: apresenta o projeto, recebe doações e dá acesso
 // ao portal. É a página que qualquer pessoa vê ao abrir o endereço.
 export function SitePublico() {
   const { numeros, historia } = SITE;
   const anoAtual = new Date().getFullYear();
   useDocumentTitle(`${SITE.nome} — Jiu-jitsu gratuito para crianças`);
+
+  // Números reais do banco (crianças atendidas e polos); cai no valor estático
+  // de conteudoSite enquanto carrega ou se a API não responder.
+  const { data: estatisticas } = useEstatisticasSite();
+  const totalAlunos = estatisticas?.alunos ?? numeros.alunos;
+  const totalPolos = estatisticas?.polos ?? numeros.polos;
 
   return (
     <div className="site-publico min-h-svh bg-background text-foreground">
@@ -130,7 +125,7 @@ export function SitePublico() {
             <div className="mt-9 flex flex-wrap gap-3">
               <div className="border-l-4 border-primary bg-card px-4 py-3">
                 <div className="font-display text-3xl font-bold leading-none text-primary">
-                  {numeros.alunos}
+                  {totalAlunos}
                 </div>
                 <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
                   crianças
@@ -138,7 +133,7 @@ export function SitePublico() {
               </div>
               <div className="border-l-4 border-brand-red bg-card px-4 py-3">
                 <div className="font-display text-3xl font-bold leading-none">
-                  {numeros.polos}
+                  {totalPolos}
                 </div>
                 <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
                   polos
@@ -187,22 +182,6 @@ export function SitePublico() {
           </div>
         </div>
       </section>
-
-      {/* Números */}
-      {(numeros.alunos > 0 || numeros.polos > 0 || numeros.desde > 0) && (
-        <section className="border-y border-border bg-secondary/30">
-          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-10 px-4 py-8 md:gap-20">
-            <Numero valor={numeros.alunos} rotulo="crianças atendidas" />
-            <Numero valor={numeros.polos} rotulo="polos" />
-            {numeros.desde > 0 && (
-              <Numero
-                valor={anoAtual - numeros.desde}
-                rotulo="anos de projeto"
-              />
-            )}
-          </div>
-        </section>
-      )}
 
       {/* Versículo do dia */}
       <section className="mx-auto max-w-3xl px-4 pt-12 md:pt-16">

@@ -21,6 +21,8 @@ export const ApiRotas = {
   alunoLista: (pagina: number, tamanho: number) =>
     `/api/Aluno/lista?pagina=${pagina}&tamanho=${tamanho}`,
   alunoGet: (id: number) => `/api/Aluno/${id}`,
+  // Público (anônimo): total de crianças atendidas, para os números do site.
+  alunosTotalPublico: "/api/Aluno/total-publico",
   alunosPorPolo: `/api/Aluno/get-por-polo?${TODAS_TURMAS}`,
   alunoCreate: "/api/Aluno/create",
   alunoUpdate: "/api/Aluno/update",
