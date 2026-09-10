@@ -93,6 +93,7 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
   const editando = polo !== null;
   const [horarios, setHorarios] = useState<HorarioTurma[]>([]);
   const [limiteAlunos, setLimiteAlunos] = useState("0");
+  const [aceitaAdultos, setAceitaAdultos] = useState(true);
 
   function atualizarHorario(i: number, campo: keyof HorarioTurma, valor: string | number) {
     setHorarios((atual) =>
@@ -126,6 +127,7 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
     );
     setHorarios(polo?.horarios ? polo.horarios.map((h) => ({ ...h })) : []);
     setLimiteAlunos(String(polo?.limiteAlunos ?? 0));
+    setAceitaAdultos(polo?.aceitaAdultos ?? true);
   }, [aberto, polo, reset]);
 
   async function onSubmit(values: FormValues) {
@@ -138,6 +140,7 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
         id: polo?.id,
         ...values,
         limiteAlunos: Math.max(0, Number(limiteAlunos) || 0),
+        aceitaAdultos,
         horarios: horariosValidos,
       });
       toast.success(editando ? "Polo atualizado." : "Polo criado.");
@@ -195,6 +198,20 @@ export function PoloFormDialog({ aberto, onOpenChange, polo }: Props) {
               <p className="mt-1 text-xs text-muted-foreground">
                 Ao atingir o limite, novas inscrições para este polo são
                 bloqueadas até liberar vaga.
+              </p>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  checked={aceitaAdultos}
+                  onChange={(e) => setAceitaAdultos(e.target.checked)}
+                />
+                Tem turma de adultos
+              </label>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Desmarque se o polo não atende adultos — a inscrição de adultos
+                fica bloqueada neste polo (a ficha infantil continua liberada).
               </p>
             </div>
             <div className="sm:col-span-2">

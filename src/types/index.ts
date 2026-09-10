@@ -60,6 +60,8 @@ export interface Polo {
   cidade?: string | null;
   // Limite de alunos ativos no ano (0 = sem limite).
   limiteAlunos?: number;
+  // O polo tem turma de adultos? Se false, bloqueia inscrição de adultos.
+  aceitaAdultos?: boolean;
   // Só leitura: matrículas ativas do ano corrente (vem do GetAll).
   alunosAtivos?: number;
   // Só leitura: inscrições pendentes do ano (vaga reservada). Ativas +

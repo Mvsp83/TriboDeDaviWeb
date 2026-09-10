@@ -387,10 +387,14 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
                       <SelectItem
                         key={p.id}
                         value={String(p.id)}
-                        disabled={p.lotado}
+                        disabled={p.lotado || p.aceitaAdultos === false}
                       >
                         {p.nome}
-                        {p.lotado ? " — sem vagas" : ""}
+                        {p.lotado
+                          ? " — sem vagas"
+                          : p.aceitaAdultos === false
+                            ? " — sem turma de adultos"
+                            : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

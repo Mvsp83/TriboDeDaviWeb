@@ -8,6 +8,9 @@ export interface PoloPublico {
   nome: string;
   // Sem vaga no momento — o formulário bloqueia a escolha.
   lotado?: boolean;
+  // Tem turma de adultos? A ficha de adultos bloqueia os polos com false.
+  // (undefined = API antiga → tratar como permitido.)
+  aceitaAdultos?: boolean;
 }
 
 // Polos para o formulário público: a lista vem sem autenticação e traz apenas
