@@ -6,12 +6,12 @@ export function RodapeSite() {
   const anoAtual = new Date().getFullYear();
   return (
     <footer className="border-t border-border bg-card">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 text-xs text-muted-foreground">
-        <span className="flex items-center gap-2">
-          <MarcaTribo className="w-4 text-primary" />© {anoAtual} Instituto
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-x-2 px-4 py-6 text-[11px] text-muted-foreground sm:gap-x-6 sm:text-xs">
+        <span className="flex items-center gap-1.5 whitespace-nowrap sm:gap-2">
+          <MarcaTribo className="w-4 shrink-0 text-primary" />© {anoAtual} Instituto
           Tribo de Davi
         </span>
-        <SobreApp className="font-medium transition-colors hover:text-foreground" />
+        <SobreApp className="whitespace-nowrap font-medium transition-colors hover:text-foreground" />
       </div>
     </footer>
   );
