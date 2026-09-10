@@ -130,7 +130,10 @@ export function GaleriaPage() {
           // Tela principal: as opções (polos + coleções).
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {opcoes.map((o) => {
-              const capa = o.fotos[0]?.url;
+              // Miniatura na capa (grade) — a foto cheia só ao ampliar.
+              const capa = o.fotos[0]?.url
+                ? `${o.fotos[0].url}?mini=true`
+                : undefined;
               return (
                 <button
                   key={o.id}
@@ -188,7 +191,7 @@ export function GaleriaPage() {
                     className="block w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <img
-                      src={f.url}
+                      src={`${f.url}?mini=true`}
                       alt={f.legenda ?? selecionada.label}
                       loading="lazy"
                       className="aspect-square w-full object-cover transition-transform hover:scale-105"
