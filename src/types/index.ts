@@ -62,6 +62,9 @@ export interface Polo {
   limiteAlunos?: number;
   // Só leitura: matrículas ativas do ano corrente (vem do GetAll).
   alunosAtivos?: number;
+  // Só leitura: inscrições pendentes do ano (vaga reservada). Ativas +
+  // pendentes = ocupação para efeito de lotação.
+  inscricoesPendentes?: number;
   horarios?: HorarioTurma[];
 }
 

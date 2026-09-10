@@ -158,13 +158,22 @@ export function PolosPage() {
                   <Users className="size-3.5 text-primary" />
                   {(polo.limiteAlunos ?? 0) > 0 ? (
                     <>
-                      {polo.alunosAtivos ?? 0} / {polo.limiteAlunos} alunos
-                      {(polo.alunosAtivos ?? 0) >= (polo.limiteAlunos ?? 0) && (
+                      {polo.alunosAtivos ?? 0} ativos
+                      {(polo.inscricoesPendentes ?? 0) > 0 &&
+                        ` + ${polo.inscricoesPendentes} pendentes`}{" "}
+                      / {polo.limiteAlunos}
+                      {(polo.alunosAtivos ?? 0) + (polo.inscricoesPendentes ?? 0) >=
+                        (polo.limiteAlunos ?? 0) && (
                         <Badge variant="warning">Lotado</Badge>
                       )}
                     </>
                   ) : (
-                    <>{polo.alunosAtivos ?? 0} alunos ativos · sem limite</>
+                    <>
+                      {polo.alunosAtivos ?? 0} ativos
+                      {(polo.inscricoesPendentes ?? 0) > 0 &&
+                        ` + ${polo.inscricoesPendentes} pendentes`}{" "}
+                      · sem limite
+                    </>
                   )}
                 </p>
                 {(polo.endereco || polo.bairro) && (
