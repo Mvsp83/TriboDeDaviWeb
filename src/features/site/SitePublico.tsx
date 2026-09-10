@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { HeartHandshake, ArrowRight, BookOpen } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import { useEstatisticasSite } from "@/features/site/siteApi";
+import { registrarEvento } from "@/features/metricas/metricaApi";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { CabecalhoSite } from "@/components/site/CabecalhoSite";
 import { RodapeSite } from "@/components/site/RodapeSite";
@@ -113,7 +114,7 @@ export function SitePublico() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/doar">
+                <Link to="/doar" onClick={() => registrarEvento("doar_click")}>
                   <HeartHandshake className="size-5" />
                   Fazer uma doação
                 </Link>
@@ -241,7 +242,7 @@ export function SitePublico() {
               por Pix, sem taxas.
             </p>
             <Button asChild size="lg" className="mt-6">
-              <Link to="/doar">
+              <Link to="/doar" onClick={() => registrarEvento("doar_click")}>
                 <HeartHandshake className="size-5" />
                 Doar por Pix
                 <ArrowRight className="size-4" />

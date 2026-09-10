@@ -8,6 +8,10 @@ export const ApiRotas = {
   refresh: "/api/v1/auth/refresh",
   logout: "/api/v1/auth/logout",
 
+  // Métricas do site (acessos): evento é público (beacon); resumo é admin.
+  metricaEvento: "/api/Metrica/evento",
+  metricaResumo: (dias: number) => `/api/Metrica/resumo?dias=${dias}`,
+
   // 2FA (TOTP) do próprio usuário autenticado.
   doisFatoresStatus: "/api/Usuario/2fa/status",
   doisFatoresIniciar: "/api/Usuario/2fa/iniciar",

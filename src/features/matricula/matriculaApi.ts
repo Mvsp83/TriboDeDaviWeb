@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiGet, apiPost } from "@/lib/api";
 import { ApiRotas } from "@/lib/apiRoutes";
+import { registrarEvento } from "@/features/metricas/metricaApi";
 
 export interface PoloPublico {
   id: number;
@@ -121,5 +122,6 @@ export function useEnviarInscricao() {
           dataNascimento: `${dados.dataNascimento}T00:00:00`,
         },
       ),
+    onSuccess: () => registrarEvento("inscricao_ok"),
   });
 }

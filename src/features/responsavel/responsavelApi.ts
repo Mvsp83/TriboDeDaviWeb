@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { ApiError, type ResultViewModel } from "@/lib/api";
 import { ApiRotas } from "@/lib/apiRoutes";
+import { registrarEvento } from "@/features/metricas/metricaApi";
 
 // Cliente próprio do portal do responsável: token separado do admin, guardado
 // em sessionStorage (sessão pontual, some ao fechar a aba). Não passa pelo
@@ -115,6 +116,7 @@ export async function acessar(
     );
     const dados = unwrap(data);
     setRespToken(dados.token);
+    registrarEvento("responsavel_acesso");
     return dados;
   } catch (error) {
     throw toApiError(error);

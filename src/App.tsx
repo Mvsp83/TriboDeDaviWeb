@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Davizinho } from "@/features/assistente/Davizinho";
+import { RastreadorAcessos } from "@/features/metricas/RastreadorAcessos";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { SitePublico } from "@/features/site/SitePublico";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -207,6 +208,9 @@ const FrequenciaPage = lazy(() =>
 const RelatoriosPage = lazy(() =>
   import("@/features/relatorios/RelatoriosPage").then((m) => ({ default: m.RelatoriosPage })),
 );
+const AcessosSitePage = lazy(() =>
+  import("@/features/metricas/AcessosSitePage").then((m) => ({ default: m.AcessosSitePage })),
+);
 const ImportacaoPage = lazy(() =>
   import("@/features/importacao/ImportacaoPage").then((m) => ({ default: m.ImportacaoPage })),
 );
@@ -402,6 +406,7 @@ export default function App() {
             <Route path="documentos" element={<DocumentosPage />} />
             <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
             <Route path="config-foto-aluno" element={<ConfigFotoAlunoPage />} />
+            <Route path="acessos-site" element={<AcessosSitePage />} />
 
             {/* Relacionamento */}
             <Route element={<ProtectedRoute modulo="relacionamento" />}>
@@ -490,6 +495,7 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    <RastreadorAcessos />
     <Davizinho />
     </Suspense>
   );

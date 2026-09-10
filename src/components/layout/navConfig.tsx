@@ -49,6 +49,7 @@ import {
   Settings,
   Landmark,
   Database,
+  Globe,
   type LucideIcon,
 } from "lucide-react";
 import type { ModuloId } from "@/config/modulos";
@@ -343,6 +344,12 @@ export const navGroups: NavGroup[] = [
             href: "/impacto",
             icon: TrendingUp,
             modulo: "captacao",
+          },
+          {
+            label: "Acessos ao site",
+            href: "/acessos-site",
+            icon: Globe,
+            adminOnly: true,
           },
         ],
       },
