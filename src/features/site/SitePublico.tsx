@@ -128,7 +128,7 @@ export function SitePublico() {
                   {totalAlunos}
                 </div>
                 <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
-                  crianças
+                  alunos atendidos
                 </div>
               </div>
               <div className="border-l-4 border-brand-red bg-card px-4 py-3">
