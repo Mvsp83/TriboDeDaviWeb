@@ -21,7 +21,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePolos } from "@/features/polos/polosApi";
 import {
-  useAlunos,
+  useAlunosLista,
+  useAluno,
   useExcluirAluno,
   useExportarDadosAluno,
   useAnonimizarAluno,
@@ -108,7 +109,7 @@ export function AlunosPage() {
   // Colunas da tabela: Nome, Faixa, [Polo se admin], Ações.
   const nColunas = admin ? 4 : 3;
 
-  const { data: alunos, isLoading, isError } = useAlunos(admin);
+  const { data: alunos, isLoading, isError } = useAlunosLista(admin);
   const { data: polos } = usePolos();
   const { mapa: aptidao } = useMapaAptidao();
   const excluir = useExcluirAluno();
@@ -125,8 +126,11 @@ export function AlunosPage() {
   >("todos");
 
   const [dialogAberto, setDialogAberto] = useState(false);
-  const [alunoEdicao, setAlunoEdicao] = useState<Aluno | null>(null);
-  const [alunoDetalhe, setAlunoDetalhe] = useState<Aluno | null>(null);
+  // A listagem é enxuta; a ficha e a edição carregam o aluno completo por id.
+  const [alunoEdicaoId, setAlunoEdicaoId] = useState<number | null>(null);
+  const [alunoDetalheId, setAlunoDetalheId] = useState<number | null>(null);
+  const { data: alunoEdicao } = useAluno(alunoEdicaoId);
+  const { data: alunoDetalhe } = useAluno(alunoDetalheId);
   const [alunoExcluir, setAlunoExcluir] = useState<Aluno | null>(null);
   const [alunoAnonimizar, setAlunoAnonimizar] = useState<Aluno | null>(null);
   const [alunoCodigo, setAlunoCodigo] = useState<Aluno | null>(null);
@@ -193,12 +197,13 @@ export function AlunosPage() {
   );
 
   function abrirNovo() {
-    setAlunoEdicao(null);
+    setAlunoEdicaoId(null);
     setDialogAberto(true);
   }
 
   function abrirEdicao(aluno: Aluno) {
-    setAlunoEdicao(aluno);
+    setAlunoDetalheId(null); // fecha a ficha, se veio dela
+    setAlunoEdicaoId(aluno.id);
     setDialogAberto(true);
   }
 
@@ -521,7 +526,7 @@ export function AlunosPage() {
                         <span>
                           <button
                             type="button"
-                            onClick={() => setAlunoDetalhe(a)}
+                            onClick={() => setAlunoDetalheId(a.id)}
                             className="text-left hover:underline"
                           >
                             {a.nome}
@@ -644,7 +649,7 @@ export function AlunosPage() {
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={() => setAlunoDetalhe(a)}
+                      onClick={() => setAlunoDetalheId(a.id)}
                       className="truncate text-left font-medium hover:underline"
                     >
                       {a.nome}
@@ -726,19 +731,22 @@ export function AlunosPage() {
 
       <AlunoFormDialog
         aberto={dialogAberto}
-        onOpenChange={setDialogAberto}
-        aluno={alunoEdicao}
+        onOpenChange={(o) => {
+          setDialogAberto(o);
+          if (!o) setAlunoEdicaoId(null);
+        }}
+        aluno={alunoEdicao ?? null}
         polos={polos ?? []}
         poloPadrao={sessao?.poloId}
       />
 
       <AlunoDetalheDialog
-        aluno={alunoDetalhe}
+        aluno={alunoDetalhe ?? null}
         nomePolo={
           alunoDetalhe ? (nomePorPolo.get(alunoDetalhe.poloId) ?? "-") : "-"
         }
         mostrarPolo={admin}
-        onOpenChange={(o) => !o && setAlunoDetalhe(null)}
+        onOpenChange={(o) => !o && setAlunoDetalheId(null)}
         onEditar={admin ? abrirEdicao : undefined}
       />
 

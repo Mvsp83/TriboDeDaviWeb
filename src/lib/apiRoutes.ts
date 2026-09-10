@@ -16,6 +16,11 @@ export const ApiRotas = {
   usuarioRevogarSessoes: (id: number) => `/api/Usuario/${id}/revogar-sessoes`,
 
   alunosGetAll: "/api/Aluno/get-all",
+  // Listagem enxuta e paginada (sem PII desnecessária). A tela de Alunos busca
+  // as páginas em sequência; a ficha/edição pega o completo por id.
+  alunoLista: (pagina: number, tamanho: number) =>
+    `/api/Aluno/lista?pagina=${pagina}&tamanho=${tamanho}`,
+  alunoGet: (id: number) => `/api/Aluno/${id}`,
   alunosPorPolo: `/api/Aluno/get-por-polo?${TODAS_TURMAS}`,
   alunoCreate: "/api/Aluno/create",
   alunoUpdate: "/api/Aluno/update",

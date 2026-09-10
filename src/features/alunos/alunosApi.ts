@@ -11,6 +11,51 @@ export function useAlunos(admin: boolean) {
   });
 }
 
+// Envelope paginado da API (PagedResult<AlunoListaDTO>).
+interface PaginaAlunos {
+  itens: Aluno[];
+  total: number;
+  pagina: number;
+  tamanho: number;
+  totalPaginas: number;
+}
+
+// Busca TODOS os alunos na versão enxuta (sem CPF/RG/endereço), percorrendo as
+// páginas do endpoint /lista. A tela de Alunos filtra/ordena no cliente como
+// antes, mas agora sobre um payload muito menor e sem PII desnecessária.
+async function buscarTodosLeves(): Promise<Aluno[]> {
+  const tamanho = 200;
+  const todos: Aluno[] = [];
+  for (let pagina = 1; pagina <= 100; pagina++) {
+    const res = await apiGet<PaginaAlunos>(ApiRotas.alunoLista(pagina, tamanho));
+    const itens = res?.itens ?? [];
+    todos.push(...itens);
+    if (todos.length >= (res?.total ?? todos.length) || itens.length < tamanho)
+      break;
+  }
+  return todos;
+}
+
+// Lista da tela de Alunos: admin usa o endpoint enxuto; professor/supervisor
+// continua no get-por-polo (já restrito ao próprio polo).
+export function useAlunosLista(admin: boolean) {
+  return useQuery({
+    queryKey: ["alunos", "lista", admin],
+    queryFn: () =>
+      admin ? buscarTodosLeves() : apiGet<Aluno[]>(ApiRotas.alunosPorPolo),
+  });
+}
+
+// Ficha completa de um aluno (todos os campos) sob demanda — para o detalhe e o
+// formulário de edição, já que a listagem agora é enxuta.
+export function useAluno(id: number | null) {
+  return useQuery({
+    queryKey: ["aluno", id],
+    queryFn: () => apiGet<Aluno>(ApiRotas.alunoGet(id!)),
+    enabled: id != null,
+  });
+}
+
 // A API não aceita campos nulos no AlunoDTO; normaliza antes de enviar
 // (mesma lógica do AlunoService.MontarBody do portal Blazor).
 function montarBody(aluno: Partial<Aluno>, id: number) {
@@ -50,7 +95,10 @@ export function useSalvarAluno() {
       aluno.id
         ? apiPut(ApiRotas.alunoUpdate, montarBody(aluno, aluno.id))
         : apiPost(ApiRotas.alunoCreate, montarBody(aluno, 0)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["alunos"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["alunos"] });
+      qc.invalidateQueries({ queryKey: ["aluno"] });
+    },
   });
 }
 
@@ -89,7 +137,10 @@ export function useAnonimizarAluno() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => apiPost(ApiRotas.alunoAnonimizar(id)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["alunos"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["alunos"] });
+      qc.invalidateQueries({ queryKey: ["aluno"] });
+    },
   });
 }
 
