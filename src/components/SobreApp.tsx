@@ -40,7 +40,9 @@ export function SobreApp({ className }: { className?: string }) {
 
           <div className="flex flex-col items-center gap-3 py-1 text-center text-sm text-muted-foreground">
             <span>Desenvolvido por</span>
-            <img src="/emeve.png" alt="eMeVe" className="h-20 w-auto" />
+            <div className="rounded-xl bg-neutral-950 p-4 shadow-sm ring-1 ring-black/10">
+              <img src="/emeve.png" alt="eMeVe" className="h-44 w-auto" />
+            </div>
             <span>Versão {VERSAO_APP}</span>
             <div className="pt-1">
               <p>Dúvidas e sugestões</p>
