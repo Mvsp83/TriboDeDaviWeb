@@ -5,17 +5,12 @@ import {
   Loader2,
   LogIn,
   LogOut,
-  CalendarDays,
-  Medal,
-  Megaphone,
   CheckCircle2,
   XCircle,
   Camera,
   MessageSquarePlus,
   CloudOff,
-  Sparkles,
   AlertTriangle,
-  MessageSquare,
   ClipboardList,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
@@ -46,7 +41,7 @@ import {
   type Selo,
   type ResumoFrequencia,
 } from "@/features/responsavel/conquistas";
-import { faixaInfo } from "@/features/alunos/faixa";
+import { faixaInfo, proximaCorBase } from "@/features/alunos/faixa";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { LogoLockup } from "@/components/Logo";
@@ -107,8 +102,8 @@ function SeloCard({ selo }: { selo: Selo }) {
         </span>
       )}
       <span
-        className={`text-[2.75rem] leading-none ${
-          selo.conquistado ? "drop-shadow-sm" : "opacity-40 grayscale"
+        className={`text-5xl leading-none sm:text-[2.75rem] ${
+          selo.conquistado ? "selo-pop drop-shadow-sm" : "opacity-40 grayscale"
         }`}
         aria-hidden
       >
@@ -160,7 +155,7 @@ function ConquistasCard({
     <Card>
       <CardContent className="p-5">
         <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-          <Sparkles className="size-4" /> Conquistas
+          <span className="text-base" aria-hidden>✨</span> Conquistas
         </h2>
         {conquistados.length === 0 ? (
           <p className="text-sm text-muted-foreground">
@@ -438,6 +433,7 @@ export function ResponsavelPortal() {
   const advertencias = painel.advertencias ?? [];
   const recados = painel.recados ?? [];
   const faixaAtual = faixaInfo(aluno.faixa);
+  const proxFaixaBase = proximaCorBase(aluno.faixa);
 
   // Índices reiniciam por ano (ciclo anual): frequência, presenças e conquistas
   // contam só o ano selecionado. O seletor mostra os anos com registro.
@@ -488,6 +484,13 @@ export function ResponsavelPortal() {
             </div>
             <FaixaBadge faixa={aluno.faixa} />
           </CardContent>
+          {proxFaixaBase != null && (
+            <div className="flex items-center gap-2 border-t border-border px-5 py-2.5 text-sm">
+              <span aria-hidden>🎯</span>
+              <span className="text-muted-foreground">Próxima faixa:</span>
+              <FaixaBadge faixa={proxFaixaBase} />
+            </div>
+          )}
         </Card>
 
         {/* Frequência (do ano selecionado) */}
@@ -614,7 +617,7 @@ export function ResponsavelPortal() {
           <Card>
             <CardContent className="p-5">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                <MessageSquare className="size-4" /> Recados do professor
+                <span className="text-base" aria-hidden>💬</span> Recados do professor
               </h2>
               <div className="flex flex-col gap-3">
                 {recados.map((r, i) => {
@@ -718,7 +721,7 @@ export function ResponsavelPortal() {
         <Card>
           <CardContent className="p-5">
             <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-              <Medal className="size-4" /> Graduações
+              <span className="text-base" aria-hidden>🥋</span> Graduações
             </h2>
             {graduacoes.length === 0 ? (
               <p className="text-sm text-muted-foreground">
@@ -746,7 +749,7 @@ export function ResponsavelPortal() {
           <Card>
             <CardContent className="p-5">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                <Megaphone className="size-4" /> Avisos
+                <span className="text-base" aria-hidden>📣</span> Avisos
               </h2>
               <div className="flex flex-col gap-3">
                 {avisos.map((a, i) => (
@@ -771,7 +774,7 @@ export function ResponsavelPortal() {
         <Card>
           <CardContent className="p-5">
             <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-              <CalendarDays className="size-4" /> Calendário
+              <span className="text-base" aria-hidden>🗓️</span> Calendário
             </h2>
             {eventos.length === 0 ? (
               <p className="text-sm text-muted-foreground">

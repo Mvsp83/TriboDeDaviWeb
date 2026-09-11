@@ -47,3 +47,12 @@ export function baseDaCor(faixa: number): number {
 export function mudouDeCor(faixaAnterior: number, faixaNova: number): boolean {
   return baseDaCor(faixaAnterior) !== baseDaCor(faixaNova);
 }
+
+// Base da PRÓXIMA cor na progressão (para motivar "rumo à próxima faixa").
+// Null quando já está na Preta (não há próxima).
+export function proximaCorBase(faixa: number): number | null {
+  const base = baseDaCor(faixa);
+  const idx = CORES.findIndex((c) => c.base === base);
+  const prox = CORES[idx + 1];
+  return prox ? prox.base : null;
+}

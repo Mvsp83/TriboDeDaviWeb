@@ -275,6 +275,25 @@
   animation: skeleton-shimmer 1.5s var(--ease-standard) infinite;
 }
 
+/* Selo conquistado no Portal do Responsável: "pop" de entrada da figurinha,
+   dá um ar de comemoração sem ser cansativo (roda uma vez, ao abrir). */
+@keyframes selo-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.selo-pop {
+  animation: selo-pop 0.45s var(--ease-out-premium) both;
+}
+
 /* Acessibilidade: quem pede menos movimento não vê deslizes/escalas. Zeramos as
    entradas com deslocamento e encurtamos as transições, mas mantemos os fades
    de opacidade e o pulse/shimmer do skeleton (não causam enjoo e o pulse é o
@@ -291,6 +310,7 @@
 
   .animate-page-enter,
   .animate-in,
+  .selo-pop,
   [class*="slide-in-from"],
   [class*="slide-out-to"],
   [class*="zoom-in"],
