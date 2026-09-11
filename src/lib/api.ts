@@ -30,10 +30,21 @@ export class ApiError extends Error {
 
 // Em dev, baseURL vazia => caminhos relativos passam pelo proxy do Vite.
 // Em produção, VITE_API_BASE_URL aponta para a API pública.
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+
 export const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "",
+  baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
 });
+
+// URL absoluta para um recurso servido pela API que vai direto no <img src>/href
+// (a tag não passa pelo axios, então precisa do host da API em produção; em dev,
+// baseURL vazia mantém o caminho relativo e o proxy do Vite resolve). Já-absolutas
+// (http/https/data:) passam sem alteração.
+export function midiaUrl(caminho: string): string {
+  if (!caminho || /^(https?:|data:)/i.test(caminho)) return caminho;
+  return `${API_BASE_URL}${caminho}`;
+}
 
 http.interceptors.request.use((config) => {
   const token = getToken();

@@ -24,6 +24,7 @@ import {
 import { Video, Play, PlayCircle } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import { dataBR } from "@/lib/format";
+import { midiaUrl } from "@/lib/api";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Button } from "@/components/ui/button";
 import { PaginaPublica } from "@/components/PaginaPublica";
@@ -132,7 +133,7 @@ export function GaleriaPage() {
             {opcoes.map((o) => {
               // Miniatura na capa (grade) — a foto cheia só ao ampliar.
               const capa = o.fotos[0]?.url
-                ? `${o.fotos[0].url}?mini=true`
+                ? `${midiaUrl(o.fotos[0].url)}?mini=true`
                 : undefined;
               return (
                 <button
@@ -191,7 +192,7 @@ export function GaleriaPage() {
                     className="block w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <img
-                      src={`${f.url}?mini=true`}
+                      src={`${midiaUrl(f.url)}?mini=true`}
                       alt={f.legenda ?? selecionada.label}
                       loading="lazy"
                       className="aspect-square w-full object-cover transition-transform hover:scale-105"
@@ -326,7 +327,7 @@ export function GaleriaPage() {
 
           <figure className="max-h-[90svh] max-w-4xl" onClick={(e) => e.stopPropagation()}>
             <img
-              src={ampliada.url}
+              src={midiaUrl(ampliada.url)}
               alt={ampliada.legenda ?? "Foto do Instituto Tribo de Davi"}
               className="max-h-[85svh] w-auto rounded-lg object-contain"
             />
