@@ -28,6 +28,11 @@ export const ApiRotas = {
   // Público (anônimo): total de crianças atendidas, para os números do site.
   alunosTotalPublico: "/api/Aluno/total-publico",
   alunosPorPolo: `/api/Aluno/get-por-polo?${TODAS_TURMAS}`,
+  // Alunos importados de planilha sem turma (turma 0). O get-por-polo filtra
+  // turmas 1-3, então esses ficam de fora da lista até alguém atribuir a turma.
+  // pendentes = admin vê todos; professor/supervisor vê os do próprio polo.
+  alunosSemTurma: "/api/Aluno/pendentes",
+  alunoAtribuirTurma: "/api/Aluno/atribuir-turma",
   alunoCreate: "/api/Aluno/create",
   alunoUpdate: "/api/Aluno/update",
   alunoDelete: (id: number) => `/api/Aluno/delete/${id}`,

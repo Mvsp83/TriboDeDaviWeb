@@ -173,6 +173,15 @@ export async function apiPut<T>(url: string, body?: unknown): Promise<T> {
   }
 }
 
+export async function apiPatch<T>(url: string, body?: unknown): Promise<T> {
+  try {
+    const { data } = await http.patch<ResultViewModel<T>>(url, body);
+    return unwrap(data);
+  } catch (error) {
+    throw toApiError(error);
+  }
+}
+
 export async function apiDelete<T>(url: string): Promise<T> {
   try {
     const { data } = await http.delete<ResultViewModel<T>>(url);

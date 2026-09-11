@@ -11,7 +11,18 @@ import {
   type NavBranch,
 } from "@/components/layout/navConfig";
 import { LogoLockup } from "@/components/Logo";
+import { useAlunosSemTurma } from "@/features/alunos/alunosApi";
 import { cn } from "@/lib/utils";
+
+// Badge (contador) do menu — some quando zero.
+function NavBadge({ n }: { n: number }) {
+  if (n <= 0) return null;
+  return (
+    <span className="ml-auto inline-flex min-w-[18px] items-center justify-center rounded-full bg-amber-500 px-1.5 text-[11px] font-semibold leading-5 text-black">
+      {n > 99 ? "99+" : n}
+    </span>
+  );
+}
 
 // Cor de cada pilar (nível 0). A cor "desce" para os filhos, agrupando
 // visualmente as opções. No item ativo, o dourado da marca assume.
@@ -42,6 +53,9 @@ interface NodeProps {
   depth: number;
   cor: string;
   onNavigate?: () => void;
+  // Resolve o contador (badge) de um nó: folha usa sua própria chave; ramo soma
+  // a subárvore (para borbulhar o total ao pilar quando fechado).
+  getBadge: (node: NavNode) => number;
   // Abertura controlada de fora (usada nos pilares de nível 0, para manter só
   // um aberto por vez). Sem isto, o ramo controla o próprio estado.
   aberto?: boolean;
@@ -56,8 +70,9 @@ function NavNodeItem(props: NodeProps) {
   );
 }
 
-function NavLeafItem({ node, depth, cor, onNavigate }: NodeProps & { node: NavLeaf }) {
+function NavLeafItem({ node, depth, cor, onNavigate, getBadge }: NodeProps & { node: NavLeaf }) {
   const raiz = depth === 0;
+  const badge = getBadge(node);
   return (
     <NavLink
       to={node.href}
@@ -86,7 +101,8 @@ function NavLeafItem({ node, depth, cor, onNavigate }: NodeProps & { node: NavLe
             className={cn("shrink-0", raiz ? "size-[18px]" : "size-[18px] md:size-4")}
             style={{ color: isActive ? undefined : cor }}
           />
-          {node.label}
+          <span className="truncate">{node.label}</span>
+          <NavBadge n={badge} />
         </>
       )}
     </NavLink>
@@ -98,6 +114,7 @@ function NavBranchItem({
   depth,
   cor,
   onNavigate,
+  getBadge,
   aberto: abertoProp,
   onAlternar,
 }: NodeProps & { node: NavBranch }) {
@@ -105,6 +122,7 @@ function NavBranchItem({
   const ativo = contemAtivo(node, pathname);
   const [abertoLocal, setAbertoLocal] = useState(ativo);
   const raiz = depth === 0;
+  const badge = getBadge(node);
   // Se o pai controla a abertura (pilares), usa isso; senão, estado próprio.
   const controlado = onAlternar !== undefined;
   const aberto = controlado ? !!abertoProp : abertoLocal;
@@ -133,6 +151,9 @@ function NavBranchItem({
           style={{ color: cor }}
         />
         <span className="flex-1 text-left">{node.label}</span>
+        {/* Fechado: mostra o total da subárvore no pilar; aberto, quem mostra é
+            a folha/ramo interno (evita duplicar). */}
+        {!aberto && <NavBadge n={badge} />}
         <ChevronRight
           className={cn(
             "size-5 shrink-0 text-sidebar-foreground/40 transition-transform duration-[var(--dur-fast)] ease-[var(--ease-standard)] md:size-4",
@@ -169,6 +190,7 @@ function NavBranchItem({
                 depth={depth + 1}
                 cor={cor}
                 onNavigate={onNavigate}
+                getBadge={getBadge}
               />
             ))}
           </div>
@@ -183,6 +205,19 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { pathname } = useLocation();
   const admin = sessao?.isAdministrador ?? false;
   const modulos = sessao?.modulos ?? [];
+
+  // Contadores do menu, por chave (ver NavLeaf.badge). Um ramo soma a subárvore
+  // para borbulhar o total ao pilar fechado.
+  const { data: alunosSemTurma } = useAlunosSemTurma();
+  const contadores: Record<string, number> = {
+    alunosSemTurma: alunosSemTurma?.length ?? 0,
+  };
+  const getBadge = (node: NavNode): number =>
+    isBranch(node)
+      ? node.children.reduce((soma, filho) => soma + getBadge(filho), 0)
+      : node.badge
+        ? (contadores[node.badge] ?? 0)
+        : 0;
 
   // Acordeão dos pilares (nível 0): só um aberto por vez. Começa aberto no
   // pilar que contém a página atual.
@@ -233,6 +268,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                     depth={0}
                     cor={CORES_SECAO[node.label] ?? "#94a3b8"}
                     onNavigate={onNavigate}
+                    getBadge={getBadge}
                     {...(isBranch(node)
                       ? {
                           aberto: pilarAberto === node.label,

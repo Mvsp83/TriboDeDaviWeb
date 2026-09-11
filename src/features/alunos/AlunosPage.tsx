@@ -29,6 +29,7 @@ import {
   usePrepararCodigosResponsavel,
 } from "@/features/alunos/alunosApi";
 import { AlunoFormDialog } from "@/features/alunos/AlunoFormDialog";
+import { AlunosSemTurma } from "@/features/alunos/AlunosSemTurma";
 import { AlunoDetalheDialog } from "@/features/alunos/AlunoDetalheDialog";
 import { CodigoResponsavelDialog } from "@/features/responsavel/CodigoResponsavelDialog";
 import { OcorrenciasDialog } from "@/features/ocorrencias/OcorrenciasDialog";
@@ -389,6 +390,9 @@ export function AlunosPage() {
           )}
         </div>
       </div>
+
+      {/* Alunos importados sem turma — a professora/admin atribui a turma aqui. */}
+      <AlunosSemTurma mostrarPolo={admin} />
 
       <Card>
         <CardContent className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from "@/lib/api";
 import { ApiRotas } from "@/lib/apiRoutes";
 import type { Aluno } from "@/types";
 
@@ -43,6 +43,46 @@ export function useAlunosLista(admin: boolean) {
     queryKey: ["alunos", "lista", admin],
     queryFn: () =>
       admin ? buscarTodosLeves() : apiGet<Aluno[]>(ApiRotas.alunosPorPolo),
+  });
+}
+
+// ── Alunos sem turma (pendentes) ───────────────────────────────────────────
+// Importação de planilha cria o aluno com turma 0 quando a coluna vem vazia; o
+// get-por-polo filtra turmas 1-3, então esses só aparecem aqui até alguém
+// atribuir a turma. Admin vê todos os polos; professor/supervisor vê o seu.
+export interface AlunoPendenteTurma {
+  id: number;
+  nome: string;
+  dataNascimento: string;
+  peso?: number | null;
+  faixa: number;
+  poloId: number;
+  poloNome: string;
+}
+
+export function useAlunosSemTurma() {
+  return useQuery({
+    queryKey: ["alunos-sem-turma"],
+    queryFn: () =>
+      apiGet<AlunoPendenteTurma[] | null>(ApiRotas.alunosSemTurma).then(
+        (r) => r ?? [],
+      ),
+    // O menu lateral consome isto o tempo todo; evita refazer a cada navegação.
+    staleTime: 60 * 1000,
+    retry: false,
+  });
+}
+
+export function useAtribuirTurma() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ alunoId, turma }: { alunoId: number; turma: number }) =>
+      apiPatch<Aluno>(ApiRotas.alunoAtribuirTurma, { alunoId, turma }),
+    onSuccess: () => {
+      // Sai da lista de pendentes e passa a aparecer na listagem normal.
+      qc.invalidateQueries({ queryKey: ["alunos-sem-turma"] });
+      qc.invalidateQueries({ queryKey: ["alunos"] });
+    },
   });
 }
 

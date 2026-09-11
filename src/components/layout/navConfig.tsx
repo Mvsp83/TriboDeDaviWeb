@@ -64,6 +64,10 @@ export interface NavLeaf {
   // Só aparece se a conta contratou este módulo. Sem `modulo` = base (core),
   // sempre visível. Ortogonal a `adminOnly` (papel do usuário).
   modulo?: ModuloId;
+  // Chave de um contador (badge) exibido no menu. O Sidebar resolve a chave
+  // para um número e mostra o badge na folha e, quando o pilar está fechado,
+  // borbulha a soma para ele. Ex.: "alunosSemTurma".
+  badge?: string;
 }
 
 export interface NavBranch {
@@ -102,7 +106,7 @@ export const navGroups: NavGroup[] = [
             label: "Cadastros",
             icon: FolderPlus,
             children: [
-              { label: "Alunos", href: "/alunos", icon: Users },
+              { label: "Alunos", href: "/alunos", icon: Users, badge: "alunosSemTurma" },
               { label: "Inscrições", href: "/inscricoes", icon: ClipboardList },
               { label: "Polos", href: "/polos", icon: MapPin, adminOnly: true },
               {
