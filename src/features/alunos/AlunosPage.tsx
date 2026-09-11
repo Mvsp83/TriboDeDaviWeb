@@ -392,7 +392,7 @@ export function AlunosPage() {
       </div>
 
       {/* Alunos importados sem turma — a professora/admin atribui a turma aqui. */}
-      <AlunosSemTurma mostrarPolo={admin} />
+      <AlunosSemTurma />
 
       <Card>
         <CardContent className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">

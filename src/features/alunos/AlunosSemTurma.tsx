@@ -37,7 +37,7 @@ function ChipFaixa({ faixa }: { faixa: number }) {
 // Alunos importados de planilha sem turma (turma 0). Ficam fora da lista normal
 // (que filtra turmas 1-3) até alguém atribuir a turma. A professora do polo (ou
 // o admin) resolve aqui com um clique. Só aparece quando há pendências.
-export function AlunosSemTurma({ mostrarPolo = false }: { mostrarPolo?: boolean }) {
+export function AlunosSemTurma() {
   const { data: pendentes, isLoading } = useAlunosSemTurma();
   const atribuir = useAtribuirTurma();
   const [idAtual, setIdAtual] = useState<number | null>(null);
@@ -60,6 +60,16 @@ export function AlunosSemTurma({ mostrarPolo = false }: { mostrarPolo?: boolean 
     );
   }
 
+  // Agrupa por polo (admin vê vários; professor, só o seu) e ordena por nome.
+  const grupos = new Map<string, AlunoPendenteTurma[]>();
+  for (const a of pendentes) {
+    const chave = a.poloNome?.trim() || "Sem polo";
+    (grupos.get(chave) ?? grupos.set(chave, []).get(chave)!).push(a);
+  }
+  const polosOrdenados = [...grupos.keys()].sort((a, b) =>
+    a.localeCompare(b, "pt-BR"),
+  );
+
   return (
     <Card className="border-amber-500/40 bg-amber-500/5">
       <CardContent className="space-y-3 p-4">
@@ -76,53 +86,69 @@ export function AlunosSemTurma({ mostrarPolo = false }: { mostrarPolo?: boolean 
           </div>
         </div>
 
-        <ul className="divide-y divide-border rounded-lg border border-border bg-card">
-          {pendentes.map((a) => {
-            const idade = idadeAnos(a.dataNascimento);
-            const ocupado = idAtual === a.id;
+        <div className="space-y-3">
+          {polosOrdenados.map((polo) => {
+            const doPolo = grupos.get(polo)!;
             return (
-              <li
-                key={a.id}
-                className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <span className="truncate font-medium text-foreground">
-                    {a.nome}
+              <div key={polo}>
+                <div className="mb-1 flex items-center gap-2 px-0.5">
+                  <span className="text-sm font-semibold text-foreground">
+                    {polo}
                   </span>
-                  <ChipFaixa faixa={a.faixa} />
-                  {idade != null && (
-                    <span className="text-xs text-muted-foreground">
-                      {idade} anos
-                    </span>
-                  )}
-                  {mostrarPolo && a.poloNome && (
-                    <span className="text-xs text-muted-foreground">
-                      · {a.poloNome}
-                    </span>
-                  )}
+                  <span className="rounded-full bg-amber-500/20 px-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+                    {doPolo.length}
+                  </span>
                 </div>
+                <ul className="divide-y divide-border rounded-lg border border-border bg-card">
+                  {doPolo.map((a) => {
+                    const idade = idadeAnos(a.dataNascimento);
+                    const ocupado = idAtual === a.id;
+                    return (
+                      <li
+                        key={a.id}
+                        className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <span className="truncate font-medium text-foreground">
+                            {a.nome}
+                          </span>
+                          <ChipFaixa faixa={a.faixa} />
+                          {idade != null && (
+                            <span className="text-xs text-muted-foreground">
+                              {idade} anos
+                            </span>
+                          )}
+                        </div>
 
-                <div className="flex shrink-0 items-center gap-1.5">
-                  <span className="mr-1 text-xs text-muted-foreground">
-                    Turma:
-                  </span>
-                  {[1, 2, 3].map((t) => (
-                    <Button
-                      key={t}
-                      size="sm"
-                      variant="outline"
-                      disabled={ocupado}
-                      onClick={() => definir(a, t)}
-                      aria-label={`Atribuir ${a.nome} à Turma ${t}`}
-                    >
-                      {ocupado ? <Loader2 className="size-4 animate-spin" /> : t}
-                    </Button>
-                  ))}
-                </div>
-              </li>
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <span className="mr-1 text-xs text-muted-foreground">
+                            Turma:
+                          </span>
+                          {[1, 2, 3].map((t) => (
+                            <Button
+                              key={t}
+                              size="sm"
+                              variant="outline"
+                              disabled={ocupado}
+                              onClick={() => definir(a, t)}
+                              aria-label={`Atribuir ${a.nome} à Turma ${t}`}
+                            >
+                              {ocupado ? (
+                                <Loader2 className="size-4 animate-spin" />
+                              ) : (
+                                t
+                              )}
+                            </Button>
+                          ))}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             );
           })}
-        </ul>
+        </div>
       </CardContent>
     </Card>
   );
