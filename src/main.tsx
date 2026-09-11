@@ -3,11 +3,25 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { registerSW } from "virtual:pwa-register";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/features/auth/AuthContext";
 import { queryClient } from "@/lib/queryClient";
 import App from "@/App";
 import "@/index.css";
+
+// Service worker (PWA): registra na inicialização e, além da checagem que o
+// navegador já faz a cada carga, revalida de hora em hora enquanto a aba fica
+// aberta. Com registerType "autoUpdate", achar uma versão nova troca o SW e
+// recarrega sozinho — evita que a família fique presa numa versão antiga em
+// cache. Sem UI de aviso (autoUpdate cuida de tudo).
+const UMA_HORA = 60 * 60 * 1000;
+registerSW({
+  immediate: true,
+  onRegisteredSW(_url, registro) {
+    if (registro) setInterval(() => registro.update(), UMA_HORA);
+  },
+});
 
 // Persiste o cache do Query em localStorage para que os dados necessários à
 // chamada (alunos, aulas, polos, presenças) fiquem disponíveis offline. Só

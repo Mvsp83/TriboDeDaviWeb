@@ -18,7 +18,10 @@ export default defineConfig({
     // cache do TanStack Query persistido em localStorage (ver src/main.tsx).
     VitePWA({
       registerType: "autoUpdate",
-      injectRegister: "auto",
+      // O registro é feito manualmente em src/main.tsx (com update periódico);
+      // por isso NÃO deixamos o plugin injetar o próprio registro (evita
+      // registrar o SW duas vezes).
+      injectRegister: null,
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
         name: "Tribo de Davi",
