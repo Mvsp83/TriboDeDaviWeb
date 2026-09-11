@@ -20,6 +20,8 @@ export interface Selo {
   descricao: string;
   // Ícone lucide (resolvido no componente para não acoplar a UI aqui).
   icone: "medal" | "flame" | "star" | "trophy" | "award" | "zap";
+  // Figurinha (emoji) do selo — visual amigável para a criança.
+  emoji: string;
   meta: number; // valor-alvo (presenças, sequência ou %)
   atual: number; // progresso atual rumo à meta
   conquistado: boolean;
@@ -69,15 +71,15 @@ export function sequenciaAtual(presencas: PresencaLite[]): number {
 
 // Metas dos selos. Ficam num lugar só para ajustar sem caçar no código.
 const METAS_TOTAL = [
-  { id: "total-10", nome: "Primeiros passos", meta: 10, icone: "medal" as const },
-  { id: "total-25", nome: "Faixa firme", meta: 25, icone: "star" as const },
-  { id: "total-50", nome: "Guerreiro do tatame", meta: 50, icone: "award" as const },
-  { id: "total-100", nome: "Lenda do dojo", meta: 100, icone: "trophy" as const },
+  { id: "total-10", nome: "Primeiros passos", meta: 10, icone: "medal" as const, emoji: "👣" },
+  { id: "total-25", nome: "Faixa firme", meta: 25, icone: "star" as const, emoji: "🥋" },
+  { id: "total-50", nome: "Guerreiro do tatame", meta: 50, icone: "award" as const, emoji: "🛡️" },
+  { id: "total-100", nome: "Lenda do dojo", meta: 100, icone: "trophy" as const, emoji: "🏆" },
 ];
 
 const METAS_SEQUENCIA = [
-  { id: "seq-5", nome: "Constância", meta: 5, icone: "flame" as const },
-  { id: "seq-10", nome: "Imbatível", meta: 10, icone: "zap" as const },
+  { id: "seq-5", nome: "Constância", meta: 5, icone: "flame" as const, emoji: "🔥" },
+  { id: "seq-10", nome: "Imbatível", meta: 10, icone: "zap" as const, emoji: "⚡" },
 ];
 
 // Assiduidade só vale a partir de um mínimo de aulas, senão "100% de 1 aula"
@@ -96,6 +98,7 @@ export function calcularSelos(
     nome: m.nome,
     descricao: `${m.meta} presenças no total`,
     icone: m.icone,
+    emoji: m.emoji,
     meta: m.meta,
     atual: Math.min(resumo.presencas, m.meta),
     conquistado: resumo.presencas >= m.meta,
@@ -106,6 +109,7 @@ export function calcularSelos(
     nome: m.nome,
     descricao: `${m.meta} aulas seguidas sem faltar`,
     icone: m.icone,
+    emoji: m.emoji,
     meta: m.meta,
     atual: Math.min(seq, m.meta),
     conquistado: seq >= m.meta,
@@ -116,6 +120,7 @@ export function calcularSelos(
     nome: "Sempre presente",
     descricao: `${ASSIDUIDADE_META}% de presença ou mais`,
     icone: "star",
+    emoji: "⭐",
     meta: ASSIDUIDADE_META,
     atual: resumo.percentual,
     // Só conquistável com histórico suficiente; senão fica como meta a atingir.

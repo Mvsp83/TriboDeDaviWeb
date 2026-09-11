@@ -13,13 +13,7 @@ import {
   Camera,
   MessageSquarePlus,
   CloudOff,
-  Flame,
-  Star,
-  Trophy,
-  Award,
-  Zap,
   Sparkles,
-  Lock,
   AlertTriangle,
   MessageSquare,
   ClipboardList,
@@ -91,52 +85,52 @@ function dataBR(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR");
 }
 
-// Ícone lucide de cada selo (a lógica de conquistas não conhece a UI).
-const ICONE_SELO = {
-  medal: Medal,
-  flame: Flame,
-  star: Star,
-  trophy: Trophy,
-  award: Award,
-  zap: Zap,
-} as const;
-
+// Selo como "figurinha": emoji grande e colorido quando conquistado; cinza e
+// com barra de progresso quando ainda é uma meta. A lógica (conquistas.ts) traz
+// o emoji; aqui é só a apresentação.
 function SeloCard({ selo }: { selo: Selo }) {
-  const Icone = ICONE_SELO[selo.icone];
   const pct =
     selo.meta > 0
       ? Math.min(100, Math.round((selo.atual * 100) / selo.meta))
       : 0;
   return (
     <div
-      className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-center ${
+      className={`relative flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center transition-transform ${
         selo.conquistado
-          ? "border-primary/40 bg-primary/5"
-          : "border-dashed border-border opacity-70"
+          ? "border-amber-400/50 bg-gradient-to-b from-amber-100 to-amber-50 shadow-sm hover:-translate-y-0.5 dark:from-amber-500/15 dark:to-amber-500/[0.04]"
+          : "border-dashed border-border bg-secondary/30"
       }`}
     >
+      {selo.conquistado && (
+        <span className="absolute right-1.5 top-1.5 text-sm" aria-hidden>
+          ✅
+        </span>
+      )}
+      <span
+        className={`text-[2.75rem] leading-none ${
+          selo.conquistado ? "drop-shadow-sm" : "opacity-40 grayscale"
+        }`}
+        aria-hidden
+      >
+        {selo.emoji}
+      </span>
       <div
-        className={`flex size-11 items-center justify-center rounded-full ${
+        className={`text-xs font-bold leading-tight ${
           selo.conquistado
-            ? "bg-primary/15 text-primary"
-            : "bg-secondary text-muted-foreground"
+            ? "text-amber-700 dark:text-amber-300"
+            : "text-muted-foreground"
         }`}
       >
-        {selo.conquistado ? (
-          <Icone className="size-6" />
-        ) : (
-          <Lock className="size-4" />
-        )}
+        {selo.nome}
       </div>
-      <div className="text-xs font-semibold leading-tight">{selo.nome}</div>
       <div className="text-[11px] leading-tight text-muted-foreground">
         {selo.descricao}
       </div>
       {!selo.conquistado && (
         <div className="mt-0.5 w-full">
-          <div className="h-1 overflow-hidden rounded-full bg-secondary">
+          <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
             <div
-              className="h-full rounded-full bg-primary/60"
+              className="h-full rounded-full bg-amber-400"
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -443,6 +437,7 @@ export function ResponsavelPortal() {
   // `?? []` protege enquanto a API não estiver atualizada (campos novos ausentes).
   const advertencias = painel.advertencias ?? [];
   const recados = painel.recados ?? [];
+  const faixaAtual = faixaInfo(aluno.faixa);
 
   // Índices reiniciam por ano (ciclo anual): frequência, presenças e conquistas
   // contam só o ano selecionado. O seletor mostra os anos com registro.
@@ -464,18 +459,29 @@ export function ResponsavelPortal() {
       <main className="mx-auto flex max-w-2xl flex-col gap-4 p-4">
         <VersiculoDoDia />
 
-        {/* Aluno */}
-        <Card>
-          <CardContent className="flex flex-wrap items-center gap-3 p-5">
-            {aluno.fotoDataUri && (
+        {/* Aluno — cabeçalho com a cor da faixa em destaque. */}
+        <Card className="overflow-hidden">
+          <div className="h-2 w-full" style={{ backgroundColor: faixaAtual.cor }} />
+          <CardContent className="flex flex-wrap items-center gap-4 p-5">
+            {aluno.fotoDataUri ? (
               <img
                 src={aluno.fotoDataUri}
                 alt={aluno.nome}
-                className="size-14 shrink-0 rounded-full border border-border object-cover"
+                className="size-16 shrink-0 rounded-full border-2 object-cover"
+                style={{ borderColor: faixaAtual.cor }}
               />
+            ) : (
+              <div
+                className="flex size-16 shrink-0 items-center justify-center rounded-full text-3xl"
+                style={{ backgroundColor: faixaAtual.cor, color: faixaAtual.texto }}
+                aria-hidden
+              >
+                🥋
+              </div>
             )}
-            <div className="flex-1">
-              <h1 className="text-xl font-semibold">{aluno.nome}</h1>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-muted-foreground">Oi! 👋</p>
+              <h1 className="truncate text-xl font-bold">{aluno.nome}</h1>
               <p className="text-sm text-muted-foreground">
                 {aluno.polo || "—"} · Turma {aluno.turma}
               </p>
@@ -526,13 +532,13 @@ export function ResponsavelPortal() {
                   <div className="text-2xl font-bold text-emerald-600">
                     {frequencia.presencas}
                   </div>
-                  <div className="text-xs text-muted-foreground">Presenças</div>
+                  <div className="text-xs text-muted-foreground">✅ Presenças</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-destructive">
                     {frequencia.totalAulas - frequencia.presencas}
                   </div>
-                  <div className="text-xs text-muted-foreground">Faltas</div>
+                  <div className="text-xs text-muted-foreground">❌ Faltas</div>
                 </div>
               </div>
             )}
