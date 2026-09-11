@@ -33,6 +33,10 @@ export function useCriarOcorrencia() {
     mutationFn: (dados: NovaOcorrencia) => apiPost<Ocorrencia>(ApiRotas.ocorrenciaCriar, dados),
     onSuccess: (_r, dados) => {
       qc.invalidateQueries({ queryKey: ["ocorrencias", dados.alunoId] });
+      // Uma advertência muda a contagem que decide o "apto ao exame" — força o
+      // recálculo da aptidão (senão o selo fica com o número antigo até o cache
+      // vencer). Recado não conta, mas invalidar é barato e mantém tudo em sincronia.
+      qc.invalidateQueries({ queryKey: ["graduacao-aptidao"] });
     },
   });
 }
@@ -43,6 +47,8 @@ export function useExcluirOcorrencia(alunoId: number) {
     mutationFn: (id: number) => apiDelete(ApiRotas.ocorrenciaExcluir(id)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ocorrencias", alunoId] });
+      // Excluir uma advertência pode tornar o aluno apto de novo — recalcula.
+      qc.invalidateQueries({ queryKey: ["graduacao-aptidao"] });
     },
   });
 }
