@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { ImageOff, Check, EyeOff, ShieldCheck, Trash2 } from "lucide-react";
-import { ApiError } from "@/lib/api";
+import { ApiError, midiaUrl } from "@/lib/api";
 import { dataBR } from "@/lib/format";
 import {
   useFotosTreino,
@@ -20,7 +20,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 // autenticada — porque <img> não envia token para uma foto pendente.
 function Miniatura({ foto }: { foto: FotoTreino }) {
   const { data: previa, isLoading } = usePreviaFoto(foto.publicada ? null : foto.id);
-  const src = foto.publicada ? foto.url : previa;
+  // Publicada: URL pública (miniatura) já com a base da API (senão o <img>
+  // resolveria contra o host do front). Pendente: prévia base64 autenticada.
+  const src = foto.publicada ? `${midiaUrl(foto.url)}?mini=true` : previa;
 
   if (!foto.publicada && isLoading) {
     return <Skeleton className="aspect-video w-full rounded-md" />;
