@@ -70,10 +70,12 @@ export function Topbar({
             <ImageIcon className="size-4" />
             Alterar avatar
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDialogPerfilSite(true)}>
-            <IdCard className="size-4" />
-            Meu perfil no site
-          </DropdownMenuItem>
+          {!sessao?.isAdministrador && (
+            <DropdownMenuItem onClick={() => setDialogPerfilSite(true)}>
+              <IdCard className="size-4" />
+              Meu perfil no site
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => setDialog2fa(true)}>
             <ShieldCheck className="size-4" />
             Verificação em 2 etapas
