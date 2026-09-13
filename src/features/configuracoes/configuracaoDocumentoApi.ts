@@ -24,8 +24,25 @@ interface DocumentoPadraoApi {
   textosPadraoJson?: string | null;
 }
 
+// Campos que NÃO têm coluna tipada na API viajam dentro do textosPadraoJson
+// (contato estruturado, logo próprio, modelo de cabeçalho). Assim ganhamos
+// campos novos sem mudar o schema da API.
+type Extras = Pick<
+  DocumentoPadrao,
+  | "oficio"
+  | "recibo"
+  | "certificado"
+  | "endereco"
+  | "telefone"
+  | "email"
+  | "site"
+  | "cnpj"
+  | "logoDataUrl"
+  | "modelo"
+>;
+
 function daApi(api: Partial<DocumentoPadraoApi>): DocumentoPadrao {
-  let textos: Partial<Pick<DocumentoPadrao, "oficio" | "recibo" | "certificado">> = {};
+  let textos: Partial<Extras> = {};
   try {
     if (api.textosPadraoJson) textos = JSON.parse(api.textosPadraoJson);
   } catch {
@@ -42,17 +59,25 @@ function daApi(api: Partial<DocumentoPadraoApi>): DocumentoPadrao {
 }
 
 function paraApi(cfg: DocumentoPadrao): DocumentoPadraoApi {
+  const extras: Extras = {
+    oficio: cfg.oficio,
+    recibo: cfg.recibo,
+    certificado: cfg.certificado,
+    endereco: cfg.endereco,
+    telefone: cfg.telefone,
+    email: cfg.email,
+    site: cfg.site,
+    cnpj: cfg.cnpj,
+    logoDataUrl: cfg.logoDataUrl,
+    modelo: cfg.modelo,
+  };
   return {
     tituloCabecalho: cfg.tituloCabecalho,
     linhaExtra: cfg.linhaExtra,
     textoRodape: cfg.textoRodape,
     mostrarLogo: cfg.mostrarLogo,
     mostrarDataGeracao: cfg.mostrarDataGeracao,
-    textosPadraoJson: JSON.stringify({
-      oficio: cfg.oficio,
-      recibo: cfg.recibo,
-      certificado: cfg.certificado,
-    }),
+    textosPadraoJson: JSON.stringify(extras),
   };
 }
 

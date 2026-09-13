@@ -8,6 +8,7 @@
 // relatório, etc.) só fornece o corpo (corpoHtml).
 import {
   carregarDocumentoPadrao,
+  linhasCabecalho,
   type DocumentoPadrao,
 } from "@/lib/documentoPadrao";
 
@@ -39,24 +40,28 @@ export function montarDocumentoHtml(
   cfg: DocumentoPadrao = carregarDocumentoPadrao(),
   imprimirAoCarregar = false,
 ): string {
-  // Usa o símbolo (só a estrela) — o logo é branco, feito para a barra lateral
-  // escura, e sumiria no fundo branco do documento. Por isso ele vai dentro de
-  // um selo escuro, onde a marca branca fica visível no papel timbrado.
-  const logo = `${window.location.origin}/simbolo.png`;
+  // Logo próprio (data URL) quando definido; senão o símbolo padrão (só a
+  // estrela). O símbolo é branco, feito para a barra lateral escura, e sumiria
+  // no fundo branco — por isso vai dentro de um selo escuro, onde a marca fica
+  // visível no papel timbrado.
+  const logo = cfg.logoDataUrl || `${window.location.origin}/simbolo.png`;
   const geradoEm = new Date().toLocaleString("pt-BR");
 
+  // O selo escuro existe só para o símbolo branco padrão aparecer no fundo
+  // claro. Um logo enviado pelo instituto (colorido/transparente) fica melhor
+  // "limpo", sem a moldura preta.
+  const marcaClasse = cfg.logoDataUrl ? "marca marca-custom" : "marca";
   const logoHtml = cfg.mostrarLogo
-    ? `<span class="marca"><img src="${logo}" alt="" onerror="this.parentNode.style.display='none'" /></span>`
+    ? `<span class="${marcaClasse}"><img src="${esc(logo)}" alt="" onerror="this.parentNode.style.display='none'" /></span>`
     : "";
   const instHtml = cfg.tituloCabecalho
     ? `<div class="inst">${esc(cfg.tituloCabecalho)}</div>`
     : "";
-  // linhaExtra pode ter várias linhas (email, site, CNPJ) — cada uma numa linha.
-  const extraHtml = cfg.linhaExtra
-    ? `<div class="extra">${cfg.linhaExtra
-        .split("\n")
-        .map((l) => esc(l))
-        .join("<br>")}</div>`
+  // Linhas do cabeçalho: contato estruturado (endereço/telefone/e-mail/site/
+  // CNPJ) + linhas livres — cada uma numa linha.
+  const linhas = linhasCabecalho(cfg);
+  const extraHtml = linhas.length
+    ? `<div class="extra">${linhas.map((l) => esc(l)).join("<br>")}</div>`
     : "";
   const dataHtml = cfg.mostrarDataGeracao
     ? `<span>Gerado em ${esc(geradoEm)}</span>`
@@ -98,8 +103,23 @@ window.addEventListener("load",function(){
     display: inline-flex; align-items: center;
   }
   .cabecalho .marca img { height: 44px; width: auto; display: block; }
+  /* Logo próprio: sem o selo escuro (fica "limpo" no fundo do papel). */
+  .cabecalho .marca.marca-custom { background: transparent; padding: 0; border-radius: 0; }
+  .cabecalho .marca.marca-custom img { height: 52px; }
   .cabecalho .inst { font-size: 12px; color: #555; font-weight: 600; letter-spacing: .3px; }
   .cabecalho .extra { font-size: 11px; color: #777; margin-top: 1px; }
+
+  /* Modelo Centralizado: marca em cima, tudo centralizado. */
+  .cabecalho.modelo-centralizado { flex-direction: column; text-align: center; gap: 8px; }
+
+  /* Modelo Minimalista: enxuto, régua fina, logo menor e cores suaves. */
+  .cabecalho.modelo-minimalista {
+    border-bottom: 1px solid #d9d9d9; padding-bottom: 8px; gap: 10px;
+  }
+  .cabecalho.modelo-minimalista .marca { padding: 5px 6px; border-radius: 8px; }
+  .cabecalho.modelo-minimalista .marca img { height: 30px; }
+  .cabecalho.modelo-minimalista .inst { font-weight: 600; letter-spacing: .18em; text-transform: uppercase; font-size: 11px; }
+  .cabecalho.modelo-minimalista h1 { font-size: 17px; }
   h1 { font-size: 20px; margin: 2px 0 0 0; }
   .sub { margin: 2px 0 0 0; color: #555; font-size: 12px; }
   .rodape {
@@ -110,7 +130,7 @@ window.addEventListener("load",function(){
   p { margin: 0 0 8px 0; line-height: 1.45; }
 </style>
 </head><body>
-  <div class="cabecalho">
+  <div class="cabecalho modelo-${esc(cfg.modelo)}">
     ${logoHtml}
     <div>
       ${instHtml}

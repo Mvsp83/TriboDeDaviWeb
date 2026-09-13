@@ -1,5 +1,5 @@
 import { montarDocumentoHtml, esc } from "@/lib/impressaoDocumento";
-import { carregarDocumentoPadrao } from "@/lib/documentoPadrao";
+import { carregarDocumentoPadrao, type DocumentoPadrao } from "@/lib/documentoPadrao";
 import { faixaInfo } from "@/features/alunos/faixa";
 import type { Graduacao } from "@/features/graduacoes/graduacoesApi";
 
@@ -18,12 +18,16 @@ function porExtenso(iso: string): string {
   return `${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
 }
 
-export function imprimirCertificado(g: Graduacao): boolean {
+// Corpo (miolo) do certificado. Exportado para a prévia da tela "Padrão de
+// Documentos" reusar exatamente o mesmo layout da impressão.
+export function corpoCertificado(g: Graduacao, cfg: DocumentoPadrao): string {
   const faixa = faixaInfo(g.faixaNova);
   const anterior = faixaInfo(g.faixaAnterior);
-  const cfg = carregarDocumentoPadrao();
+  // Logo próprio quando houver; senão o ícone grande do app (visível no fundo
+  // claro do certificado).
+  const logo = cfg.logoDataUrl || `${window.location.origin}/pwa-512.png`;
 
-  const corpoHtml = `
+  return `
 <style>
   /* Paisagem: o certificado é para emoldurar, não para arquivar. */
   @page { size: A4 landscape; margin: 0; }
@@ -71,7 +75,7 @@ export function imprimirCertificado(g: Graduacao): boolean {
 </style>
 
 <div class="cert">
-  ${cfg.mostrarLogo ? `<img class="marca" src="${window.location.origin}/pwa-512.png" alt="" onerror="this.style.display='none'" />` : ""}
+  ${cfg.mostrarLogo ? `<img class="marca" src="${esc(logo)}" alt="" onerror="this.style.display='none'" />` : ""}
   <div class="inst">${esc(cfg.tituloCabecalho || "Instituto Tribo de Davi")}</div>
 
   <h1>${esc(cfg.certificado.titulo)}</h1>
@@ -98,11 +102,15 @@ export function imprimirCertificado(g: Graduacao): boolean {
     <div>${esc(cfg.certificado.assinaturaDireita)}</div>
   </div>
 </div>`;
+}
+
+export function imprimirCertificado(g: Graduacao): boolean {
+  const cfg = carregarDocumentoPadrao();
 
   // O certificado tem cabeçalho próprio, então o shell entra só pela mecânica
   // de impressão (esperar as imagens antes de abrir o diálogo).
   const html = montarDocumentoHtml(
-    { titulo: `Certificado — ${g.nomeAluno ?? ""}`, corpoHtml },
+    { titulo: `Certificado — ${g.nomeAluno ?? ""}`, corpoHtml: corpoCertificado(g, cfg) },
     cfg,
     true,
   );

@@ -2,9 +2,20 @@
 // aplicada a todos os PDFs — planos, relatórios, etc. O conteúdo muda, o padrão
 // não. Configurável na tela "Padrão de Documentos".
 //
-// Guardado em localStorage (a API .NET não tem endpoint para isto, mesmo caso
-// do módulo Financeiro). Limitação: fica no navegador de quem configura; para
-// compartilhar entre dispositivos seria preciso um endpoint na API.
+// Persiste na API (compartilhado entre todos) com um cache síncrono em
+// localStorage para a exportação de PDF funcionar sem await. Ver
+// configuracaoDocumentoApi.ts. Os campos "novos" (contato estruturado, logo
+// próprio, modelo de cabeçalho) viajam dentro do JSON de textos-padrão, então
+// não exigem mudança de schema na API.
+
+// Layout do cabeçalho (papel timbrado). Aplicado por CSS em impressaoDocumento.
+export type ModeloCabecalho = "classico" | "centralizado" | "minimalista";
+
+export const MODELOS_CABECALHO: { id: ModeloCabecalho; nome: string; descricao: string }[] = [
+  { id: "classico", nome: "Clássico", descricao: "Logo à esquerda, textos ao lado, régua embaixo." },
+  { id: "centralizado", nome: "Centralizado", descricao: "Logo em cima e tudo centralizado." },
+  { id: "minimalista", nome: "Minimalista", descricao: "Enxuto, linha fina e cores suaves." },
+];
 
 // Textos-padrão do ofício (o que já vem preenchido ao criar um novo ofício).
 export interface PadraoOficio {
@@ -30,14 +41,26 @@ export interface PadraoCertificado {
 export interface DocumentoPadrao {
   // Nome no topo do documento (papel timbrado). Ex.: "INSTITUTO TRIBO DE DAVI".
   tituloCabecalho: string;
-  // Linha extra opcional no cabeçalho (ex.: endereço, CNPJ, contato).
+  // Contato estruturado — cada campo vira uma linha (ou parte de uma) no
+  // cabeçalho. Preferidos sobre `linhaExtra`, que fica para linhas livres.
+  endereco: string;
+  telefone: string;
+  email: string;
+  site: string;
+  cnpj: string;
+  // Linhas livres adicionais do cabeçalho (uma por linha). Mantido por
+  // compatibilidade e para textos que não se encaixam nos campos acima.
   linhaExtra: string;
   // Texto à esquerda do rodapé.
   textoRodape: string;
-  // Mostrar o logo do instituto no cabeçalho.
+  // Mostrar a marca/logo no cabeçalho.
   mostrarLogo: boolean;
   // Mostrar "Gerado em <data/hora>" no rodapé.
   mostrarDataGeracao: boolean;
+  // Logo próprio (data URL base64). Vazio = usa o símbolo padrão do instituto.
+  logoDataUrl: string;
+  // Modelo/layout do cabeçalho.
+  modelo: ModeloCabecalho;
   // Textos-padrão por tipo de documento (editáveis na tela Padrão de Documentos).
   oficio: PadraoOficio;
   recibo: PadraoRecibo;
@@ -46,10 +69,17 @@ export interface DocumentoPadrao {
 
 export const PADRAO_DEFAULT: DocumentoPadrao = {
   tituloCabecalho: "INSTITUTO TRIBO DE DAVI",
+  endereco: "",
+  telefone: "",
+  email: "",
+  site: "",
+  cnpj: "",
   linhaExtra: "",
   textoRodape: "Instituto Tribo de Davi",
   mostrarLogo: true,
   mostrarDataGeracao: true,
+  logoDataUrl: "",
+  modelo: "classico",
   oficio: {
     saudacao: "Para você, nosso(a) amigo(a) e apoiador(a).",
     fecho:
@@ -68,10 +98,33 @@ export const PADRAO_DEFAULT: DocumentoPadrao = {
   },
 };
 
+// Monta as linhas do cabeçalho a partir do contato estruturado + linhas livres.
+// Telefone/e-mail/site ficam juntos numa linha (separados por " · "); endereço
+// e CNPJ ganham linha própria.
+export function linhasCabecalho(cfg: DocumentoPadrao): string[] {
+  const linhas: string[] = [];
+  if (cfg.endereco.trim()) linhas.push(cfg.endereco.trim());
+  const contato = [cfg.telefone, cfg.email, cfg.site]
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join(" · ");
+  if (contato) linhas.push(contato);
+  if (cfg.cnpj.trim()) {
+    linhas.push(/cnpj/i.test(cfg.cnpj) ? cfg.cnpj.trim() : `CNPJ ${cfg.cnpj.trim()}`);
+  }
+  cfg.linhaExtra
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .forEach((l) => linhas.push(l));
+  return linhas;
+}
+
 const KEY = "tribo-documento-padrao";
 
 // Mescla defendendo os blocos aninhados: config antiga (sem oficio/recibo/
-// certificado) ou parcial cai nos defaults campo a campo, sem virar undefined.
+// certificado, ou sem os campos novos) ou parcial cai nos defaults campo a
+// campo, sem virar undefined.
 export function mesclarPadrao(parcial: Partial<DocumentoPadrao> | null | undefined): DocumentoPadrao {
   const p = parcial ?? {};
   return {
