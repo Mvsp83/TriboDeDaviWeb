@@ -254,20 +254,17 @@ export function InformacoesPage() {
       return proxima;
     });
 
-  // Âncora #enderecos (usada pelo botão "Ver Endereços"): abre e rola até a
-  // lista de endereços dos polos, que fica na categoria de polos.
+  // Âncora #enderecos (botão "Conheça os polos"/Davizinho): rola até a lista de
+  // endereços, que fica direto no topo do tópico de polos (sempre visível).
   const location = useLocation();
-  const polosCatIndex = categorias.findIndex((c) => ehCategoriaPolos(c.titulo));
   useEffect(() => {
-    if (location.hash !== "#enderecos" || polosCatIndex < 0) return;
-    setAbertas((atual) => new Set(atual).add(`polos-${polosCatIndex}`));
-    // Espera o acordeão abrir antes de rolar até ele.
+    if (location.hash !== "#enderecos") return;
     requestAnimationFrame(() =>
       document
         .getElementById("enderecos")
         ?.scrollIntoView({ behavior: "smooth", block: "start" }),
     );
-  }, [location, polosCatIndex]);
+  }, [location]);
 
   const secoes = categorias.map((c, i) => ({
     id: idCategoria(i),
@@ -317,6 +314,16 @@ export function InformacoesPage() {
                 <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
                   {cat.titulo}
                 </h2>
+
+                {/* No tópico de polos, a lista de endereços vem direto no topo
+                    (sempre visível), sem virar pergunta. id="enderecos" é o alvo
+                    do botão "Conheça os polos". */}
+                {ehCategoriaPolos(cat.titulo) && (
+                  <div id="enderecos" className="mt-4 scroll-mt-6">
+                    <PolosCadastrados />
+                  </div>
+                )}
+
                 <div className="mt-4 flex flex-col gap-2">
                   {cat.perguntas.map((p, qi) => (
                     <ItemPergunta
@@ -329,20 +336,6 @@ export function InformacoesPage() {
                       {p.link && <LinkResposta link={p.link} />}
                     </ItemPergunta>
                   ))}
-
-                  {/* Lista dinâmica dos polos, na categoria de polos.
-                      id="enderecos" é o alvo do botão "Ver Endereços". */}
-                  {ehCategoriaPolos(cat.titulo) && (
-                    <div id="enderecos" className="scroll-mt-6">
-                      <ItemPergunta
-                        pergunta="Quais são os polos e seus endereços?"
-                        aberta={abertas.has(`polos-${ci}`)}
-                        onAlternar={() => alternar(`polos-${ci}`)}
-                      >
-                        <PolosCadastrados />
-                      </ItemPergunta>
-                    </div>
-                  )}
                 </div>
               </div>
             ))}

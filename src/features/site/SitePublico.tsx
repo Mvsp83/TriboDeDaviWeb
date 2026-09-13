@@ -120,7 +120,7 @@ export function SitePublico() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link to="/informacoes">Conheça os polos</Link>
+                <Link to="/informacoes#enderecos">Conheça os polos</Link>
               </Button>
             </div>
             <div className="mt-9 flex flex-wrap gap-3">

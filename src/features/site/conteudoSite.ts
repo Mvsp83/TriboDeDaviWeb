@@ -189,14 +189,9 @@ export const SITE = {
 
       {
         titulo: "Polos e endereços",
+        // A lista de polos e endereços é mostrada direto no topo deste tópico
+        // (InformacoesPage), então não há pergunta "Quais são nossos endereços?".
         perguntas: [
-          {
-            pergunta: "Quais são nossos endereços?",
-            resposta:
-              "O Instituto Tribo de Davi possui atividades em 5 polos de Blumenau. Os endereços, horários e informações de cada local podem ser consultados abaixo.",
-            link: { label: "Ver Endereços", para: "/informacoes#enderecos" },
-          },
-
           {
             pergunta: "Posso escolher qualquer polo?",
             resposta: "Você deve escolher o polo mais próximo de sua casa.",

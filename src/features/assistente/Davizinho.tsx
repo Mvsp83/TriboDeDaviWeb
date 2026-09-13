@@ -123,7 +123,7 @@ export function Davizinho() {
         autor: "davi",
         texto:
           "Temos vários polos. Você pode ver todos, com endereço e horários das turmas, na página de Informações.",
-        link: { label: "Ver polos e endereços", para: "/informacoes" },
+        link: { label: "Ver polos e endereços", para: "/informacoes#enderecos" },
       };
     }
 
