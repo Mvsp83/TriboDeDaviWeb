@@ -21,6 +21,7 @@ import {
   type DocumentoPublico,
 } from "@/features/transparencia/conteudoTransparencia";
 import { SITE } from "@/features/site/conteudoSite";
+import { useEstatisticasSite } from "@/features/site/siteApi";
 import { ApiRotas } from "@/lib/apiRoutes";
 import {
   useGovernancaPublica,
@@ -110,6 +111,12 @@ export function TransparenciaPage() {
   const anoAtual = new Date().getFullYear();
   useDocumentTitle(`Transparência e impacto — ${SITE.nome}`);
 
+  // Atendidos e polos vêm do banco (ao vivo, público) — assim não envelhecem.
+  // O valor curado em conteudoTransparencia serve só de fallback offline.
+  const { data: estatisticas } = useEstatisticasSite();
+  const atendidos = estatisticas?.alunos ?? impacto.atendidos;
+  const polos = estatisticas?.polos ?? impacto.polos;
+
   const totalReceitas = financeiro.receitas.reduce((s, r) => s + r.valor, 0);
   const totalDespesas = financeiro.despesas.reduce((s, d) => s + d.valor, 0);
   const maxFin = Math.max(totalReceitas, totalDespesas, 1);
@@ -191,11 +198,11 @@ export function TransparenciaPage() {
               Nossos números em {impacto.ano}
             </p>
             <div className="flex flex-wrap items-start justify-center gap-10 md:gap-16">
-              {impacto.atendidos > 0 && (
-                <Numero valor={String(impacto.atendidos)} rotulo="crianças e adolescentes" />
+              {atendidos > 0 && (
+                <Numero valor={String(atendidos)} rotulo="crianças e adolescentes" />
               )}
-              {impacto.polos > 0 && (
-                <Numero valor={String(impacto.polos)} rotulo="polos em funcionamento" />
+              {polos > 0 && (
+                <Numero valor={String(polos)} rotulo="polos em funcionamento" />
               )}
               {impacto.aulas > 0 && (
                 <Numero valor={String(impacto.aulas)} rotulo="aulas realizadas" />
