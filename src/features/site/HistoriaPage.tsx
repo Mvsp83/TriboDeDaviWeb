@@ -11,7 +11,7 @@ export function HistoriaPage() {
 
   return (
     <PaginaPublica larguraMax="max-w-3xl">
-      <section className="px-4 py-8 md:py-12">
+      <section className="mx-auto max-w-3xl px-4 py-8 md:py-12">
         <h1 className="flex items-center gap-2 font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
           <BookOpen className="size-6 text-primary" />
           Nossa história
