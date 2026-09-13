@@ -47,7 +47,7 @@ export const ApiRotas = {
   // Impressão em lote dos códigos (gera os faltantes e devolve a lista).
   alunosCodigosPreparar: "/api/Aluno/codigos-responsavel/preparar",
 
-  // Portal do responsável (público).
+  // Portal do aluno (público).
   responsavelAcesso: "/api/Responsavel/acesso",
   responsavelPainel: "/api/Responsavel/painel",
   responsavelAutorizarImagem: "/api/Responsavel/autorizar-imagem",

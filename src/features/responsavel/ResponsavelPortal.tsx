@@ -180,7 +180,7 @@ function ConquistasCard({
 }
 
 export function ResponsavelPortal() {
-  useDocumentTitle("Portal do Responsável — Instituto Tribo de Davi");
+  useDocumentTitle("Portal do Aluno — Instituto Tribo de Davi");
   const [codigo, setCodigo] = useState("");
   const [nascimento, setNascimento] = useState("");
   const [erro, setErro] = useState("");
@@ -343,7 +343,7 @@ export function ResponsavelPortal() {
           <div className="w-full max-w-sm">
             <div className="mb-8 text-center">
               <p className="text-sm font-medium text-muted-foreground">
-                Portal do Responsável
+                Portal do Aluno
               </p>
             </div>
 
@@ -433,7 +433,7 @@ export function ResponsavelPortal() {
   const advertencias = painel.advertencias ?? [];
   const recados = painel.recados ?? [];
   const faixaAtual = faixaInfo(aluno.faixa);
-  const proxFaixaBase = proximaCorBase(aluno.faixa);
+  const proxFaixaBase = proximaCorBase(aluno.faixa, aluno.ehAdulto ?? false);
 
   // Índices reiniciam por ano (ciclo anual): frequência, presenças e conquistas
   // contam só o ano selecionado. O seletor mostra os anos com registro.

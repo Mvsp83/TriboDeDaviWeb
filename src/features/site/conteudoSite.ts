@@ -328,22 +328,22 @@ export const SITE = {
           {
             pergunta: "Como acompanho a frequência do meu filho?",
             resposta:
-              "Pela Área do Responsável, você pode acompanhar as informações do aluno utilizando o código de acesso e a data de nascimento. Entre outras informações, é possível consultar a frequência, avisos e graduações.",
-            link: { label: "Área do Responsável", para: "/responsavel" },
+              "Pela Área do Aluno, você pode acompanhar as informações do aluno utilizando o código de acesso e a data de nascimento. Entre outras informações, é possível consultar a frequência, avisos e graduações.",
+            link: { label: "Área do Aluno", para: "/responsavel" },
           },
 
           {
             pergunta: "Como justifico uma falta?",
             resposta:
-              "Na Área do Responsável, você pode acessar a lista de presenças e justificar uma falta específica. A justificativa será encaminhada para análise da equipe responsável.",
-            link: { label: "Área do Responsável", para: "/responsavel" },
+              "Na Área do Aluno, você pode acessar a lista de presenças e justificar uma falta específica. A justificativa será encaminhada para análise da equipe responsável.",
+            link: { label: "Área do Aluno", para: "/responsavel" },
           },
 
           {
             pergunta: "Como autorizo ou revogo o uso de imagem?",
             resposta:
-              "A autorização para uso de imagem pode ser concedida ou retirada pelo responsável diretamente na Área do Responsável. Dessa forma, a família mantém maior controle sobre essa autorização.",
-            link: { label: "Área do Responsável", para: "/responsavel" },
+              "A autorização para uso de imagem pode ser concedida ou retirada pelo responsável diretamente na Área do Aluno. Dessa forma, a família mantém maior controle sobre essa autorização.",
+            link: { label: "Área do Aluno", para: "/responsavel" },
           },
 
           {
@@ -355,8 +355,8 @@ export const SITE = {
           {
             pergunta: "Posso acompanhar mais de um filho?",
             resposta:
-              "Sim. Quando houver mais de um aluno vinculado ao mesmo responsável, a Área do Responsável permite consultar as informações dos alunos cadastrados, conforme os vínculos registrados no Instituto.",
-            link: { label: "Área do Responsável", para: "/responsavel" },
+              "Sim. Quando houver mais de um aluno vinculado ao mesmo responsável, a Área do Aluno permite consultar as informações dos alunos cadastrados, conforme os vínculos registrados no Instituto.",
+            link: { label: "Área do Aluno", para: "/responsavel" },
           },
         ],
       },
@@ -381,8 +381,8 @@ export const SITE = {
           {
             pergunta: "Meu filho pode aparecer nas fotos e vídeos?",
             resposta:
-              "Somente quando houver autorização de uso de imagem registrada. O responsável pode consultar, autorizar ou revogar essa autorização pela Área do Responsável.",
-            link: { label: "Área do Responsável", para: "/responsavel" },
+              "Somente quando houver autorização de uso de imagem registrada. O responsável pode consultar, autorizar ou revogar essa autorização pela Área do Aluno.",
+            link: { label: "Área do Aluno", para: "/responsavel" },
           },
         ],
       },

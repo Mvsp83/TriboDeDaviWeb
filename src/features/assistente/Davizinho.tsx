@@ -22,7 +22,7 @@ const ROTAS_PUBLICAS = new Set([
 // Atalhos de navegação (aparecem sempre + no rodapé do chat).
 const ATALHOS: { label: string; para: string }[] = [
   { label: "Fazer inscrição", para: "/matricula" },
-  { label: "Área do Responsável", para: "/responsavel" },
+  { label: "Área do Aluno", para: "/responsavel" },
   { label: "Galeria", para: "/galeria" },
   { label: "Doar", para: "/doar" },
   { label: "Transparência", para: "/transparencia" },

@@ -35,7 +35,7 @@ interface Props {
 }
 
 // Registro de advertências (comportamento) e recados do professor sobre um
-// aluno — o que aparece no Portal do Responsável.
+// aluno — o que aparece no Portal do Aluno.
 export function OcorrenciasDialog({ aberto, onOpenChange, alunoId, alunoNome }: Props) {
   const { data: lista, isLoading } = useOcorrenciasAluno(aberto ? alunoId : null);
   const criar = useCriarOcorrencia();
@@ -73,7 +73,7 @@ export function OcorrenciasDialog({ aberto, onOpenChange, alunoId, alunoNome }: 
         <DialogHeader>
           <DialogTitle>Comportamento e recados</DialogTitle>
           <DialogDescription>
-            {alunoNome} — aparece para a família no Portal do Responsável.
+            {alunoNome} — aparece para a família no Portal do Aluno.
           </DialogDescription>
         </DialogHeader>
 

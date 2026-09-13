@@ -49,7 +49,7 @@ export function CabecalhoSite() {
             <Button asChild size="sm">
               <Link to="/responsavel">
                 <Users className="size-4" />
-                Responsável
+                Aluno
               </Link>
             </Button>
             <Button asChild variant="ghost" size="sm">
@@ -90,7 +90,7 @@ export function CabecalhoSite() {
               <Button asChild size="lg">
                 <Link to="/responsavel" onClick={fechar}>
                   <Users className="size-4" />
-                  Área do Responsável
+                  Área do Aluno
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">

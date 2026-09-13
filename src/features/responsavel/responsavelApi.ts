@@ -77,6 +77,9 @@ export interface PainelResponsavel {
     faixa: number;
     polo: string;
     turma: number;
+    // Aluno adulto: define a sequência da próxima faixa. Opcional para funcionar
+    // antes de a API atualizada estar no ar (ausente = tratado como criança).
+    ehAdulto?: boolean;
     autorizaImagem: boolean | null;
     autorizaImagemEm: string | null;
     // Foto do aluno em data URI (base64), quando a config permite. null = sem foto.

@@ -21,7 +21,7 @@ const PADRAO: ConfigFotoAluno = {
 const OPCOES: { chave: keyof ConfigFotoAluno; label: string; ajuda: string }[] = [
   { chave: "mostrarNoCadastro", label: "Cadastro do aluno", ajuda: "Foto e botão de tirar/trocar na ficha do aluno." },
   { chave: "mostrarNaChamada", label: "Chamada", ajuda: "Miniatura ao lado de cada aluno na chamada." },
-  { chave: "mostrarNoResponsavel", label: "Portal do responsável", ajuda: "Foto do aluno no acompanhamento da família." },
+  { chave: "mostrarNoResponsavel", label: "Portal do aluno", ajuda: "Foto do aluno no acompanhamento da família." },
   { chave: "mostrarNaCarteirinha", label: "Carteirinha", ajuda: "Foto impressa na carteirinha do aluno." },
 ];
 

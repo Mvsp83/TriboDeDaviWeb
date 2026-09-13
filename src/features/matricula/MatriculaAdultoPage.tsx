@@ -334,12 +334,12 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             Guarde este código: com ele e sua data de nascimento você acompanha
-            presença e recados na Área do Responsável.
+            presença e recados na Área do Aluno.
           </p>
         </div>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button asChild variant="outline">
-            <a href={linkPortal}>Ir para a Área do Responsável</a>
+            <a href={linkPortal}>Ir para a Área do Aluno</a>
           </Button>
           <Button onClick={() => navigate("/")}>Voltar ao início</Button>
         </div>

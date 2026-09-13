@@ -43,7 +43,7 @@ export const MODULOS: Record<ModuloId, Modulo> = {
   relacionamento: {
     nome: "Relacionamento",
     descricao:
-      "Portal do responsável, avisos, calendário e notificações às famílias.",
+      "Portal do aluno, avisos, calendário e notificações às famílias.",
   },
 };
 

@@ -48,11 +48,26 @@ export function mudouDeCor(faixaAnterior: number, faixaNova: number): boolean {
   return baseDaCor(faixaAnterior) !== baseDaCor(faixaNova);
 }
 
-// Base da PRÓXIMA cor na progressão (para motivar "rumo à próxima faixa").
-// Null quando já está na Preta (não há próxima).
-export function proximaCorBase(faixa: number): number | null {
+// Sequência de cores por público (a progressão bifurca depois da Branca):
+// - Criança (até 16): Branca → Cinza → Amarela → Laranja → Verde e, ao virar
+//   adulto, segue para Azul… (por isso a sequência infantil é a linear completa).
+// - Adulto: Branca → Azul → Roxa → Marrom → Preta (pula as cores infantis).
+const SEQ_CRIANCA = CORES.map((c) => c.base); // 0,5,10,15,20,25,30,35,40
+const SEQ_ADULTO = [0, 25, 30, 35, 40]; // Branca, Azul, Roxa, Marrom, Preta
+
+// Base da PRÓXIMA cor na progressão do aluno (para motivar "rumo à próxima
+// faixa"). Null quando já está na Preta (não há próxima). `ehAdulto` escolhe a
+// sequência: a Branca é o único ponto em que criança (→Cinza) e adulto (→Azul)
+// divergem só pela idade.
+export function proximaCorBase(faixa: number, ehAdulto = false): number | null {
   const base = baseDaCor(faixa);
-  const idx = CORES.findIndex((c) => c.base === base);
-  const prox = CORES[idx + 1];
-  return prox ? prox.base : null;
+  const seq = ehAdulto ? SEQ_ADULTO : SEQ_CRIANCA;
+  const idx = seq.indexOf(base);
+  // Base fora da sequência do público (ex.: adulto marcado numa cor infantil,
+  // caso raro): cai na progressão linear completa para não travar.
+  if (idx === -1) {
+    const li = SEQ_CRIANCA.indexOf(base);
+    return li >= 0 && li + 1 < SEQ_CRIANCA.length ? SEQ_CRIANCA[li + 1] : null;
+  }
+  return idx + 1 < seq.length ? seq[idx + 1] : null;
 }

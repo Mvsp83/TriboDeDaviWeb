@@ -7,7 +7,7 @@ import type { Foto } from "@/features/site/conteudoSite";
 //
 // >>> IMPORTANTE (LGPD): só inclua fotos de alunos cujo responsável AUTORIZOU
 // o uso de imagem (campo "autoriza imagem", coletado na inscrição e ajustável
-// no Portal do Responsável). Na dúvida, não publique.
+// no Portal do Aluno). Na dúvida, não publique.
 //
 // As fotos podem estar em /public (ex.: "/fotos/graduacao-2026-01.jpg") ou em
 // qualquer URL pública (Google Drive com link, etc.).
