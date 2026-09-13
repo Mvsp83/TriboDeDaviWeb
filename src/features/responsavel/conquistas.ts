@@ -71,15 +71,15 @@ export function sequenciaAtual(presencas: PresencaLite[]): number {
 
 // Metas dos selos. Ficam num lugar só para ajustar sem caçar no código.
 const METAS_TOTAL = [
-  { id: "total-10", nome: "Primeiros passos", meta: 10, icone: "medal" as const, emoji: "👣" },
-  { id: "total-25", nome: "Faixa firme", meta: 25, icone: "star" as const, emoji: "🥋" },
-  { id: "total-50", nome: "Guerreiro do tatame", meta: 50, icone: "award" as const, emoji: "🛡️" },
-  { id: "total-100", nome: "Lenda do dojo", meta: 100, icone: "trophy" as const, emoji: "🏆" },
+  { id: "total-8", nome: "Primeiros passos", meta: 8, icone: "medal" as const, emoji: "👣" },
+  { id: "total-16", nome: "Faixa firme", meta: 16, icone: "star" as const, emoji: "🥋" },
+  { id: "total-25", nome: "Guerreiro do tatame", meta: 25, icone: "award" as const, emoji: "🛡️" },
+  { id: "total-40", nome: "Lenda do dojo", meta: 40, icone: "trophy" as const, emoji: "🏆" },
 ];
 
 const METAS_SEQUENCIA = [
-  { id: "seq-5", nome: "Constância", meta: 5, icone: "flame" as const, emoji: "🔥" },
-  { id: "seq-10", nome: "Imbatível", meta: 10, icone: "zap" as const, emoji: "⚡" },
+  { id: "seq-6", nome: "Constância", meta: 6, icone: "flame" as const, emoji: "🔥" },
+  { id: "seq-12", nome: "Imbatível", meta: 12, icone: "zap" as const, emoji: "⚡" },
 ];
 
 // Assiduidade só vale a partir de um mínimo de aulas, senão "100% de 1 aula"

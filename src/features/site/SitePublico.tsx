@@ -116,7 +116,7 @@ export function SitePublico() {
               <Button asChild size="lg">
                 <Link to="/doar" onClick={() => registrarEvento("doar_click")}>
                   <HeartHandshake className="size-5" />
-                  Fazer uma doação
+                  Seja um doador
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
@@ -192,7 +192,7 @@ export function SitePublico() {
       {/* Pilares */}
       <section className="mx-auto max-w-5xl px-4 py-14 md:py-20">
         <h2 className="font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
-          O que o projeto faz
+          O que fazemos
         </h2>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {SITE.pilares.map((p) => (
@@ -234,17 +234,17 @@ export function SitePublico() {
         <div className="mx-auto max-w-5xl px-4 py-14 md:py-20">
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 md:p-10">
             <h2 className="font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
-              Ajude a manter as aulas gratuitas
+              Ajude-nos a continuar transformando vidas
             </h2>
             <p className="mt-3 max-w-2xl text-muted-foreground">
-              O instituto se mantém com doações. Sua contribuição paga quimono,
-              faixa, tatame e o transporte das crianças para as competições — e é
-              por Pix, sem taxas.
+              O instituto se mantém apenas através de doações. É sua
+              contribuição que proporciona um quimono, uma faixa e tatames para
+              atender mais crianças.
             </p>
             <Button asChild size="lg" className="mt-6">
               <Link to="/doar" onClick={() => registrarEvento("doar_click")}>
                 <HeartHandshake className="size-5" />
-                Doar por Pix
+                Fazer uma doação
                 <ArrowRight className="size-4" />
               </Link>
             </Button>

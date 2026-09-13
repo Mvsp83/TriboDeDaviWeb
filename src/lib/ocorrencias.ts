@@ -5,10 +5,11 @@ export const TIPO_OCORRENCIA = { Advertencia: 0, Recado: 1 } as const;
 
 // Status do recado — o índice é o valor guardado (int) na API.
 export const STATUS_RECADO = [
-  "Evoluindo bem",
-  "Precisa de atenção",
-  "Faltando material",
-  "Ótima participação",
+  "Evoluindo bem!",
+  "Continue assim!",
+  "Precisa prestar mais atenção na aula!",
+  "Menos conversa!",
+  "Ótima participação!",
 ] as const;
 
 export function statusRecadoLabel(i: number): string {
@@ -17,7 +18,7 @@ export function statusRecadoLabel(i: number): string {
 
 // Tom do status para colorir o selo (positivo/neutro/atenção).
 export function statusRecadoTom(i: number): "positivo" | "atencao" | "neutro" {
-  if (i === 1 || i === 2) return "atencao"; // precisa de atenção / faltando material
+  if (i === 1 || i === 2) return "atencao"; // precisa de atenção /
   if (i === 0 || i === 3) return "positivo"; // evoluindo bem / ótima participação
   return "neutro";
 }
