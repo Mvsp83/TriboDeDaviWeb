@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "react-router-dom";
-import { Info, ChevronDown, MapPin, ClipboardList, ArrowRight } from "lucide-react";
+import { Info, ChevronDown, MapPin, Map as MapIcon, ClipboardList, ArrowRight } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import type { LinkFaq } from "@/features/site/conteudoSite";
 import { MolduraFaixa } from "@/components/MolduraFaixa";
@@ -94,16 +94,39 @@ function PolosCadastrados() {
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      {polos.map((p) => (
+      {polos.map((p) => {
+        // Endereço para o mapa. Garante cidade/UF para a busca do Google Maps
+        // não ambiguar, sem duplicar quando o endereço já cita Blumenau.
+        const enderecoCompleto = [p.endereco, p.bairro, p.cidade]
+          .map((s) => s?.trim())
+          .filter(Boolean)
+          .join(", ");
+        const consultaMapa = [
+          enderecoCompleto,
+          /blumenau/i.test(enderecoCompleto) ? "SC" : "Blumenau, SC",
+        ]
+          .filter(Boolean)
+          .join(", ");
+        const mapaUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(consultaMapa)}`;
+        return (
         <div key={p.nome} className="rounded-lg border border-border bg-background p-4">
           <h4 className="flex items-center gap-1.5 font-semibold text-foreground">
             <MapPin className="size-4 shrink-0 text-primary" />
             {p.nome}
           </h4>
-          {(p.endereco || p.bairro || p.cidade) && (
-            <p className="mt-1 text-xs">
-              {[p.endereco, p.bairro, p.cidade].filter(Boolean).join(", ")}
-            </p>
+          {enderecoCompleto && (
+            <p className="mt-1 text-xs">{enderecoCompleto}</p>
+          )}
+          {enderecoCompleto && (
+            <a
+              href={mapaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            >
+              <MapIcon className="size-3.5" />
+              Ver no mapa
+            </a>
           )}
           {p.informacoes && <p className="mt-1 text-xs">{p.informacoes}</p>}
           {p.horarios.length > 0 && (
@@ -146,7 +169,8 @@ function PolosCadastrados() {
             </div>
           )}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
