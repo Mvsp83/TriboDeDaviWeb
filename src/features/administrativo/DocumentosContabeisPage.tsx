@@ -44,6 +44,9 @@ interface Props {
   titulo: string;
   descricao: string;
   acoesExtras?: ReactNode;
+  // Esconde o bloco de título/descrição (mantendo o botão de upload à direita).
+  // Usado quando a tela é embutida sob abas que já têm o próprio cabeçalho.
+  mostrarCabecalho?: boolean;
 }
 
 // Tela reutilizável de armazenamento de documentos no Drive (DRE, Balanço,
@@ -53,6 +56,7 @@ export function DocumentosContabeisPage({
   titulo,
   descricao,
   acoesExtras,
+  mostrarCabecalho = true,
 }: Props) {
   const { data: documentos, isLoading, isError, error } = useDocumentos(categoria);
   const upload = useUploadDocumento(categoria);
@@ -143,11 +147,13 @@ export function DocumentosContabeisPage({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">{titulo}</h1>
-          <p className="text-sm text-muted-foreground">{descricao}</p>
-        </div>
-        <div className="flex items-center gap-2">
+        {mostrarCabecalho && (
+          <div>
+            <h1 className="text-xl font-semibold">{titulo}</h1>
+            <p className="text-sm text-muted-foreground">{descricao}</p>
+          </div>
+        )}
+        <div className="ml-auto flex items-center gap-2">
           {acoesExtras}
           <input
             ref={inputRef}

@@ -329,6 +329,12 @@ export const CategoriaDocumento = {
   Balanco: "Balanco",
   RelatorioAtividades: "RelatorioAtividades",
   Modelos: "Modelos",
+  // Documentos institucionais / de governança.
+  Estatuto: "Estatuto",
+  AlteracoesEstatuto: "AlteracoesEstatuto",
+  Atas: "Atas",
+  Pareceres: "Pareceres",
+  OutrosDocumentos: "OutrosDocumentos",
 } as const;
 
 export type CategoriaDocumento =

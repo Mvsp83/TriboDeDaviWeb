@@ -235,6 +235,11 @@ const GovernancaPage = lazy(() =>
 const DocumentosPage = lazy(() =>
   import("@/features/documentos/DocumentosPage").then((m) => ({ default: m.DocumentosPage })),
 );
+const DocumentosInstitucionaisPage = lazy(() =>
+  import("@/features/documentos/DocumentosInstitucionaisPage").then((m) => ({
+    default: m.DocumentosInstitucionaisPage,
+  })),
+);
 const ConfigFotoAlunoPage = lazy(() =>
   import("@/features/configuracoes/ConfigFotoAlunoPage").then((m) => ({
     default: m.ConfigFotoAlunoPage,
@@ -408,6 +413,10 @@ export default function App() {
             <Route path="retencao-lgpd" element={<RetencaoLgpdPage />} />
             <Route path="governanca" element={<GovernancaPage />} />
             <Route path="documentos" element={<DocumentosPage />} />
+            <Route
+              path="documentos-institucionais"
+              element={<DocumentosInstitucionaisPage />}
+            />
             <Route path="padrao-documentos" element={<PadraoDocumentosPage />} />
             <Route path="config-foto-aluno" element={<ConfigFotoAlunoPage />} />
             <Route path="acessos-site" element={<AcessosSitePage />} />

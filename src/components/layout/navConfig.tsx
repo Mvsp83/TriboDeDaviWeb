@@ -227,6 +227,12 @@ export const navGroups: NavGroup[] = [
                 icon: FileText,
                 adminOnly: true,
               },
+              {
+                label: "Documentos Institucionais",
+                href: "/documentos-institucionais",
+                icon: ScrollText,
+                adminOnly: true,
+              },
             ],
           },
           {
