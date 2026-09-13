@@ -38,6 +38,10 @@ export interface EnvioInscricao {
   cpf: string;
   peso: number | null;
   altura: number | null;
+  // Tamanhos de roupa (opcionais) — só na ficha de criança; ajudam a equipe a
+  // escolher o quimono de empréstimo.
+  tamanhoCalca?: string;
+  tamanhoBlusa?: string;
   faixa: number;
   escola: string;
   serie: string;
@@ -81,6 +85,8 @@ export interface DadosPreMatricula {
   cpf: string;
   peso: number | null;
   altura: number | null;
+  tamanhoCalca?: string;
+  tamanhoBlusa?: string;
   faixa: number;
   escola: string;
   serie: string;

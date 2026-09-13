@@ -239,6 +239,8 @@ function DetalheInscricao({
             <Linha rotulo="Altura" valor={inscricao.altura ? `${inscricao.altura} m` : null} />
             {!adulto && (
               <>
+                <Linha rotulo="Tam. calça" valor={inscricao.tamanhoCalca} />
+                <Linha rotulo="Tam. blusa" valor={inscricao.tamanhoBlusa} />
                 <Linha rotulo="Escola" valor={inscricao.escola} />
                 <Linha rotulo="Série" valor={inscricao.serie} />
                 <Linha rotulo="Período" valor={inscricao.periodo} />

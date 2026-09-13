@@ -34,6 +34,8 @@ export interface Inscricao {
   cpf?: string | null;
   peso?: number | null;
   altura?: number | null;
+  tamanhoCalca?: string | null;
+  tamanhoBlusa?: string | null;
   faixa: number;
   escola?: string | null;
   serie?: string | null;

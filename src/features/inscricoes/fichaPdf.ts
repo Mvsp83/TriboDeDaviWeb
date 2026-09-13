@@ -77,6 +77,8 @@ export function imprimirFicha(i: Inscricao): boolean {
     campo("CPF", i.cpf) +
     campo("Peso", i.peso ? `${i.peso} kg` : null) +
     campo("Altura", i.altura ? `${i.altura} m` : null) +
+    campo("Tam. calça", i.tamanhoCalca) +
+    campo("Tam. blusa", i.tamanhoBlusa) +
     campo("Faixa", faixaInfo(i.faixa).nome) +
     campo("Escola", i.escola) +
     campo("Série", i.serie) +

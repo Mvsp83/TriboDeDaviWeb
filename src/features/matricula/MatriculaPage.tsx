@@ -198,6 +198,8 @@ export function MatriculaPage() {
   const [cpf, setCpf] = useState("");
   const [peso, setPeso] = useState("");
   const [altura, setAltura] = useState("");
+  const [tamanhoCalca, setTamanhoCalca] = useState("");
+  const [tamanhoBlusa, setTamanhoBlusa] = useState("");
   const [faixaBase, setFaixaBase] = useState("0");
   const [grau, setGrau] = useState("0");
   const [escola, setEscola] = useState("");
@@ -270,6 +272,8 @@ export function MatriculaPage() {
     setCpf(d.cpf);
     setPeso(d.peso != null ? String(d.peso) : "");
     setAltura(d.altura != null ? String(d.altura) : "");
+    setTamanhoCalca(d.tamanhoCalca ?? "");
+    setTamanhoBlusa(d.tamanhoBlusa ?? "");
     setFaixaBase(String(baseDaCor(d.faixa)));
     setGrau(String(d.faixa - baseDaCor(d.faixa)));
     setEscola(d.escola);
@@ -390,6 +394,8 @@ export function MatriculaPage() {
         cpf: cpf.trim(),
         peso: peso ? Number(peso.replace(",", ".")) : null,
         altura: altura ? Number(altura.replace(",", ".")) : null,
+        tamanhoCalca: tamanhoCalca.trim(),
+        tamanhoBlusa: tamanhoBlusa.trim(),
         faixa: Number(faixaBase) + Number(grau),
         escola: escola.trim(),
         serie: serie.trim(),
@@ -641,6 +647,20 @@ export function MatriculaPage() {
                     placeholder="ex: 1,42"
                     value={altura}
                     onChange={(e) => setAltura(e.target.value)}
+                  />
+                </Campo>
+                <Campo label="Tamanho de calça" dica="Opcional — ajuda a definir o quimono">
+                  <Input
+                    placeholder="ex: 10"
+                    value={tamanhoCalca}
+                    onChange={(e) => setTamanhoCalca(e.target.value)}
+                  />
+                </Campo>
+                <Campo label="Tamanho de blusa" dica="Opcional — ajuda a definir o quimono">
+                  <Input
+                    placeholder="ex: 12"
+                    value={tamanhoBlusa}
+                    onChange={(e) => setTamanhoBlusa(e.target.value)}
                   />
                 </Campo>
                 <Campo label="Faixa" dica="Se ainda não pratica, deixe Branca">
