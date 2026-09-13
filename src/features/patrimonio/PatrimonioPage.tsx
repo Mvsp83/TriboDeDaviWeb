@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Search, Download, FileDown } from "lucide-react";
 import { usePolos } from "@/features/polos/polosApi";
+import { useAuth } from "@/features/auth/AuthContext";
+import { useAlunosLista } from "@/features/alunos/alunosApi";
 import { useBens, useExcluirBem } from "@/features/patrimonio/patrimonioApi";
 import { BemFormDialog } from "@/features/patrimonio/BemFormDialog";
 import { exportarPatrimonioPdf } from "@/features/patrimonio/patrimonioPdf";
@@ -40,7 +42,41 @@ import {
 export function PatrimonioPage() {
   const { data: bens, isLoading } = useBens();
   const { data: polos } = usePolos();
+  const { sessao } = useAuth();
+  const admin = sessao?.isAdministrador ?? false;
+  const { data: alunos } = useAlunosLista(admin);
   const excluir = useExcluirBem();
+
+  const nomePorAluno = useMemo(
+    () => new Map((alunos ?? []).map((a) => [a.id, a.nome])),
+    [alunos],
+  );
+  const nomeAluno = (id: number | null | undefined) =>
+    id == null ? null : nomePorAluno.get(id) ?? `#${id}`;
+
+  // Disponibilidade de itens emprestáveis (Quimono=0, Faixa=1) por tamanho:
+  // conta unidades (1 linha = 1 peça) totais x emprestadas x livres.
+  const disponibilidade = useMemo(() => {
+    const grupos = new Map<
+      string,
+      { categoria: number; tamanho: string; total: number; emprestados: number }
+    >();
+    for (const b of bens ?? []) {
+      if (b.categoria !== 0 && b.categoria !== 1) continue;
+      const tam = (b.tamanho ?? "").trim() || "—";
+      const chave = `${b.categoria}|${tam}`;
+      const g =
+        grupos.get(chave) ??
+        { categoria: b.categoria, tamanho: tam, total: 0, emprestados: 0 };
+      g.total += 1;
+      if (b.alunoId != null) g.emprestados += 1;
+      grupos.set(chave, g);
+    }
+    return [...grupos.values()].sort(
+      (a, b) =>
+        a.categoria - b.categoria || a.tamanho.localeCompare(b.tamanho, "pt-BR"),
+    );
+  }, [bens]);
 
   const [filtroTexto, setFiltroTexto] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("todas");
@@ -94,15 +130,18 @@ export function PatrimonioPage() {
   function exportarCsv() {
     baixarCsv(
       `patrimonio-${new Date().toISOString().slice(0, 10)}`,
-      ["Categoria", "Descrição", "Qtd", "Valor unitário", "Valor total", "Estado", "Polo", "Nº patrimônio", "Aquisição", "Observações"],
+      ["Categoria", "Descrição", "Tamanho", "Cor", "Qtd", "Valor unitário", "Valor total", "Estado", "Polo", "Com quem está", "Nº patrimônio", "Aquisição", "Observações"],
       filtrados.map((b) => [
         CATEGORIA_BEM_LABEL[b.categoria] ?? "",
         b.descricao,
+        b.tamanho ?? "",
+        b.cor ?? "",
         b.quantidade,
         b.valorUnitario.toFixed(2),
         (b.quantidade * b.valorUnitario).toFixed(2),
         ESTADO_BEM_LABEL[b.estado] ?? "",
         nomePolo(b.poloId),
+        nomeAluno(b.alunoId) ?? "",
         b.numeroPatrimonio ?? "",
         b.dataAquisicao ? dataCurtaBR(b.dataAquisicao) : "",
         b.observacoes ?? "",
@@ -142,6 +181,46 @@ export function PatrimonioPage() {
           </Button>
         </div>
       </div>
+
+      {disponibilidade.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <p className="mb-3 text-sm font-medium">
+              Disponibilidade de quimonos e faixas (por tamanho)
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {disponibilidade.map((g) => {
+                const livres = g.total - g.emprestados;
+                return (
+                  <div
+                    key={`${g.categoria}-${g.tamanho}`}
+                    className="rounded-md border border-border px-3 py-2 text-sm"
+                  >
+                    <div className="font-medium">
+                      {CATEGORIA_BEM_LABEL[g.categoria]}{" "}
+                      <span className="text-muted-foreground">{g.tamanho}</span>
+                    </div>
+                    <div className="mt-0.5 text-xs">
+                      <span
+                        className={
+                          livres > 0
+                            ? "font-semibold text-emerald-600 dark:text-emerald-400"
+                            : "font-semibold text-muted-foreground"
+                        }
+                      >
+                        {livres} livre{livres === 1 ? "" : "s"}
+                      </span>{" "}
+                      <span className="text-muted-foreground">
+                        · {g.emprestados} emprestado{g.emprestados === 1 ? "" : "s"} · {g.total} no total
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="flex flex-wrap items-end gap-3 p-4">
@@ -202,6 +281,7 @@ export function PatrimonioPage() {
                 <TableHead className="text-right">Valor total</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Polo</TableHead>
+                <TableHead>Com quem está</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -209,7 +289,7 @@ export function PatrimonioPage() {
               {isLoading &&
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={8}>
+                    <TableCell colSpan={9}>
                       <Skeleton className="h-6 w-full" />
                     </TableCell>
                   </TableRow>
@@ -236,6 +316,11 @@ export function PatrimonioPage() {
                           #{b.numeroPatrimonio}
                         </span>
                       ) : null}
+                      {(b.tamanho || b.cor) && (
+                        <span className="ml-1 text-xs text-muted-foreground">
+                          ({[b.tamanho, b.cor].filter(Boolean).join(" · ")})
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right tabular-nums">{b.quantidade}</TableCell>
                     <TableCell className="text-right tabular-nums">{moeda(b.valorUnitario)}</TableCell>
@@ -244,6 +329,17 @@ export function PatrimonioPage() {
                     </TableCell>
                     <TableCell className="text-muted-foreground">{ESTADO_BEM_LABEL[b.estado]}</TableCell>
                     <TableCell className="text-muted-foreground">{nomePolo(b.poloId)}</TableCell>
+                    <TableCell>
+                      {nomeAluno(b.alunoId) ? (
+                        <Badge variant="secondary">{nomeAluno(b.alunoId)}</Badge>
+                      ) : (b.categoria === 0 || b.categoria === 1) ? (
+                        <span className="text-xs text-emerald-600 dark:text-emerald-400">
+                          Disponível
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button
@@ -280,6 +376,7 @@ export function PatrimonioPage() {
         onOpenChange={setDialog}
         bem={emEdicao}
         polos={polos ?? []}
+        alunos={alunos ?? []}
       />
 
       <ConfirmDialog

@@ -26,6 +26,9 @@ function montarBody(bem: Partial<BemPatrimonial>) {
     poloId: bem.poloId ?? null,
     numeroPatrimonio: bem.numeroPatrimonio ?? "",
     observacoes: bem.observacoes ?? "",
+    tamanho: bem.tamanho ?? "",
+    cor: bem.cor ?? "",
+    alunoId: bem.alunoId ?? null,
   };
 }
 

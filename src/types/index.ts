@@ -282,6 +282,10 @@ export interface BemPatrimonial {
   poloId?: number | null;
   numeroPatrimonio?: string | null;
   observacoes?: string | null;
+  // Vestuário (quimono/faixa): atributos e empréstimo a um aluno.
+  tamanho?: string | null;
+  cor?: string | null;
+  alunoId?: number | null;
 }
 
 export interface AuthData {
