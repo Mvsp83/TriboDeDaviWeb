@@ -30,6 +30,9 @@ const GaleriaPage = lazy(() =>
 const InformacoesPage = lazy(() =>
   import("@/features/informacoes/InformacoesPage").then((m) => ({ default: m.InformacoesPage })),
 );
+const HistoriaPage = lazy(() =>
+  import("@/features/site/HistoriaPage").then((m) => ({ default: m.HistoriaPage })),
+);
 const PoliticaPrivacidadePage = lazy(() =>
   import("@/features/legal/PoliticaPrivacidadePage").then((m) => ({
     default: m.PoliticaPrivacidadePage,
@@ -345,6 +348,7 @@ export default function App() {
       <Route path="/galeria" element={<GaleriaPage />} />
       <Route path="/loja" element={<LojaPage />} />
       <Route path="/informacoes" element={<InformacoesPage />} />
+      <Route path="/historia" element={<HistoriaPage />} />
       <Route path="/politica-privacidade" element={<PoliticaPrivacidadePage />} />
       <Route path="/matricula" element={<InscricaoPage />} />
       <Route path="/responsavel" element={<ResponsavelPortal />} />

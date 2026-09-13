@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 // Cabeçalho único de todo o site público (home + telas de menu + login).
 const LINKS: { label: string; para: string }[] = [
   { label: "Início", para: "/" },
+  { label: "História", para: "/historia" },
   { label: "Galeria", para: "/galeria" },
   { label: "Loja", para: "/loja" },
   ...(temInformacoes() ? [{ label: "Informações", para: "/informacoes" }] : []),

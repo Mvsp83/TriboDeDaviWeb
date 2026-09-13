@@ -207,24 +207,24 @@ export function SitePublico() {
         </div>
       </section>
 
-      {/* História */}
+      {/* História — resumida na home; o texto completo fica em /historia. */}
       {historia.length > 0 && (
-        <section id="historia" className="scroll-mt-6 border-t border-border">
-          <div className="mx-auto max-w-3xl px-4 py-14 md:py-20">
-            <h2 className="flex items-center gap-2 font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
+        <section className="border-t border-border">
+          <div className="mx-auto max-w-3xl px-4 py-12 text-center md:py-16">
+            <h2 className="flex items-center justify-center gap-2 font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
               <BookOpen className="size-6 text-primary" />
               Nossa história
             </h2>
-            <div className="mt-6 space-y-4">
-              {historia.map((par, i) => (
-                <p
-                  key={i}
-                  className="text-justify text-pretty leading-relaxed text-muted-foreground"
-                >
-                  {par}
-                </p>
-              ))}
-            </div>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+              Como o Instituto Tribo de Davi nasceu em 2013 e se tornou o que é
+              hoje.
+            </p>
+            <Button asChild variant="outline" className="mt-6">
+              <Link to="/historia">
+                Ler nossa história
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
           </div>
         </section>
       )}
