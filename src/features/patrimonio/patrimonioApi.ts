@@ -50,3 +50,48 @@ export function useExcluirBem() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["patrimonio"] }),
   });
 }
+
+// ── Empréstimo / comodato (histórico por item) ──────────────────────────────
+export interface EmprestimoBem {
+  id: number;
+  bemPatrimonialId: number;
+  alunoId: number;
+  dataEmprestimo: string;
+  dataDevolucao?: string | null;
+  observacao?: string | null;
+  registradoPor?: string | null;
+}
+
+export function useEmprestarBem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (dados: { bemPatrimonialId: number; alunoId: number; observacao: string }) =>
+      apiPost(ApiRotas.patrimonioEmprestar, dados),
+    onSuccess: (_r, v) => {
+      qc.invalidateQueries({ queryKey: ["patrimonio"] });
+      qc.invalidateQueries({ queryKey: ["patrimonio-historico", v.bemPatrimonialId] });
+    },
+  });
+}
+
+export function useDevolverBem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (bemId: number) => apiPost(ApiRotas.patrimonioDevolver(bemId), {}),
+    onSuccess: (_r, bemId) => {
+      qc.invalidateQueries({ queryKey: ["patrimonio"] });
+      qc.invalidateQueries({ queryKey: ["patrimonio-historico", bemId] });
+    },
+  });
+}
+
+export function useHistoricoBem(bemId: number | null) {
+  return useQuery({
+    queryKey: ["patrimonio-historico", bemId],
+    queryFn: async (): Promise<EmprestimoBem[]> => {
+      const lista = await apiGet<EmprestimoBem[] | null>(ApiRotas.patrimonioHistorico(bemId!));
+      return lista ?? [];
+    },
+    enabled: bemId != null,
+  });
+}

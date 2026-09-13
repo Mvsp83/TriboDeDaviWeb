@@ -5,7 +5,7 @@ import { useSalvarBem } from "@/features/patrimonio/patrimonioApi";
 import { CATEGORIAS_BEM, ESTADOS_BEM } from "@/features/patrimonio/tipos";
 import { ApiError } from "@/lib/api";
 import { paraInputDate } from "@/lib/format";
-import type { Aluno, BemPatrimonial, Polo } from "@/types";
+import type { BemPatrimonial, Polo } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,9 +26,9 @@ import {
 } from "@/components/ui/select";
 
 const SEM_POLO = "nenhum";
-const SEM_ALUNO = "nenhum";
 
-// Categorias que são emprestadas a um aluno e ganham tamanho/cor (Quimono, Faixa).
+// Categorias que ganham tamanho/cor e são emprestáveis (Quimono, Faixa). O
+// empréstimo em si é feito pelas ações Emprestar/Devolver da lista, não aqui.
 const CATEGORIAS_VESTUARIO = new Set(["0", "1"]);
 
 interface Props {
@@ -36,10 +36,9 @@ interface Props {
   onOpenChange: (aberto: boolean) => void;
   bem: BemPatrimonial | null;
   polos: Polo[];
-  alunos: Pick<Aluno, "id" | "nome">[];
 }
 
-export function BemFormDialog({ aberto, onOpenChange, bem, polos, alunos }: Props) {
+export function BemFormDialog({ aberto, onOpenChange, bem, polos }: Props) {
   const salvar = useSalvarBem();
   const editando = bem !== null;
 
@@ -54,7 +53,6 @@ export function BemFormDialog({ aberto, onOpenChange, bem, polos, alunos }: Prop
   const [observacoes, setObservacoes] = useState("");
   const [tamanho, setTamanho] = useState("");
   const [cor, setCor] = useState("");
-  const [alunoId, setAlunoId] = useState(SEM_ALUNO);
 
   const vestuario = CATEGORIAS_VESTUARIO.has(categoria);
 
@@ -71,7 +69,6 @@ export function BemFormDialog({ aberto, onOpenChange, bem, polos, alunos }: Prop
     setObservacoes(bem?.observacoes ?? "");
     setTamanho(bem?.tamanho ?? "");
     setCor(bem?.cor ?? "");
-    setAlunoId(bem?.alunoId ? String(bem.alunoId) : SEM_ALUNO);
   }, [aberto, bem]);
 
   async function onSalvar() {
@@ -91,11 +88,12 @@ export function BemFormDialog({ aberto, onOpenChange, bem, polos, alunos }: Prop
         poloId: polo === SEM_POLO ? null : Number(polo),
         numeroPatrimonio: numeroPatrimonio.trim(),
         observacoes: observacoes.trim(),
-        // Tamanho/cor/empréstimo só fazem sentido para vestuário; nas demais
-        // categorias vão zerados.
+        // Tamanho/cor só valem para vestuário; nas demais categorias vão zerados.
         tamanho: vestuario ? tamanho.trim() : "",
         cor: vestuario ? cor.trim() : "",
-        alunoId: vestuario && alunoId !== SEM_ALUNO ? Number(alunoId) : null,
+        // O empréstimo é gerido pelas ações Emprestar/Devolver; ao editar o bem,
+        // preserva quem já está com ele.
+        alunoId: bem?.alunoId ?? null,
       });
       toast.success(editando ? "Bem atualizado." : "Bem cadastrado.");
       onOpenChange(false);
@@ -210,45 +208,25 @@ export function BemFormDialog({ aberto, onOpenChange, bem, polos, alunos }: Prop
             </div>
           </div>
 
-          {/* Vestuário (quimono/faixa): tamanho, cor e empréstimo a um aluno.
-              Cadastre 1 unidade por linha para controlar quem está com cada peça. */}
+          {/* Vestuário (quimono/faixa): tamanho e cor. Cadastre 1 unidade por
+              linha; o empréstimo a um aluno é feito pela lista (Emprestar). */}
           {vestuario && (
-            <div className="space-y-3 rounded-md border border-border p-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="mb-1.5">Tamanho</Label>
-                  <Input
-                    value={tamanho}
-                    onChange={(e) => setTamanho(e.target.value)}
-                    placeholder={categoria === "0" ? "ex.: M2 / A2" : "ex.: M2"}
-                  />
-                </div>
-                <div>
-                  <Label className="mb-1.5">Cor</Label>
-                  <Input
-                    value={cor}
-                    onChange={(e) => setCor(e.target.value)}
-                    placeholder={categoria === "1" ? "ex.: Azul" : "ex.: Branco"}
-                  />
-                </div>
+            <div className="grid grid-cols-2 gap-3 rounded-md border border-border p-3">
+              <div>
+                <Label className="mb-1.5">Tamanho</Label>
+                <Input
+                  value={tamanho}
+                  onChange={(e) => setTamanho(e.target.value)}
+                  placeholder={categoria === "0" ? "ex.: M2 / A2" : "ex.: M2"}
+                />
               </div>
               <div>
-                <Label className="mb-1.5">Emprestado a (opcional)</Label>
-                <Select value={alunoId} onValueChange={setAlunoId}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={SEM_ALUNO}>Disponível (ninguém)</SelectItem>
-                    {[...alunos]
-                      .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))
-                      .map((a) => (
-                        <SelectItem key={a.id} value={String(a.id)}>
-                          {a.nome}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <Label className="mb-1.5">Cor</Label>
+                <Input
+                  value={cor}
+                  onChange={(e) => setCor(e.target.value)}
+                  placeholder={categoria === "1" ? "ex.: Azul" : "ex.: Branco"}
+                />
               </div>
             </div>
           )}

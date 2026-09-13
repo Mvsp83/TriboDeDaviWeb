@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search, Download, FileDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Download, FileDown, Handshake, RotateCcw, History, FileText } from "lucide-react";
 import { usePolos } from "@/features/polos/polosApi";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAlunosLista } from "@/features/alunos/alunosApi";
-import { useBens, useExcluirBem } from "@/features/patrimonio/patrimonioApi";
+import { useBens, useExcluirBem, useDevolverBem } from "@/features/patrimonio/patrimonioApi";
 import { BemFormDialog } from "@/features/patrimonio/BemFormDialog";
+import { EmprestarBemDialog } from "@/features/patrimonio/EmprestarBemDialog";
+import { HistoricoBemDialog } from "@/features/patrimonio/HistoricoBemDialog";
+import { imprimirComodato } from "@/features/patrimonio/comodatoPdf";
 import { exportarPatrimonioPdf } from "@/features/patrimonio/patrimonioPdf";
 import {
   CATEGORIA_BEM_LABEL,
@@ -46,6 +49,7 @@ export function PatrimonioPage() {
   const admin = sessao?.isAdministrador ?? false;
   const { data: alunos } = useAlunosLista(admin);
   const excluir = useExcluirBem();
+  const devolver = useDevolverBem();
 
   const nomePorAluno = useMemo(
     () => new Map((alunos ?? []).map((a) => [a.id, a.nome])),
@@ -85,6 +89,17 @@ export function PatrimonioPage() {
   const [dialog, setDialog] = useState(false);
   const [emEdicao, setEmEdicao] = useState<BemPatrimonial | null>(null);
   const [paraExcluir, setParaExcluir] = useState<BemPatrimonial | null>(null);
+  const [paraEmprestar, setParaEmprestar] = useState<BemPatrimonial | null>(null);
+  const [verHistorico, setVerHistorico] = useState<BemPatrimonial | null>(null);
+
+  async function devolverBem(b: BemPatrimonial) {
+    try {
+      await devolver.mutateAsync(b.id);
+      toast.success("Devolução registrada.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Erro ao registrar a devolução.");
+    }
+  }
 
   const nomePorPolo = useMemo(
     () => new Map((polos ?? []).map((p) => [p.id, p.nome])),
@@ -342,6 +357,55 @@ export function PatrimonioPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        {(b.categoria === 0 || b.categoria === 1) && (
+                          <>
+                            {b.alunoId != null ? (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    if (!imprimirComodato(b, nomeAluno(b.alunoId) ?? ""))
+                                      toast.error("Permita pop-ups para o PDF.");
+                                  }}
+                                  aria-label="Termo de comodato"
+                                  title="Termo de comodato (PDF)"
+                                >
+                                  <FileText className="size-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => devolverBem(b)}
+                                  disabled={devolver.isPending}
+                                  aria-label="Registrar devolução"
+                                  title="Registrar devolução"
+                                >
+                                  <RotateCcw className="size-4" />
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setParaEmprestar(b)}
+                                aria-label="Emprestar"
+                                title="Emprestar"
+                              >
+                                <Handshake className="size-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setVerHistorico(b)}
+                              aria-label="Histórico de empréstimos"
+                              title="Histórico de empréstimos"
+                            >
+                              <History className="size-4" />
+                            </Button>
+                          </>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -376,7 +440,20 @@ export function PatrimonioPage() {
         onOpenChange={setDialog}
         bem={emEdicao}
         polos={polos ?? []}
+      />
+
+      <EmprestarBemDialog
+        aberto={paraEmprestar !== null}
+        onOpenChange={(o) => !o && setParaEmprestar(null)}
+        bem={paraEmprestar}
         alunos={alunos ?? []}
+      />
+
+      <HistoricoBemDialog
+        aberto={verHistorico !== null}
+        onOpenChange={(o) => !o && setVerHistorico(null)}
+        bem={verHistorico}
+        nomeAluno={nomeAluno}
       />
 
       <ConfirmDialog

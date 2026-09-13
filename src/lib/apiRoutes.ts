@@ -248,6 +248,9 @@ export const ApiRotas = {
   patrimonioCreate: "/api/BemPatrimonial/create",
   patrimonioUpdate: "/api/BemPatrimonial/update",
   patrimonioDelete: (id: number) => `/api/BemPatrimonial/delete/${id}`,
+  patrimonioEmprestar: "/api/BemPatrimonial/emprestar",
+  patrimonioDevolver: (bemId: number) => `/api/BemPatrimonial/devolver/${bemId}`,
+  patrimonioHistorico: (bemId: number) => `/api/BemPatrimonial/historico/${bemId}`,
 
   avisosPendentes: "/api/Aviso/pendentes",
   avisoCiente: (id: number) => `/api/Aviso/ciente/${id}`,
