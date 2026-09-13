@@ -32,6 +32,7 @@ import {
   type Inscricao,
 } from "@/features/inscricoes/inscricoesApi";
 import { imprimirFicha } from "@/features/inscricoes/fichaPdf";
+import { sugerirQuimono } from "@/features/inscricoes/sugestaoQuimono";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -241,6 +242,10 @@ function DetalheInscricao({
               <>
                 <Linha rotulo="Tam. calça" valor={inscricao.tamanhoCalca} />
                 <Linha rotulo="Tam. blusa" valor={inscricao.tamanhoBlusa} />
+                <Linha
+                  rotulo="Quimono sugerido"
+                  valor={sugerirQuimono(inscricao.tamanhoCalca, inscricao.tamanhoBlusa)}
+                />
                 <Linha rotulo="Escola" valor={inscricao.escola} />
                 <Linha rotulo="Série" valor={inscricao.serie} />
                 <Linha rotulo="Período" valor={inscricao.periodo} />

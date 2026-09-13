@@ -41,6 +41,7 @@ import {
   Wallet,
   CircleDollarSign,
   Receipt,
+  ReceiptText,
   HeartHandshake,
   TrendingUp,
   FileSpreadsheet,
@@ -226,28 +227,7 @@ export const navGroups: NavGroup[] = [
                 icon: FileText,
                 adminOnly: true,
               },
-              {
-                label: "Ofícios e Recibos",
-                href: "/documentos-oficiais",
-                icon: FileSignature,
-                adminOnly: true,
-                modulo: "financeiro",
-              },
             ],
-          },
-          {
-            label: "Patrimônio",
-            href: "/patrimonio",
-            icon: Boxes,
-            adminOnly: true,
-            modulo: "financeiro",
-          },
-          {
-            label: "Doações",
-            href: "/doacoes",
-            icon: HeartHandshake,
-            adminOnly: true,
-            modulo: "captacao",
           },
           {
             label: "Governança",
@@ -259,11 +239,13 @@ export const navGroups: NavGroup[] = [
       },
 
       // ── Financeiro: pilar próprio (antes dentro do Administrativo) ────────
+      // Sem `modulo` no ramo: a maioria das folhas exige "financeiro", mas
+      // Doações exige "captacao" — o gate por folha deixa cada uma aparecer
+      // conforme o módulo contratado (uma conta só com captação vê Doações).
       {
         label: "Financeiro",
         icon: Wallet,
         adminOnly: true,
-        modulo: "financeiro",
         children: [
           {
             label: "Contabilidade",
@@ -333,6 +315,34 @@ export const navGroups: NavGroup[] = [
                 icon: Receipt,
               },
             ],
+          },
+          {
+            label: "Ofícios",
+            href: "/documentos-oficiais/oficios",
+            icon: FileSignature,
+            adminOnly: true,
+            modulo: "financeiro",
+          },
+          {
+            label: "Recibos",
+            href: "/documentos-oficiais/recibos",
+            icon: ReceiptText,
+            adminOnly: true,
+            modulo: "financeiro",
+          },
+          {
+            label: "Patrimônio",
+            href: "/patrimonio",
+            icon: Boxes,
+            adminOnly: true,
+            modulo: "financeiro",
+          },
+          {
+            label: "Doações",
+            href: "/doacoes",
+            icon: HeartHandshake,
+            adminOnly: true,
+            modulo: "captacao",
           },
         ],
       },

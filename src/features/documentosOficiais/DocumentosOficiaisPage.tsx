@@ -44,11 +44,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function DocumentosOficiaisPage() {
+// `escopo` fixa a tela em só Ofícios ou só Recibos (entradas separadas no
+// menu). Sem escopo, mostra os dois com o filtro de tipo (visão combinada).
+export function DocumentosOficiaisPage({
+  escopo,
+}: {
+  escopo?: "oficios" | "recibos";
+} = {}) {
   const navigate = useNavigate();
   const anoCorrente = new Date().getFullYear();
   const [ano, setAno] = useState(anoCorrente);
-  const [filtroTipo, setFiltroTipo] = useState("todos");
+  const [filtroTipo, setFiltroTipo] = useState(
+    escopo === "oficios" ? "0" : escopo === "recibos" ? "recibos" : "todos",
+  );
 
   const { data: docs, isLoading } = useDocumentosOficiais(ano);
   const { data: anos } = useAnosDocumentos();
@@ -128,32 +136,38 @@ export function DocumentosOficiaisPage() {
           >
             <FileBarChart className="size-4" /> Relatório
           </Button>
-          <Button variant="outline" onClick={() => navigate("/documentos-oficiais/novo/oficio")}>
-            <FilePlus className="size-4" /> Novo ofício
-          </Button>
-          <Button variant="outline" onClick={() => navigate("/documentos-oficiais/novo/recibo")}>
-            <ReceiptText className="size-4" /> Novo recibo
-          </Button>
+          {escopo !== "recibos" && (
+            <Button variant="outline" onClick={() => navigate("/documentos-oficiais/novo/oficio")}>
+              <FilePlus className="size-4" /> Novo ofício
+            </Button>
+          )}
+          {escopo !== "oficios" && (
+            <Button variant="outline" onClick={() => navigate("/documentos-oficiais/novo/recibo")}>
+              <ReceiptText className="size-4" /> Novo recibo
+            </Button>
+          )}
         </div>
       </div>
 
-      <Card>
-        <CardContent className="flex flex-wrap items-end gap-3 p-4">
-          <div className="w-48">
-            <Label className="mb-1.5">Tipo</Label>
-            <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="0">Ofícios</SelectItem>
-                <SelectItem value="recibos">Recibos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      {!escopo && (
+        <Card>
+          <CardContent className="flex flex-wrap items-end gap-3 p-4">
+            <div className="w-48">
+              <Label className="mb-1.5">Tipo</Label>
+              <Select value={filtroTipo} onValueChange={setFiltroTipo}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="0">Ofícios</SelectItem>
+                  <SelectItem value="recibos">Recibos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="p-0">

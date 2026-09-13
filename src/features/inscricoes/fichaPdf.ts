@@ -1,6 +1,7 @@
 import { abrirParaImpressao, esc } from "@/lib/impressaoDocumento";
 import { dataBR } from "@/lib/format";
 import { faixaInfo } from "@/features/alunos/faixa";
+import { sugerirQuimono } from "@/features/inscricoes/sugestaoQuimono";
 import {
   PARQ,
   TERMO_RESPONSABILIDADE,
@@ -79,6 +80,7 @@ export function imprimirFicha(i: Inscricao): boolean {
     campo("Altura", i.altura ? `${i.altura} m` : null) +
     campo("Tam. calça", i.tamanhoCalca) +
     campo("Tam. blusa", i.tamanhoBlusa) +
+    campo("Quimono sugerido", sugerirQuimono(i.tamanhoCalca, i.tamanhoBlusa)) +
     campo("Faixa", faixaInfo(i.faixa).nome) +
     campo("Escola", i.escola) +
     campo("Série", i.serie) +

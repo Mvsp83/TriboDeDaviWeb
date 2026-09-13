@@ -424,6 +424,14 @@ export default function App() {
                 element={<DocumentosOficiaisPage />}
               />
               <Route
+                path="documentos-oficiais/oficios"
+                element={<DocumentosOficiaisPage escopo="oficios" />}
+              />
+              <Route
+                path="documentos-oficiais/recibos"
+                element={<DocumentosOficiaisPage escopo="recibos" />}
+              />
+              <Route
                 path="documentos-oficiais/novo/:tipo"
                 element={<DocumentoOficialEditorPage />}
               />
