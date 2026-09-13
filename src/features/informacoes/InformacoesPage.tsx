@@ -160,7 +160,7 @@ function LinkResposta({ link }: { link: LinkFaq }) {
     </>
   );
   return (
-    <Button asChild variant="outline" size="sm" className="mt-3">
+    <Button asChild size="sm" className="mt-3">
       {link.externo ? (
         <a href={link.para} target="_blank" rel="noopener noreferrer">
           {conteudo}
