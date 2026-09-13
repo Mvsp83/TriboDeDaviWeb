@@ -74,16 +74,17 @@ export const SITE = {
     },
   ],
 
-  // AJUSTE com a história real do instituto. Cada item é um parágrafo.
-  // Lista vazia esconde a seção "Nossa história".
+  // AJUSTE com a história real do instituto. Cada item é um parágrafo; um item
+  // iniciado por "## " vira um SUBTÍTULO na página /historia. Lista vazia
+  // esconde a seção "Nossa história" na home.
   historia: [
-    "Um sonho que se tornou uma missão",
+    "## Um sonho que se tornou uma missão",
 
     "Fundado em 2013, na cidade de Blumenau (SC), o Instituto Tribo de Davi nasceu de um sonho: fazer a diferença e contribuir para a transformação de vidas. Na época, chamado Instituto Elo Vital, iniciou sua trajetória com a missão de oferecer novas oportunidades por meio do esporte, da cultura e da assistência social.",
 
     "Desde o começo, o Instituto escolheu olhar para pessoas e comunidades que precisam de oportunidades para construir um futuro melhor. Crianças, adolescentes e adultos, especialmente aqueles em situação de vulnerabilidade social, passaram a encontrar no projeto um espaço de acolhimento, desenvolvimento e esperança.",
 
-    "O jiu-jitsu como ferramenta de transformação",
+    "## O jiu-jitsu como ferramenta de transformação",
 
     "Ao longo dessa caminhada, o jiu-jitsu tornou-se uma das principais ferramentas utilizadas pelo Instituto para promover inclusão, disciplina e desenvolvimento humano.",
 
@@ -93,7 +94,7 @@ export const SITE = {
 
     "É por isso que acreditamos no esporte como uma poderosa ferramenta de transformação social e como uma alternativa saudável ao caminho das drogas e da violência.",
 
-    "Formando pessoas para a vida",
+    "## Formando pessoas para a vida",
 
     "Nossa missão vai além da formação esportiva. Queremos contribuir para a formação de cidadãos conscientes, preparados para enfrentar desafios, respeitar o próximo e fazer boas escolhas.",
 
@@ -101,7 +102,7 @@ export const SITE = {
 
     "Tudo isso é construído sobre princípios cristãos que valorizam a fé, o amor ao próximo, a dignidade humana e o compromisso com a comunidade.",
 
-    "Presença que alcança a comunidade",
+    "## Presença que alcança a comunidade",
 
     "Com sede em Blumenau, o Instituto Tribo de Davi ampliou sua atuação ao longo dos anos. Hoje atuamos em 5 polos: Eça de Queiroz, Itoupavazinha, Araranguá, Artex e Casa de Jairo.",
 
@@ -109,13 +110,13 @@ export const SITE = {
 
     "Mais do que oferecer aulas, buscamos construir ambientes seguros, acolhedores e capazes de gerar novas perspectivas para crianças, adolescentes e famílias.",
 
-    "Esporte, fé e cidadania",
+    "## Esporte, fé e cidadania",
 
     "O trabalho do Instituto também se estende para além dos tatames. Atuamos no atendimento a pessoas em cumprimento de medidas socioeducativas, buscando contribuir para processos de mudança, reconstrução de vínculos e novas oportunidades.",
 
     "Também valorizamos a construção de parcerias com escolas, instituições de assistência social e organizações que atuam na prevenção e no combate às drogas. Acreditamos que a transformação de uma comunidade acontece quando pessoas e instituições se unem em torno de um propósito maior.",
 
-    "Uma história construída por muitas vidas",
+    "## Uma história construída por muitas vidas",
 
     "Desde sua fundação, centenas de alunos já passaram pelos tatames do Instituto Tribo de Davi. Cada um deles deixou uma história e levou consigo muito mais do que técnicas de jiu-jitsu.",
 
@@ -123,7 +124,7 @@ export const SITE = {
 
     "Por isso, cada troca de faixa representa muito mais do que uma conquista esportiva. É a celebração de uma etapa vencida, de um esforço recompensado e de uma pessoa que está aprendendo a acreditar em seu próprio potencial.",
 
-    "Um propósito que continua",
+    "## Um propósito que continua",
 
     "Mais de uma década depois de sua fundação, o Instituto Tribo de Davi continua avançando com o mesmo propósito que deu origem à sua história: usar o esporte, a fé e a educação como instrumentos para transformar vidas e construir um futuro melhor.",
 
