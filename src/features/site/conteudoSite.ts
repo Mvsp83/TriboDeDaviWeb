@@ -193,8 +193,8 @@ export const SITE = {
           {
             pergunta: "Quais são nossos endereços?",
             resposta:
-              "O Instituto Tribo de Davi possui atividades em 5 polos de Blumenau. Os endereços, horários e informações de cada local podem ser consultados na página de polos.",
-            link: { label: "Ver polos e horários", para: "/polos" },
+              "O Instituto Tribo de Davi possui atividades em 5 polos de Blumenau. Os endereços, horários e informações de cada local podem ser consultados abaixo.",
+            link: { label: "Ver Endereços", para: "/informacoes#enderecos" },
           },
 
           {

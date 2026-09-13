@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Info, ChevronDown, MapPin, ClipboardList, ArrowRight } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import type { LinkFaq } from "@/features/site/conteudoSite";
@@ -230,6 +230,21 @@ export function InformacoesPage() {
       return proxima;
     });
 
+  // Âncora #enderecos (usada pelo botão "Ver Endereços"): abre e rola até a
+  // lista de endereços dos polos, que fica na categoria de polos.
+  const location = useLocation();
+  const polosCatIndex = categorias.findIndex((c) => ehCategoriaPolos(c.titulo));
+  useEffect(() => {
+    if (location.hash !== "#enderecos" || polosCatIndex < 0) return;
+    setAbertas((atual) => new Set(atual).add(`polos-${polosCatIndex}`));
+    // Espera o acordeão abrir antes de rolar até ele.
+    requestAnimationFrame(() =>
+      document
+        .getElementById("enderecos")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  }, [location, polosCatIndex]);
+
   const secoes = categorias.map((c, i) => ({
     id: idCategoria(i),
     label: c.titulo,
@@ -291,15 +306,18 @@ export function InformacoesPage() {
                     </ItemPergunta>
                   ))}
 
-                  {/* Lista dinâmica dos polos, na categoria de polos. */}
+                  {/* Lista dinâmica dos polos, na categoria de polos.
+                      id="enderecos" é o alvo do botão "Ver Endereços". */}
                   {ehCategoriaPolos(cat.titulo) && (
-                    <ItemPergunta
-                      pergunta="Quais são os polos e seus endereços?"
-                      aberta={abertas.has(`polos-${ci}`)}
-                      onAlternar={() => alternar(`polos-${ci}`)}
-                    >
-                      <PolosCadastrados />
-                    </ItemPergunta>
+                    <div id="enderecos" className="scroll-mt-6">
+                      <ItemPergunta
+                        pergunta="Quais são os polos e seus endereços?"
+                        aberta={abertas.has(`polos-${ci}`)}
+                        onAlternar={() => alternar(`polos-${ci}`)}
+                      >
+                        <PolosCadastrados />
+                      </ItemPergunta>
+                    </div>
                   )}
                 </div>
               </div>
