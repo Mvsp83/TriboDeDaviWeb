@@ -24,8 +24,11 @@ export function CabecalhoSite() {
       <header className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-4">
         <Link to="/" onClick={fechar} className="flex items-center gap-3">
           <MarcaTribo className="w-8 text-primary" />
-          <span className="font-display text-lg font-bold uppercase tracking-wide">
-            Tribo de Davi
+          <span className="flex flex-col font-display font-bold uppercase leading-none">
+            <span className="text-[0.7rem] tracking-[0.25em] text-muted-foreground">
+              Instituto
+            </span>
+            <span className="text-lg tracking-wide">Tribo de Davi</span>
           </span>
         </Link>
 
