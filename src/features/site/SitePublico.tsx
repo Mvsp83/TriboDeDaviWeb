@@ -125,6 +125,9 @@ export function SitePublico() {
             </div>
             <div className="mt-9 flex flex-wrap gap-3">
               <div className="border-l-4 border-primary bg-card px-4 py-3">
+                <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
+                  Atualmente são
+                </div>
                 <div className="font-display text-3xl font-bold leading-none text-primary">
                   {totalAlunos}
                 </div>
@@ -133,6 +136,9 @@ export function SitePublico() {
                 </div>
               </div>
               <div className="border-l-4 border-brand-red bg-card px-4 py-3">
+                <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
+                  Em
+                </div>
                 <div className="font-display text-3xl font-bold leading-none">
                   {totalPolos}
                 </div>
@@ -169,7 +175,7 @@ export function SitePublico() {
         {/* Faixas: da branca à preta */}
         <div className="mx-auto max-w-5xl px-4 pb-14 text-center md:pb-20">
           <p className="mb-3 font-display text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Da faixa branca à preta
+            Sua trajetória da faixa branca à preta
           </p>
           <div className="mx-auto grid max-w-3xl grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-x-1.5">
             {FAIXAS.map((f) => (
@@ -192,7 +198,7 @@ export function SitePublico() {
       {/* Pilares */}
       <section className="mx-auto max-w-5xl px-4 py-14 md:py-20">
         <h2 className="font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
-          O que fazemos
+          O que fazemos?
         </h2>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {SITE.pilares.map((p) => (
@@ -212,8 +218,7 @@ export function SitePublico() {
         <section className="border-t border-border">
           <div className="mx-auto max-w-3xl px-4 py-12 text-center md:py-16">
             <h2 className="flex items-center justify-center gap-2 font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
-              <BookOpen className="size-6 text-primary" />
-              Nossa história
+              <BookOpen className="size-6 text-primary" />O que somos?
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
               Como o Instituto Tribo de Davi nasceu em 2013 e se tornou o que é
@@ -221,7 +226,7 @@ export function SitePublico() {
             </p>
             <Button asChild variant="outline" className="mt-6">
               <Link to="/historia">
-                Ler nossa história
+                Nossa história
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -237,14 +242,14 @@ export function SitePublico() {
               Ajude-nos a continuar transformando vidas
             </h2>
             <p className="mt-3 max-w-2xl text-muted-foreground">
-              O instituto se mantém apenas através de doações. É sua
-              contribuição que proporciona um quimono, uma faixa e tatames para
-              atender mais crianças.
+              O instituto se mantém através de doações. E sua contribuição pode
+              proporcionar um quimono, uma faixa e um tatame para atendermos
+              cada vez mais crianças.
             </p>
             <Button asChild size="lg" className="mt-6">
               <Link to="/doar" onClick={() => registrarEvento("doar_click")}>
                 <HeartHandshake className="size-5" />
-                Fazer uma doação
+                Seja um doador
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
