@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Package, Settings } from "lucide-react";
+import { Plus, Pencil, Trash2, Package, Settings, PackageMinus } from "lucide-react";
 import { toast } from "sonner";
 import {
   useProdutos,
@@ -9,6 +9,7 @@ import {
   type Produto,
 } from "@/features/loja/produtosApi";
 import { ProdutoFormDialog } from "@/features/loja/ProdutoFormDialog";
+import { DarBaixaDialog } from "@/features/loja/DarBaixaDialog";
 import { ConfigLojaDialog } from "@/features/loja/ConfigLojaDialog";
 import { ApiError } from "@/lib/api";
 import { moeda } from "@/lib/format";
@@ -25,6 +26,7 @@ export function ProdutosPage() {
   const [dialogAberto, setDialogAberto] = useState(false);
   const [configAberto, setConfigAberto] = useState(false);
   const [edicao, setEdicao] = useState<Produto | null>(null);
+  const [baixaAlvo, setBaixaAlvo] = useState<Produto | null>(null);
   const [excluirAlvo, setExcluirAlvo] = useState<Produto | null>(null);
 
   async function confirmarExclusao() {
@@ -111,6 +113,16 @@ export function ProdutosPage() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={() => setBaixaAlvo(p)}
+                      aria-label="Registrar venda / dar baixa"
+                      title="Registrar venda / dar baixa no estoque"
+                      disabled={estoqueTotal(p) === 0}
+                    >
+                      <PackageMinus className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => {
                         setEdicao(p);
                         setDialogAberto(true);
@@ -153,6 +165,12 @@ export function ProdutosPage() {
         aberto={dialogAberto}
         onOpenChange={setDialogAberto}
         produto={edicao}
+      />
+
+      <DarBaixaDialog
+        aberto={baixaAlvo !== null}
+        onOpenChange={(o) => !o && setBaixaAlvo(null)}
+        produto={baixaAlvo}
       />
 
       <ConfigLojaDialog aberto={configAberto} onOpenChange={setConfigAberto} />
