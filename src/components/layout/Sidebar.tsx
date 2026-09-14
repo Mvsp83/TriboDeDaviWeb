@@ -12,6 +12,7 @@ import {
 } from "@/components/layout/navConfig";
 import { LogoLockup } from "@/components/Logo";
 import { useAlunosSemTurma } from "@/features/alunos/alunosApi";
+import { useContatoNaoLidas } from "@/features/contato/contatoApi";
 import { cn } from "@/lib/utils";
 
 // Badge (contador) do menu — some quando zero.
@@ -209,8 +210,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   // Contadores do menu, por chave (ver NavLeaf.badge). Um ramo soma a subárvore
   // para borbulhar o total ao pilar fechado.
   const { data: alunosSemTurma } = useAlunosSemTurma();
+  const { data: contatoNaoLidas } = useContatoNaoLidas(admin);
   const contadores: Record<string, number> = {
     alunosSemTurma: alunosSemTurma?.length ?? 0,
+    contatoNaoLidas: contatoNaoLidas ?? 0,
   };
   const getBadge = (node: NavNode): number =>
     isBranch(node)

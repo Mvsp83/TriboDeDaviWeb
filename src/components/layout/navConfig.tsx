@@ -18,6 +18,7 @@ import {
   Boxes,
   Megaphone,
   MessagesSquare,
+  Mail,
   ShoppingBag,
   UserCheck,
   Trophy,
@@ -203,6 +204,13 @@ export const navGroups: NavGroup[] = [
         icon: Briefcase,
         children: [
           { label: "Solicitações", href: "/solicitacoes", icon: MessagesSquare },
+          {
+            label: "Mensagens",
+            href: "/mensagens",
+            icon: Mail,
+            adminOnly: true,
+            badge: "contatoNaoLidas",
+          },
           {
             label: "Avisos",
             href: "/avisos",

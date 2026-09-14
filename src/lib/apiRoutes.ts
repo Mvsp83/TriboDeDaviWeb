@@ -252,6 +252,13 @@ export const ApiRotas = {
   patrimonioDevolver: (bemId: number) => `/api/BemPatrimonial/devolver/${bemId}`,
   patrimonioHistorico: (bemId: number) => `/api/BemPatrimonial/historico/${bemId}`,
 
+  // Fale Conosco (público envia; admin lê).
+  contatoEnviar: "/api/Contato/enviar",
+  contatoListar: "/api/Contato",
+  contatoNaoLidas: "/api/Contato/nao-lidas",
+  contatoMarcarLida: (id: number) => `/api/Contato/marcar-lida/${id}`,
+  contatoExcluir: (id: number) => `/api/Contato/${id}`,
+
   avisosPendentes: "/api/Aviso/pendentes",
   avisoCiente: (id: number) => `/api/Aviso/ciente/${id}`,
   avisosGetAll: "/api/Aviso/get-all",

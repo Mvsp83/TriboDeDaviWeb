@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { SobreApp } from "@/components/SobreApp";
 import { MarcaTribo } from "@/components/site/MarcaTribo";
 
@@ -11,7 +12,15 @@ export function RodapeSite() {
           <MarcaTribo className="w-4 shrink-0 text-primary" />© {anoAtual} Instituto
           Tribo de Davi
         </span>
-        <SobreApp className="whitespace-nowrap font-medium transition-colors hover:text-foreground" />
+        <div className="flex items-center gap-x-4 sm:gap-x-6">
+          <Link
+            to="/contato"
+            className="whitespace-nowrap font-medium transition-colors hover:text-foreground"
+          >
+            Fale Conosco
+          </Link>
+          <SobreApp className="whitespace-nowrap font-medium transition-colors hover:text-foreground" />
+        </div>
       </div>
     </footer>
   );

@@ -30,6 +30,9 @@ const GaleriaPage = lazy(() =>
 const InformacoesPage = lazy(() =>
   import("@/features/informacoes/InformacoesPage").then((m) => ({ default: m.InformacoesPage })),
 );
+const FaleConoscoPage = lazy(() =>
+  import("@/features/contato/FaleConoscoPage").then((m) => ({ default: m.FaleConoscoPage })),
+);
 const HistoriaPage = lazy(() =>
   import("@/features/site/HistoriaPage").then((m) => ({ default: m.HistoriaPage })),
 );
@@ -114,6 +117,11 @@ const PatrimonioPage = lazy(() =>
 );
 const AvisosPage = lazy(() =>
   import("@/features/avisos/AvisosPage").then((m) => ({ default: m.AvisosPage })),
+);
+const MensagensContatoPage = lazy(() =>
+  import("@/features/contato/MensagensContatoPage").then((m) => ({
+    default: m.MensagensContatoPage,
+  })),
 );
 const SolicitacoesPage = lazy(() =>
   import("@/features/solicitacoes/SolicitacoesPage").then((m) => ({
@@ -353,6 +361,7 @@ export default function App() {
       <Route path="/galeria" element={<GaleriaPage />} />
       <Route path="/loja" element={<LojaPage />} />
       <Route path="/informacoes" element={<InformacoesPage />} />
+      <Route path="/contato" element={<FaleConoscoPage />} />
       <Route path="/historia" element={<HistoriaPage />} />
       <Route path="/politica-privacidade" element={<PoliticaPrivacidadePage />} />
       <Route path="/matricula" element={<InscricaoPage />} />
@@ -366,6 +375,8 @@ export default function App() {
           <Route path="graduacoes" element={<GraduacoesPage />} />
           {/* Solicitações internas (operacional — professor e admin) */}
           <Route path="solicitacoes" element={<SolicitacoesPage />} />
+          {/* Fale Conosco: caixa de entrada do site público (admin) */}
+          <Route path="mensagens" element={<MensagensContatoPage />} />
           {/* Atletas de alto rendimento (equipe) */}
           <Route path="atletas" element={<AtletasPage />} />
           <Route path="atletas/comparativo" element={<AtletaComparativoPage />} />

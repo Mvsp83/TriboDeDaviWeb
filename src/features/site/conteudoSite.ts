@@ -201,7 +201,8 @@ export const SITE = {
           {
             pergunta: "Como falo com a equipe?",
             resposta:
-              "Você pode entrar em contato pelo e-mail: institutotribodedavi@gmail.com -  ou procurar diretamente os professores nos horários de aula de cada polo. Teremos prazer em orientar você.",
+              "Você pode enviar uma mensagem pelo Fale Conosco, escrever para o e-mail institutotribodedavi@gmail.com ou procurar diretamente os professores nos horários de aula de cada polo. Teremos prazer em orientar você.",
+            link: { label: "Fale Conosco", para: "/contato" },
           },
         ],
       },
