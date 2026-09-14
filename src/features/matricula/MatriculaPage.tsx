@@ -79,7 +79,12 @@ const ETAPAS = [
   "Aluno",
   "Responsável",
   "Saúde",
-  "Termos",
+  // Cada contrato/autorização em sua própria etapa, para ficar claro o que se
+  // está aceitando em cada passo.
+  "Participação",
+  "Comodato",
+  "Imagem",
+  "Dados e assinatura",
 ];
 
 // ── Campos de apoio ───────────────────────────────────────────────────────
@@ -357,7 +362,12 @@ export function MatriculaPage() {
     }
     if (etapa === 4) {
       if (!aceitouTermo) return "É preciso aceitar o termo de participação.";
+    }
+    if (etapa === 5) {
       if (!aceitouComodato) return "É preciso aceitar o termo de comodato.";
+    }
+    // etapa 6 (Imagem) é opcional — não bloqueia o avanço.
+    if (etapa === 7) {
       if (!aceitouLgpd) return "É preciso autorizar o tratamento dos dados.";
       if (!assinatura.trim()) return "Escreva o nome completo do responsável.";
     }
@@ -974,7 +984,11 @@ export function MatriculaPage() {
                 Li e concordo com o termo de participação.{" "}
                 <span className="text-destructive">*</span>
               </Marcavel>
+            </>
+          )}
 
+          {etapa === 5 && (
+            <>
               <BlocoTermo titulo="Comodato de kimono e faixa" texto={TERMO_COMODATO} />
               <Marcavel
                 marcado={aceitouComodato}
@@ -983,7 +997,11 @@ export function MatriculaPage() {
                 Estou ciente do empréstimo do uniforme e da devolução ao fim do ano.{" "}
                 <span className="text-destructive">*</span>
               </Marcavel>
+            </>
+          )}
 
+          {etapa === 6 && (
+            <>
               <BlocoTermo titulo="Uso de imagem e voz" texto={TERMO_IMAGEM} />
               <Marcavel
                 marcado={aceitouImagem}
@@ -1047,7 +1065,11 @@ export function MatriculaPage() {
                   )}
                 </div>
               </div>
+            </>
+          )}
 
+          {etapa === 7 && (
+            <>
               <BlocoTermo titulo="Tratamento de dados (LGPD)" texto={TERMO_LGPD} />
               <Marcavel marcado={aceitouLgpd} onToggle={() => setAceitouLgpd(!aceitouLgpd)}>
                 Autorizo o tratamento dos dados nos termos acima.{" "}
