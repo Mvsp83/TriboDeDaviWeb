@@ -90,9 +90,9 @@ export const SITE = {
 
     "Mas, para nós, o jiu-jitsu nunca foi apenas sobre aprender a lutar.",
 
-    "Cada treino representa uma oportunidade de ensinar respeito, perseverança, autocontrole, responsabilidade e resiliência. No tatame, o aluno aprende a cair e levantar, a respeitar seus limites, a superar desafios e a compreender que grandes conquistas são construídas com dedicação e constância.",
+    "Cada treino representa uma oportunidade de criar vínculo de aproximação de ensinar valores como: respeito, perseverança, autocontrole, responsabilidade e resiliência. No tatame, o aluno aprende a cair e levantar, a respeitar seus limites, a superar desafios e a compreender que grandes conquistas são construídas com dedicação e constância.",
 
-    "É por isso que acreditamos no esporte como uma poderosa ferramenta de transformação social e como uma alternativa saudável ao caminho das drogas e da violência.",
+    "É por isso que acreditamos no esporte como uma poderosa ferramenta de transformação social e como uma alternativa saudável ao combate ao uso de drogas e da violência.",
 
     "## Formando pessoas para a vida",
 
@@ -118,7 +118,7 @@ export const SITE = {
 
     "## Uma história construída por muitas vidas",
 
-    "Desde sua fundação, centenas de alunos já passaram pelos tatames do Instituto Tribo de Davi. Cada um deles deixou uma história e levou consigo muito mais do que técnicas de jiu-jitsu.",
+    "Desde sua fundação em 2013, centenas de alunos já passaram pelos diversos tatames do Instituto Tribo de Davi. Cada um deles nos deixou uma história e levou consigo muito mais do que técnicas de jiu-jitsu.",
 
     "Levou aprendizados, amizades, disciplina, superação e experiências que acompanham uma pessoa por toda a vida.",
 
