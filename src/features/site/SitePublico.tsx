@@ -112,17 +112,6 @@ export function SitePublico() {
             <p className="mt-5 max-w-xl text-pretty text-base text-muted-foreground md:text-lg">
               {SITE.subChamada}
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link to="/doar" onClick={() => registrarEvento("doar_click")}>
-                  <HeartHandshake className="size-5" />
-                  Seja um doador
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/informacoes#enderecos">Conheça os polos</Link>
-              </Button>
-            </div>
             <div className="mt-9 flex flex-wrap gap-3">
               <div className="border-l-4 border-primary bg-card px-4 py-3">
                 <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -156,6 +145,11 @@ export function SitePublico() {
                   </div>
                 </div>
               )}
+            </div>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button asChild variant="outline" size="lg">
+                <Link to="/informacoes#enderecos">Conheça os polos</Link>
+              </Button>
             </div>
           </div>
 
@@ -218,15 +212,12 @@ export function SitePublico() {
         <section className="border-t border-border">
           <div className="mx-auto max-w-3xl px-4 py-12 text-center md:py-16">
             <h2 className="flex items-center justify-center gap-2 font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
-              <BookOpen className="size-6 text-primary" />O que somos?
+              <BookOpen className="size-6 text-primary" />
+              Quem somos?
             </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              Como o Instituto Tribo de Davi nasceu em 2013 e se tornou o que é
-              hoje.
-            </p>
-            <Button asChild variant="outline" className="mt-6">
+            <Button asChild size="lg" className="mt-6">
               <Link to="/historia">
-                Nossa história
+                Conheça nossa história
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -243,8 +234,8 @@ export function SitePublico() {
             </h2>
             <p className="mt-3 max-w-2xl text-muted-foreground">
               O instituto se mantém através de doações. E sua contribuição pode
-              proporcionar um quimono, uma faixa e um tatame para atendermos
-              cada vez mais crianças.
+              proporcionar um quimono, uma faixa e um tatame para podermos
+              atender a cada dia mais crianças.
             </p>
             <Button asChild size="lg" className="mt-6">
               <Link to="/doar" onClick={() => registrarEvento("doar_click")}>

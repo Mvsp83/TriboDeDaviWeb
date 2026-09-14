@@ -63,7 +63,7 @@ export const SITE = {
         "Mais do que aprender técnicas de jiu-jitsu, nossos alunos aprendem a ter disciplina, respeito, autocontrole e responsabilidade. No tatame, cada treino é uma oportunidade de desenvolver valores que vão muito além do esporte e acompanham a criança e o adolescente em casa, na escola e em toda a sua caminhada.",
     },
     {
-      titulo: "Cuidado e acompanhamento de perto",
+      titulo: "Cuidado e acompanhamento individual e familiar",
       texto:
         "Cada aluno importa. Por isso, acompanhamos a presença e a evolução de cada participante aula após aula. Quando percebemos que um aluno está se afastando ou começando a faltar, buscamos entender o motivo e nos aproximar da família. Nosso objetivo não é apenas ensinar jiu-jitsu, mas caminhar ao lado de cada aluno e família, ajudando-o a permanecer no caminho do desenvolvimento e da transformação.",
     },
