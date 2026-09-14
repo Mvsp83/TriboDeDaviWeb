@@ -249,8 +249,14 @@ export const ApiRotas = {
   patrimonioUpdate: "/api/BemPatrimonial/update",
   patrimonioDelete: (id: number) => `/api/BemPatrimonial/delete/${id}`,
   patrimonioEmprestar: "/api/BemPatrimonial/emprestar",
-  patrimonioDevolver: (bemId: number) => `/api/BemPatrimonial/devolver/${bemId}`,
+  // Devolve uma alocação específica (por id do empréstimo, não do bem).
+  patrimonioDevolver: (emprestimoId: number) =>
+    `/api/BemPatrimonial/devolver/${emprestimoId}`,
   patrimonioHistorico: (bemId: number) => `/api/BemPatrimonial/historico/${bemId}`,
+  patrimonioHistoricoAluno: (alunoId: number) =>
+    `/api/BemPatrimonial/historico/aluno/${alunoId}`,
+  patrimonioHistoricoPolo: (poloId: number) =>
+    `/api/BemPatrimonial/historico/polo/${poloId}`,
 
   // Fale Conosco (público envia; admin lê).
   contatoEnviar: "/api/Contato/enviar",

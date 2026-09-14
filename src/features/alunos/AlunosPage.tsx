@@ -750,6 +750,7 @@ export function AlunosPage() {
           alunoDetalhe ? (nomePorPolo.get(alunoDetalhe.poloId) ?? "-") : "-"
         }
         mostrarPolo={admin}
+        patrimonioAdmin={admin && (sessao?.modulos.includes("financeiro") ?? false)}
         onOpenChange={(o) => !o && setAlunoDetalheId(null)}
         onEditar={admin ? abrirEdicao : undefined}
       />

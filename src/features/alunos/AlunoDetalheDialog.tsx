@@ -1,8 +1,9 @@
-import { Pencil } from "lucide-react";
+import { Pencil, Shirt } from "lucide-react";
 import type { Aluno } from "@/types";
 import { faixaInfo } from "@/features/alunos/faixa";
 import { ehAlunoAdulto } from "@/features/alunos/publico";
 import { AlunoAvatar } from "@/features/alunos/AlunoAvatar";
+import { VinculosPatrimonio } from "@/features/patrimonio/VinculosPatrimonio";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -46,6 +47,7 @@ export function AlunoDetalheDialog({
   aluno,
   nomePolo,
   mostrarPolo = true,
+  patrimonioAdmin = false,
   onOpenChange,
   onEditar,
 }: {
@@ -53,6 +55,8 @@ export function AlunoDetalheDialog({
   nomePolo: string;
   // O professor só tem o próprio polo; esconder deixa a ficha mais limpa.
   mostrarPolo?: boolean;
+  // Admin com módulo financeiro: mostra e gerencia o vínculo de quimono/faixa.
+  patrimonioAdmin?: boolean;
   onOpenChange: (aberto: boolean) => void;
   onEditar?: (aluno: Aluno) => void;
 }) {
@@ -134,6 +138,21 @@ export function AlunoDetalheDialog({
             <Campo label="Endereço" valor={endereco} />
           </div>
         </dl>
+
+        {patrimonioAdmin && (
+          <div className="border-t border-border pt-3">
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+              <Shirt className="size-4 text-primary" />
+              Quimono e Faixa
+            </div>
+            <VinculosPatrimonio
+              destino={{ tipo: "aluno", id: aluno.id, nome: aluno.nome }}
+              categorias={[0, 1]}
+              comodato
+              podeGerenciar
+            />
+          </div>
+        )}
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

@@ -28,7 +28,6 @@ function montarBody(bem: Partial<BemPatrimonial>) {
     observacoes: bem.observacoes ?? "",
     tamanho: bem.tamanho ?? "",
     cor: bem.cor ?? "",
-    alunoId: bem.alunoId ?? null,
   };
 }
 
@@ -51,37 +50,46 @@ export function useExcluirBem() {
   });
 }
 
-// ── Empréstimo / comodato (histórico por item) ──────────────────────────────
+// ── Alocação / comodato (quimono·faixa por aluno, tatame por polo) ───────────
 export interface EmprestimoBem {
   id: number;
   bemPatrimonialId: number;
-  alunoId: number;
+  alunoId?: number | null;
+  poloId?: number | null;
   dataEmprestimo: string;
   dataDevolucao?: string | null;
   observacao?: string | null;
   registradoPor?: string | null;
 }
 
+// Invalida tudo que depende de alocações: a lista de bens (disponibilidade) e os
+// históricos por bem/aluno/polo (sem precisar saber a chave exata de cada um).
+function invalidarPatrimonio(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: ["patrimonio"] });
+  qc.invalidateQueries({ queryKey: ["patrimonio-historico"] });
+  qc.invalidateQueries({ queryKey: ["patrimonio-aluno"] });
+  qc.invalidateQueries({ queryKey: ["patrimonio-polo"] });
+}
+
 export function useEmprestarBem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (dados: { bemPatrimonialId: number; alunoId: number; observacao: string }) =>
-      apiPost(ApiRotas.patrimonioEmprestar, dados),
-    onSuccess: (_r, v) => {
-      qc.invalidateQueries({ queryKey: ["patrimonio"] });
-      qc.invalidateQueries({ queryKey: ["patrimonio-historico", v.bemPatrimonialId] });
-    },
+    mutationFn: (dados: {
+      bemPatrimonialId: number;
+      alunoId?: number;
+      poloId?: number;
+      observacao: string;
+    }) => apiPost(ApiRotas.patrimonioEmprestar, dados),
+    onSuccess: () => invalidarPatrimonio(qc),
   });
 }
 
-export function useDevolverBem() {
+export function useDevolverEmprestimo() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (bemId: number) => apiPost(ApiRotas.patrimonioDevolver(bemId), {}),
-    onSuccess: (_r, bemId) => {
-      qc.invalidateQueries({ queryKey: ["patrimonio"] });
-      qc.invalidateQueries({ queryKey: ["patrimonio-historico", bemId] });
-    },
+    mutationFn: (emprestimoId: number) =>
+      apiPost(ApiRotas.patrimonioDevolver(emprestimoId), {}),
+    onSuccess: () => invalidarPatrimonio(qc),
   });
 }
 
@@ -93,5 +101,31 @@ export function useHistoricoBem(bemId: number | null) {
       return lista ?? [];
     },
     enabled: bemId != null,
+  });
+}
+
+export function useHistoricoAluno(alunoId: number | null) {
+  return useQuery({
+    queryKey: ["patrimonio-aluno", alunoId],
+    queryFn: async (): Promise<EmprestimoBem[]> => {
+      const lista = await apiGet<EmprestimoBem[] | null>(
+        ApiRotas.patrimonioHistoricoAluno(alunoId!),
+      );
+      return lista ?? [];
+    },
+    enabled: alunoId != null,
+  });
+}
+
+export function useHistoricoPolo(poloId: number | null) {
+  return useQuery({
+    queryKey: ["patrimonio-polo", poloId],
+    queryFn: async (): Promise<EmprestimoBem[]> => {
+      const lista = await apiGet<EmprestimoBem[] | null>(
+        ApiRotas.patrimonioHistoricoPolo(poloId!),
+      );
+      return lista ?? [];
+    },
+    enabled: poloId != null,
   });
 }

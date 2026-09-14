@@ -282,10 +282,13 @@ export interface BemPatrimonial {
   poloId?: number | null;
   numeroPatrimonio?: string | null;
   observacoes?: string | null;
-  // Vestuário (quimono/faixa): atributos e empréstimo a um aluno.
+  // Vestuário (quimono/faixa): atributos. O "com quem está" não fica mais aqui —
+  // as alocações (a aluno ou polo) vivem em EmprestimoBem.
   tamanho?: string | null;
   cor?: string | null;
-  alunoId?: number | null;
+  // Unidades alocadas em aberto (só leitura, vem do GetAll). Disponível =
+  // quantidade − alocadosAbertos.
+  alocadosAbertos?: number;
 }
 
 export interface AuthData {

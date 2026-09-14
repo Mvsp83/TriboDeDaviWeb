@@ -1,14 +1,9 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search, Download, FileDown, Handshake, RotateCcw, History, FileText } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Download, FileDown } from "lucide-react";
 import { usePolos } from "@/features/polos/polosApi";
-import { useAuth } from "@/features/auth/AuthContext";
-import { useAlunosLista } from "@/features/alunos/alunosApi";
-import { useBens, useExcluirBem, useDevolverBem } from "@/features/patrimonio/patrimonioApi";
+import { useBens, useExcluirBem } from "@/features/patrimonio/patrimonioApi";
 import { BemFormDialog } from "@/features/patrimonio/BemFormDialog";
-import { EmprestarBemDialog } from "@/features/patrimonio/EmprestarBemDialog";
-import { HistoricoBemDialog } from "@/features/patrimonio/HistoricoBemDialog";
-import { imprimirComodato } from "@/features/patrimonio/comodatoPdf";
 import { exportarPatrimonioPdf } from "@/features/patrimonio/patrimonioPdf";
 import {
   CATEGORIA_BEM_LABEL,
@@ -45,35 +40,25 @@ import {
 export function PatrimonioPage() {
   const { data: bens, isLoading } = useBens();
   const { data: polos } = usePolos();
-  const { sessao } = useAuth();
-  const admin = sessao?.isAdministrador ?? false;
-  const { data: alunos } = useAlunosLista(admin);
   const excluir = useExcluirBem();
-  const devolver = useDevolverBem();
 
-  const nomePorAluno = useMemo(
-    () => new Map((alunos ?? []).map((a) => [a.id, a.nome])),
-    [alunos],
-  );
-  const nomeAluno = (id: number | null | undefined) =>
-    id == null ? null : nomePorAluno.get(id) ?? `#${id}`;
-
-  // Disponibilidade de itens emprestáveis (Quimono=0, Faixa=1) por tamanho:
-  // conta unidades (1 linha = 1 peça) totais x emprestadas x livres.
+  // Disponibilidade de itens alocáveis (Quimono=0, Faixa=1, Tatame=2) por
+  // tamanho: soma a quantidade em estoque x alocadas em aberto x livres. O
+  // vínculo em si é feito na ficha do aluno (quimono/faixa) ou do polo (tatame).
   const disponibilidade = useMemo(() => {
     const grupos = new Map<
       string,
       { categoria: number; tamanho: string; total: number; emprestados: number }
     >();
     for (const b of bens ?? []) {
-      if (b.categoria !== 0 && b.categoria !== 1) continue;
+      if (b.categoria !== 0 && b.categoria !== 1 && b.categoria !== 2) continue;
       const tam = (b.tamanho ?? "").trim() || "—";
       const chave = `${b.categoria}|${tam}`;
       const g =
         grupos.get(chave) ??
         { categoria: b.categoria, tamanho: tam, total: 0, emprestados: 0 };
-      g.total += 1;
-      if (b.alunoId != null) g.emprestados += 1;
+      g.total += b.quantidade;
+      g.emprestados += b.alocadosAbertos ?? 0;
       grupos.set(chave, g);
     }
     return [...grupos.values()].sort(
@@ -89,17 +74,6 @@ export function PatrimonioPage() {
   const [dialog, setDialog] = useState(false);
   const [emEdicao, setEmEdicao] = useState<BemPatrimonial | null>(null);
   const [paraExcluir, setParaExcluir] = useState<BemPatrimonial | null>(null);
-  const [paraEmprestar, setParaEmprestar] = useState<BemPatrimonial | null>(null);
-  const [verHistorico, setVerHistorico] = useState<BemPatrimonial | null>(null);
-
-  async function devolverBem(b: BemPatrimonial) {
-    try {
-      await devolver.mutateAsync(b.id);
-      toast.success("Devolução registrada.");
-    } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Erro ao registrar a devolução.");
-    }
-  }
 
   const nomePorPolo = useMemo(
     () => new Map((polos ?? []).map((p) => [p.id, p.nome])),
@@ -145,7 +119,7 @@ export function PatrimonioPage() {
   function exportarCsv() {
     baixarCsv(
       `patrimonio-${new Date().toISOString().slice(0, 10)}`,
-      ["Categoria", "Descrição", "Tamanho", "Cor", "Qtd", "Valor unitário", "Valor total", "Estado", "Polo", "Com quem está", "Nº patrimônio", "Aquisição", "Observações"],
+      ["Categoria", "Descrição", "Tamanho", "Cor", "Qtd", "Valor unitário", "Valor total", "Estado", "Polo", "Nº patrimônio", "Aquisição", "Observações"],
       filtrados.map((b) => [
         CATEGORIA_BEM_LABEL[b.categoria] ?? "",
         b.descricao,
@@ -156,7 +130,6 @@ export function PatrimonioPage() {
         (b.quantidade * b.valorUnitario).toFixed(2),
         ESTADO_BEM_LABEL[b.estado] ?? "",
         nomePolo(b.poloId),
-        nomeAluno(b.alunoId) ?? "",
         b.numeroPatrimonio ?? "",
         b.dataAquisicao ? dataCurtaBR(b.dataAquisicao) : "",
         b.observacoes ?? "",
@@ -201,7 +174,7 @@ export function PatrimonioPage() {
         <Card>
           <CardContent className="p-4">
             <p className="mb-3 text-sm font-medium">
-              Disponibilidade de quimonos e faixas (por tamanho)
+              Disponibilidade de quimonos, faixas e tatames
             </p>
             <div className="flex flex-wrap gap-2">
               {disponibilidade.map((g) => {
@@ -296,7 +269,7 @@ export function PatrimonioPage() {
                 <TableHead className="text-right">Valor total</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Polo</TableHead>
-                <TableHead>Com quem está</TableHead>
+                <TableHead className="text-right">Disponível</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -312,7 +285,7 @@ export function PatrimonioPage() {
 
               {!isLoading && filtrados.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="py-10 text-center text-muted-foreground">
                     Nenhum bem cadastrado. Comece adicionando um.
                   </TableCell>
                 </TableRow>
@@ -344,68 +317,28 @@ export function PatrimonioPage() {
                     </TableCell>
                     <TableCell className="text-muted-foreground">{ESTADO_BEM_LABEL[b.estado]}</TableCell>
                     <TableCell className="text-muted-foreground">{nomePolo(b.poloId)}</TableCell>
-                    <TableCell>
-                      {nomeAluno(b.alunoId) ? (
-                        <Badge variant="secondary">{nomeAluno(b.alunoId)}</Badge>
-                      ) : (b.categoria === 0 || b.categoria === 1) ? (
-                        <span className="text-xs text-emerald-600 dark:text-emerald-400">
-                          Disponível
-                        </span>
+                    <TableCell className="text-right tabular-nums">
+                      {(b.categoria === 0 || b.categoria === 1 || b.categoria === 2) ? (
+                        (() => {
+                          const livres = b.quantidade - (b.alocadosAbertos ?? 0);
+                          return (
+                            <span
+                              className={
+                                livres > 0
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-muted-foreground"
+                              }
+                            >
+                              {livres}/{b.quantidade}
+                            </span>
+                          );
+                        })()
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        {(b.categoria === 0 || b.categoria === 1) && (
-                          <>
-                            {b.alunoId != null ? (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => {
-                                    if (!imprimirComodato(b, nomeAluno(b.alunoId) ?? ""))
-                                      toast.error("Permita pop-ups para o PDF.");
-                                  }}
-                                  aria-label="Termo de comodato"
-                                  title="Termo de comodato (PDF)"
-                                >
-                                  <FileText className="size-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => devolverBem(b)}
-                                  disabled={devolver.isPending}
-                                  aria-label="Registrar devolução"
-                                  title="Registrar devolução"
-                                >
-                                  <RotateCcw className="size-4" />
-                                </Button>
-                              </>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setParaEmprestar(b)}
-                                aria-label="Emprestar"
-                                title="Emprestar"
-                              >
-                                <Handshake className="size-4" />
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setVerHistorico(b)}
-                              aria-label="Histórico de empréstimos"
-                              title="Histórico de empréstimos"
-                            >
-                              <History className="size-4" />
-                            </Button>
-                          </>
-                        )}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -440,20 +373,6 @@ export function PatrimonioPage() {
         onOpenChange={setDialog}
         bem={emEdicao}
         polos={polos ?? []}
-      />
-
-      <EmprestarBemDialog
-        aberto={paraEmprestar !== null}
-        onOpenChange={(o) => !o && setParaEmprestar(null)}
-        bem={paraEmprestar}
-        alunos={alunos ?? []}
-      />
-
-      <HistoricoBemDialog
-        aberto={verHistorico !== null}
-        onOpenChange={(o) => !o && setVerHistorico(null)}
-        bem={verHistorico}
-        nomeAluno={nomeAluno}
       />
 
       <ConfirmDialog

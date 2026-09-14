@@ -91,9 +91,6 @@ export function BemFormDialog({ aberto, onOpenChange, bem, polos }: Props) {
         // Tamanho/cor só valem para vestuário; nas demais categorias vão zerados.
         tamanho: vestuario ? tamanho.trim() : "",
         cor: vestuario ? cor.trim() : "",
-        // O empréstimo é gerido pelas ações Emprestar/Devolver; ao editar o bem,
-        // preserva quem já está com ele.
-        alunoId: bem?.alunoId ?? null,
       });
       toast.success(editando ? "Bem atualizado." : "Bem cadastrado.");
       onOpenChange(false);

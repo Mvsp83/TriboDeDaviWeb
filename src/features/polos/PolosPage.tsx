@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2, MapPin, Users } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, MapPin, Users, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
 import { usePolos, useExcluirPolo } from "@/features/polos/polosApi";
 import { PoloFormDialog } from "@/features/polos/PoloFormDialog";
+import { useAuth } from "@/features/auth/AuthContext";
+import { VinculosPatrimonio } from "@/features/patrimonio/VinculosPatrimonio";
 import { ApiError } from "@/lib/api";
 import type { HorarioTurma, Polo } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -11,6 +13,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const DIA_CURTO: Record<number, string> = {
   0: "Dom",
@@ -36,11 +44,15 @@ function agruparPorTurma(horarios: HorarioTurma[]): Map<number, HorarioTurma[]> 
 export function PolosPage() {
   const { data: polos, isLoading, isError } = usePolos();
   const excluir = useExcluirPolo();
+  const { sessao } = useAuth();
+  // Tatames são patrimônio: o vínculo só aparece com o módulo financeiro.
+  const temPatrimonio = sessao?.modulos.includes("financeiro") ?? false;
 
   const [filtro, setFiltro] = useState("");
   const [dialogAberto, setDialogAberto] = useState(false);
   const [poloEdicao, setPoloEdicao] = useState<Polo | null>(null);
   const [poloExcluir, setPoloExcluir] = useState<Polo | null>(null);
+  const [poloTatames, setPoloTatames] = useState<Polo | null>(null);
 
   const filtrados = useMemo(() => {
     const q = filtro.toLocaleLowerCase("pt-BR");
@@ -130,6 +142,17 @@ export function PolosPage() {
                   {polo.nome}
                 </h3>
                 <div className="flex gap-1">
+                  {temPatrimonio && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setPoloTatames(polo)}
+                      aria-label="Tatames do polo"
+                      title="Tatames vinculados"
+                    >
+                      <LayoutGrid className="size-4" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -217,6 +240,24 @@ export function PolosPage() {
         onOpenChange={setDialogAberto}
         polo={poloEdicao}
       />
+
+      <Dialog
+        open={poloTatames !== null}
+        onOpenChange={(o) => !o && setPoloTatames(null)}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Tatames — {poloTatames?.nome}</DialogTitle>
+          </DialogHeader>
+          {poloTatames && (
+            <VinculosPatrimonio
+              destino={{ tipo: "polo", id: poloTatames.id, nome: poloTatames.nome }}
+              categorias={[2]}
+              podeGerenciar
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
         aberto={poloExcluir !== null}
