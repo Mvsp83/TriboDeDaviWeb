@@ -54,7 +54,42 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const ETAPAS = ["Polo", "Dados", "Saúde", "Termos"] as const;
+// Cada contrato/autorização em sua própria etapa, para ficar claro o que se
+// está aceitando em cada passo.
+const ETAPAS = [
+  "Polo",
+  "Dados",
+  "Saúde",
+  "Participação",
+  "Comodato",
+  "Imagem",
+  "Dados e assinatura",
+] as const;
+
+// Caixa de um contrato: texto rolável + aceite. Uma por etapa de termo.
+function TermoBox({
+  texto,
+  marcado,
+  onToggle,
+  rotulo,
+}: {
+  texto: string;
+  marcado: boolean;
+  onToggle: (v: boolean) => void;
+  rotulo: string;
+}) {
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <div className="max-h-72 overflow-y-auto whitespace-pre-line text-xs text-muted-foreground">
+        {texto}
+      </div>
+      <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm font-medium">
+        <input type="checkbox" checked={marcado} onChange={(e) => onToggle(e.target.checked)} />
+        {rotulo}
+      </label>
+    </div>
+  );
+}
 
 function Campo({
   label,
@@ -221,8 +256,16 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
         return "Liste os medicamentos (ou escreva NÃO).";
     }
     if (etapa === 3) {
-      if (!aceitouTermo || !aceitouComodato || !aceitouImagem || !aceitouLgpd)
-        return "Aceite todos os termos para concluir.";
+      if (!aceitouTermo) return "Aceite o termo de participação.";
+    }
+    if (etapa === 4) {
+      if (!aceitouComodato) return "Aceite o termo de comodato.";
+    }
+    if (etapa === 5) {
+      if (!aceitouImagem) return "Autorize o uso de imagem e voz para concluir.";
+    }
+    if (etapa === 6) {
+      if (!aceitouLgpd) return "Autorize o tratamento dos dados (LGPD).";
       if (!assinatura.trim()) return "Assine com o nome completo.";
     }
     return null;
@@ -502,28 +545,47 @@ export function MatriculaAdultoPage({ onVoltar }: { onVoltar?: () => void }) {
           )}
 
           {etapa === 3 && (
+            <TermoBox
+              texto={TERMO_PARTICIPACAO}
+              marcado={aceitouTermo}
+              onToggle={setAceitouTermo}
+              rotulo="Li e aceito o termo de participação."
+            />
+          )}
+
+          {etapa === 4 && (
+            <TermoBox
+              texto={TERMO_COMODATO}
+              marcado={aceitouComodato}
+              onToggle={setAceitouComodato}
+              rotulo="Li e aceito o termo de comodato (uniforme)."
+            />
+          )}
+
+          {etapa === 5 && (
             <>
-              {[
-                { texto: TERMO_PARTICIPACAO, on: aceitouTermo, set: setAceitouTermo, rot: "Li e aceito o termo de participação." },
-                { texto: TERMO_COMODATO, on: aceitouComodato, set: setAceitouComodato, rot: "Li e aceito o termo de comodato (uniforme)." },
-                { texto: TERMO_IMAGEM, on: aceitouImagem, set: setAceitouImagem, rot: "Autorizo o uso de imagem e voz." },
-                { texto: TERMO_LGPD, on: aceitouLgpd, set: setAceitouLgpd, rot: "Autorizo o tratamento dos dados (LGPD)." },
-              ].map((t, i) => (
-                <div key={i} className="rounded-lg border border-border p-3">
-                  <div className="max-h-40 overflow-y-auto whitespace-pre-line text-xs text-muted-foreground">
-                    {t.texto}
-                  </div>
-                  <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm font-medium">
-                    <input type="checkbox" checked={t.on} onChange={(e) => t.set(e.target.checked)} />
-                    {t.rot}
-                  </label>
-                </div>
-              ))}
+              <TermoBox
+                texto={TERMO_IMAGEM}
+                marcado={aceitouImagem}
+                onToggle={setAceitouImagem}
+                rotulo="Autorizo o uso de imagem e voz."
+              />
+              <FotoInscricao onChange={setFotoInscricaoId} />
+            </>
+          )}
+
+          {etapa === 6 && (
+            <>
+              <TermoBox
+                texto={TERMO_LGPD}
+                marcado={aceitouLgpd}
+                onToggle={setAceitouLgpd}
+                rotulo="Autorizo o tratamento dos dados (LGPD)."
+              />
               <p className="text-xs text-muted-foreground">{PRAZO_FILIACAO(ano)}</p>
               <Campo label="Assinatura (nome completo)" obrigatorio>
                 <Input value={assinatura} onChange={(e) => setAssinatura(e.target.value)} />
               </Campo>
-              <FotoInscricao onChange={setFotoInscricaoId} />
             </>
           )}
         </CardContent>
