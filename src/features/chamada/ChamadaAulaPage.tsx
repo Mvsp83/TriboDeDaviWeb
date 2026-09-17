@@ -49,6 +49,7 @@ function mensagemErro(e: unknown, padrao: string): string {
 export function ChamadaAulaPage() {
   const { aulaId: aulaIdParam } = useParams();
   const aulaId = Number(aulaIdParam);
+  const navigate = useNavigate();
 
   const { sessao } = useAuth();
   const admin = sessao?.isAdministrador ?? false;
@@ -65,6 +66,12 @@ export function ChamadaAulaPage() {
     const p = (polos ?? []).find((x) => x.id === aula?.poloId);
     return p?.nome ?? "-";
   }, [polos, aula]);
+
+  // Ausentes da chamada recém-salva, para oferecer o aviso aos responsáveis.
+  // Fica aqui (e não em ChamadaPendente) porque, ao salvar, a aula passa a
+  // "salva" e aquele componente é desmontado — o diálogo precisa sobreviver
+  // à troca para não fechar sozinho e voltar para a lista de aulas.
+  const [avisarAusentes, setAvisarAusentes] = useState<Aluno[] | null>(null);
 
   if (carregandoAulas) {
     return <Skeleton className="h-96 w-full" />;
@@ -83,6 +90,11 @@ export function ChamadaAulaPage() {
     );
   }
 
+  const concluirAviso = () => {
+    setAvisarAusentes(null);
+    navigate("/chamada");
+  };
+
   return (
     <div className="space-y-5">
       <VoltarLink />
@@ -91,8 +103,25 @@ export function ChamadaAulaPage() {
       {aula.presencaSalva ? (
         <ChamadaSalva aula={aula} podeEditar={podeEditar} />
       ) : (
-        <ChamadaPendente aula={aula} admin={admin} podeEditar={podeEditar} />
+        <ChamadaPendente
+          aula={aula}
+          admin={admin}
+          podeEditar={podeEditar}
+          onSalvou={(ausentes) =>
+            ausentes.length > 0 ? setAvisarAusentes(ausentes) : navigate("/chamada")
+          }
+        />
       )}
+
+      <AvisarFaltasDialog
+        aberto={avisarAusentes !== null}
+        onOpenChange={(v) => {
+          if (!v) concluirAviso();
+        }}
+        ausentes={avisarAusentes ?? []}
+        dataAula={aula.data}
+        onConcluir={concluirAviso}
+      />
     </div>
   );
 }
@@ -152,20 +181,20 @@ function ChamadaPendente({
   aula,
   admin,
   podeEditar,
+  onSalvou,
 }: {
   aula: Aula;
   admin: boolean;
   podeEditar: boolean;
+  // Chamada gravada: recebe os ausentes para o pai oferecer o aviso.
+  onSalvou: (ausentes: Aluno[]) => void;
 }) {
-  const navigate = useNavigate();
   const { data: alunos, isLoading } = useAlunos(admin);
   const salvar = useSalvarChamada();
   const { mapa: aptidao } = useMapaAptidao();
   const [marcadas, setMarcadas] = useState<Record<number, boolean>>({});
   const [confirmando, setConfirmando] = useState(false);
   const [alunoOcorrencias, setAlunoOcorrencias] = useState<{ id: number; nome: string } | null>(null);
-  // Ausentes da chamada recém-salva, para oferecer o aviso aos responsáveis.
-  const [avisarAusentes, setAvisarAusentes] = useState<Aluno[] | null>(null);
   const [lendoQr, setLendoQr] = useState(false);
 
   // Chamada já salva neste aparelho, aguardando internet (fila offline).
@@ -201,10 +230,9 @@ function ChamadaPendente({
               ? "Chamada salva no aparelho. Será enviada quando houver internet."
               : "Chamada salva com sucesso.",
           );
-          // Com faltas, oferece avisar os responsáveis antes de sair da tela.
-          const ausentes = roster.filter((a) => !marcadas[a.id]);
-          if (ausentes.length > 0) setAvisarAusentes(ausentes);
-          else navigate("/chamada");
+          // Entrega os ausentes ao pai: com faltas, ele abre o aviso aos
+          // responsáveis; sem faltas, volta direto para a lista.
+          onSalvou(roster.filter((a) => !marcadas[a.id]));
         },
         onError: (e) =>
           toast.error(mensagemErro(e, "Não foi possível salvar a chamada.")),
@@ -361,22 +389,6 @@ function ChamadaPendente({
         aberto={alunoOcorrencias !== null}
         onOpenChange={(o) => !o && setAlunoOcorrencias(null)}
       />
-
-      <AvisarFaltasDialog
-        aberto={avisarAusentes !== null}
-        onOpenChange={(v) => {
-          if (!v) {
-            setAvisarAusentes(null);
-            navigate("/chamada");
-          }
-        }}
-        ausentes={avisarAusentes ?? []}
-        dataAula={aula.data}
-        onConcluir={() => {
-          setAvisarAusentes(null);
-          navigate("/chamada");
-        }}
-      />
     </div>
   );
 }
@@ -530,32 +542,40 @@ function LinhaAluno({
 
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3">
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         {mostrarFoto && (
           <AlunoAvatar alunoId={alunoId ?? null} nome={nome} temFoto={temFoto} size={32} ampliavel />
         )}
-        <span className="truncate font-medium">{nome}</span>
-        {info && (
-          <span
-            className="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium"
-            style={{ backgroundColor: info.cor, color: info.texto }}
-          >
-            {info.nome}
-          </span>
-        )}
-        {apto && (
-          <span
-            title={`Apto ao exame — ${apto}`}
-            className="inline-flex shrink-0 items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-600"
-          >
-            <Award className="size-3.5" /> Apto
-          </span>
-        )}
-        {adulto && (
-          <span className="shrink-0 rounded-md bg-sky-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-sky-600">
-            Adulto
-          </span>
-        )}
+        {/* Nome ocupa a linha inteira; os selos descem para uma segunda linha
+            (que quebra) para não roubar espaço do nome no celular. */}
+        <div className="min-w-0 flex-1">
+          <span className="block truncate font-medium">{nome}</span>
+          {(info || apto || adulto) && (
+            <div className="mt-0.5 flex flex-wrap items-center gap-1">
+              {info && (
+                <span
+                  className="rounded px-1.5 py-0.5 text-[11px] font-medium"
+                  style={{ backgroundColor: info.cor, color: info.texto }}
+                >
+                  {info.nome}
+                </span>
+              )}
+              {apto && (
+                <span
+                  title={`Apto ao exame — ${apto}`}
+                  className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-600"
+                >
+                  <Award className="size-3.5" /> Apto
+                </span>
+              )}
+              {adulto && (
+                <span className="rounded-md bg-sky-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-sky-600">
+                  Adulto
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {onOcorrencia && (
