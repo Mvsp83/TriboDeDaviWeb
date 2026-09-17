@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Loader2, Megaphone, Upload, X, Flag } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Megaphone, Upload, X, Flag, Archive, RotateCcw } from "lucide-react";
 import { usePolos } from "@/features/polos/polosApi";
 import {
   useRecadosGerenciar,
@@ -157,6 +157,25 @@ export function RecadosPage() {
     }
   }
 
+  async function alternarAtivo(r: Recado) {
+    try {
+      await salvar.mutateAsync({
+        id: r.id,
+        titulo: r.titulo,
+        descricao: r.descricao,
+        categoria: r.categoria,
+        anunciante: r.anunciante ?? "",
+        contato: r.contato,
+        fotoArquivoId: r.fotoArquivoId ?? "",
+        expiraEm: r.expiraEm ? r.expiraEm.slice(0, 10) : null,
+        ativo: !r.ativo,
+      });
+      toast.success(r.ativo ? "Recado encerrado." : "Recado reativado.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Erro ao atualizar.");
+    }
+  }
+
   async function confirmarExclusao() {
     if (!paraExcluir) return;
     try {
@@ -170,7 +189,7 @@ export function RecadosPage() {
   }
 
   function statusDoRecado(r: Recado) {
-    if (!r.ativo) return <Badge variant="secondary">Inativo</Badge>;
+    if (!r.ativo) return <Badge variant="secondary">Encerrado</Badge>;
     if (r.expiraEm && new Date(r.expiraEm) < new Date())
       return <Badge variant="warning">Expirado</Badge>;
     return <Badge variant="success">No ar</Badge>;
@@ -283,6 +302,24 @@ export function RecadosPage() {
                   </p>
                 </div>
                 <div className="flex justify-end gap-1 pt-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => alternarAtivo(r)}
+                    disabled={salvar.isPending}
+                    title={
+                      r.ativo
+                        ? "Encerrar (marcar como vendido/indisponível)"
+                        : "Reativar"
+                    }
+                    aria-label={r.ativo ? "Encerrar" : "Reativar"}
+                  >
+                    {r.ativo ? (
+                      <Archive className="size-4" />
+                    ) : (
+                      <RotateCcw className="size-4" />
+                    )}
+                  </Button>
                   <Button variant="ghost" size="icon" onClick={() => abrirEdicao(r)} aria-label="Editar">
                     <Pencil className="size-4" />
                   </Button>
