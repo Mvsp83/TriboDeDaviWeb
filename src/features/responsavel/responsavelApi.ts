@@ -137,6 +137,30 @@ export async function obterPainel(): Promise<PainelResponsavel> {
   }
 }
 
+// Mural de recados (classificados da comunidade) — visível a quem está logado.
+export interface RecadoMural {
+  id: number;
+  titulo: string;
+  descricao: string;
+  categoria: number;
+  anunciante?: string | null;
+  contato: string;
+  poloId?: number | null;
+  dataCriacao: string;
+  expiraEm?: string | null;
+}
+
+export async function obterMural(): Promise<RecadoMural[]> {
+  try {
+    const { data } = await httpResp.get<ResultViewModel<RecadoMural[]>>(
+      ApiRotas.recadosMural,
+    );
+    return (unwrap(data) as RecadoMural[] | null) ?? [];
+  } catch (error) {
+    throw toApiError(error);
+  }
+}
+
 // O responsável autoriza (true) ou revoga (false) o uso de imagem do filho.
 export async function autorizarImagem(
   autoriza: boolean,

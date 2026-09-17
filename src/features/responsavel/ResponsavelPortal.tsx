@@ -12,6 +12,7 @@ import {
   CloudOff,
   AlertTriangle,
   ClipboardList,
+  Megaphone,
 } from "lucide-react";
 import { ApiError } from "@/lib/api";
 import {
@@ -29,9 +30,12 @@ import {
   lerFilaJustificativas,
   sincronizarJustificativas,
   ehErroDeRede,
+  obterMural,
   type PainelResponsavel,
   type PresencaItem,
+  type RecadoMural,
 } from "@/features/responsavel/responsavelApi";
+import { CATEGORIA_RECADO_LABEL } from "@/features/recados/tipos";
 import {
   calcularSelos,
   proximoSelo,
@@ -186,6 +190,7 @@ export function ResponsavelPortal() {
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [painel, setPainel] = useState<PainelResponsavel | null>(null);
+  const [mural, setMural] = useState<RecadoMural[]>([]);
   // Ano do ciclo em exibição (índices reiniciam por ano).
   const [anoSel, setAnoSel] = useState(new Date().getFullYear());
   // Ids das faltas com justificativa aguardando envio (fila offline).
@@ -207,6 +212,12 @@ export function ResponsavelPortal() {
       );
     }
     setPainel(await obterPainel());
+    // Mural é best-effort: uma falha aqui não pode derrubar o painel.
+    try {
+      setMural(await obterMural());
+    } catch {
+      /* ignora: mural indisponível não afeta o restante do portal */
+    }
     atualizarPendentes();
   }, [atualizarPendentes]);
 
@@ -261,6 +272,7 @@ export function ResponsavelPortal() {
   function sair() {
     clearRespToken();
     setPainel(null);
+    setMural([]);
     setCodigo("");
     setNascimento("");
   }
@@ -791,6 +803,47 @@ export function ResponsavelPortal() {
                     <span className="font-medium">{ev.titulo}</span>
                   </div>
                 ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Mural de recados — classificados da comunidade entre polos */}
+        <Card>
+          <CardContent className="p-5">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+              <Megaphone className="size-4" /> Mural de Recados
+            </h2>
+            {mural.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nenhum recado no momento.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {mural.map((r) => (
+                  <div key={r.id} className="rounded-lg border border-border p-3">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        {CATEGORIA_RECADO_LABEL[r.categoria] ?? "Outros"}
+                      </span>
+                      <span className="text-xs tabular-nums text-muted-foreground">
+                        {dataBR(r.dataCriacao)}
+                      </span>
+                    </div>
+                    <p className="font-semibold leading-tight">{r.titulo}</p>
+                    <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
+                      {r.descricao}
+                    </p>
+                    <p className="mt-2 text-sm">
+                      {r.anunciante ? <span>{r.anunciante} · </span> : null}
+                      <span className="font-medium">{r.contato}</span>
+                    </p>
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground">
+                  Anúncios da comunidade. O Instituto apenas hospeda e não se
+                  responsabiliza pelas negociações.
+                </p>
               </div>
             )}
           </CardContent>
