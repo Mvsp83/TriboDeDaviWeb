@@ -33,11 +33,12 @@ import {
   obterMural,
   obterMuralFoto,
   denunciarMural,
+  publicarNoMural,
   type PainelResponsavel,
   type PresencaItem,
   type RecadoMural,
 } from "@/features/responsavel/responsavelApi";
-import { CATEGORIA_RECADO_LABEL } from "@/features/recados/tipos";
+import { CATEGORIA_RECADO_LABEL, CATEGORIAS_RECADO } from "@/features/recados/tipos";
 import { RecadoFoto } from "@/features/recados/RecadoFoto";
 import {
   calcularSelos,
@@ -198,6 +199,16 @@ export function ResponsavelPortal() {
   const [denunciarAlvo, setDenunciarAlvo] = useState<RecadoMural | null>(null);
   const [motivoDenuncia, setMotivoDenuncia] = useState("");
   const [enviandoDenuncia, setEnviandoDenuncia] = useState(false);
+  // Publicar um recado pelo portal (nasce pendente de aprovação da equipe).
+  const [publicarAberto, setPublicarAberto] = useState(false);
+  const [enviandoPublicacao, setEnviandoPublicacao] = useState(false);
+  const [novoRecado, setNovoRecado] = useState({
+    titulo: "",
+    categoria: 0,
+    descricao: "",
+    anunciante: "",
+    contato: "",
+  });
   // Ano do ciclo em exibição (índices reiniciam por ano).
   const [anoSel, setAnoSel] = useState(new Date().getFullYear());
   // Ids das faltas com justificativa aguardando envio (fila offline).
@@ -282,6 +293,34 @@ export function ResponsavelPortal() {
     setMural([]);
     setCodigo("");
     setNascimento("");
+  }
+
+  async function enviarPublicacao() {
+    if (
+      !novoRecado.titulo.trim() ||
+      !novoRecado.descricao.trim() ||
+      !novoRecado.contato.trim()
+    ) {
+      toast.warning("Preencha título, descrição e contato.");
+      return;
+    }
+    setEnviandoPublicacao(true);
+    try {
+      await publicarNoMural({
+        titulo: novoRecado.titulo.trim(),
+        descricao: novoRecado.descricao.trim(),
+        categoria: novoRecado.categoria,
+        anunciante: novoRecado.anunciante.trim(),
+        contato: novoRecado.contato.trim(),
+      });
+      toast.success("Recado enviado! Aparece no mural após a equipe aprovar.");
+      setPublicarAberto(false);
+      setNovoRecado({ titulo: "", categoria: 0, descricao: "", anunciante: "", contato: "" });
+    } catch {
+      toast.error("Não foi possível enviar o recado.");
+    } finally {
+      setEnviandoPublicacao(false);
+    }
   }
 
   async function enviarDenuncia() {
@@ -833,9 +872,14 @@ export function ResponsavelPortal() {
         {/* Mural de recados — classificados da comunidade entre polos */}
         <Card>
           <CardContent className="p-5">
-            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-              <Megaphone className="size-4" /> Mural de Recados
-            </h2>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <Megaphone className="size-4" /> Mural de Recados
+              </h2>
+              <Button size="sm" variant="outline" onClick={() => setPublicarAberto(true)}>
+                Publicar
+              </Button>
+            </div>
             {mural.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Nenhum recado no momento.
@@ -937,6 +981,74 @@ export function ResponsavelPortal() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Publicar um recado no mural (entra pendente de aprovação) */}
+      <Dialog open={publicarAberto} onOpenChange={setPublicarAberto}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Publicar no mural</DialogTitle>
+            <DialogDescription>
+              Seu recado passa por aprovação da equipe antes de aparecer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="rec-titulo" className="mb-1.5">Título</Label>
+              <Input
+                id="rec-titulo"
+                value={novoRecado.titulo}
+                onChange={(e) => setNovoRecado((r) => ({ ...r, titulo: e.target.value }))}
+                placeholder="Ex.: Vendo bicicleta, Ofereço faxina…"
+              />
+            </div>
+            <div>
+              <Label htmlFor="rec-categoria" className="mb-1.5">Categoria</Label>
+              <select
+                id="rec-categoria"
+                value={novoRecado.categoria}
+                onChange={(e) =>
+                  setNovoRecado((r) => ({ ...r, categoria: Number(e.target.value) }))
+                }
+                className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm"
+              >
+                {CATEGORIAS_RECADO.map((c) => (
+                  <option key={c.valor} value={c.valor}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="rec-descricao" className="mb-1.5">Descrição</Label>
+              <Textarea
+                id="rec-descricao"
+                rows={4}
+                value={novoRecado.descricao}
+                onChange={(e) => setNovoRecado((r) => ({ ...r, descricao: e.target.value }))}
+                placeholder="Detalhes do anúncio."
+              />
+            </div>
+            <div>
+              <Label htmlFor="rec-contato" className="mb-1.5">Contato</Label>
+              <Input
+                id="rec-contato"
+                value={novoRecado.contato}
+                onChange={(e) => setNovoRecado((r) => ({ ...r, contato: e.target.value }))}
+                placeholder="WhatsApp / telefone / e-mail"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPublicarAberto(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={enviarPublicacao} disabled={enviandoPublicacao}>
+              {enviandoPublicacao && <Loader2 className="size-4 animate-spin" />}
+              Publicar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Denunciar um recado do mural */}
       <Dialog

@@ -305,6 +305,7 @@ export interface Recado {
   expiraEm?: string | null;
   criadoPor?: string | null;
   ativo: boolean;
+  aprovado: boolean;
 }
 
 // Denúncia de um recado (fila de moderação da equipe).

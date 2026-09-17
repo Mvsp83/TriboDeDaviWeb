@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Loader2, Megaphone, Upload, X, Flag, Archive, RotateCcw } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Megaphone, Upload, X, Flag, Archive, RotateCcw, CheckCircle2 } from "lucide-react";
 import { usePolos } from "@/features/polos/polosApi";
 import {
   useRecadosGerenciar,
@@ -8,6 +8,7 @@ import {
   useExcluirRecado,
   useDenuncias,
   useResolverDenuncia,
+  useAprovarRecado,
   uploadRecadoFoto,
   obterRecadoFoto,
   type RecadoForm,
@@ -58,6 +59,16 @@ export function RecadosPage() {
   const salvar = useSalvarRecado();
   const excluir = useExcluirRecado();
   const resolver = useResolverDenuncia();
+  const aprovar = useAprovarRecado();
+
+  async function aprovarRecado(r: Recado) {
+    try {
+      await aprovar.mutateAsync(r.id);
+      toast.success("Recado aprovado.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Erro ao aprovar.");
+    }
+  }
 
   async function removerPorDenuncia(recadoId: number) {
     try {
@@ -189,6 +200,7 @@ export function RecadosPage() {
   }
 
   function statusDoRecado(r: Recado) {
+    if (!r.aprovado) return <Badge variant="warning">Pendente</Badge>;
     if (!r.ativo) return <Badge variant="secondary">Encerrado</Badge>;
     if (r.expiraEm && new Date(r.expiraEm) < new Date())
       return <Badge variant="warning">Expirado</Badge>;
@@ -302,6 +314,19 @@ export function RecadosPage() {
                   </p>
                 </div>
                 <div className="flex justify-end gap-1 pt-1">
+                  {!r.aprovado && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => aprovarRecado(r)}
+                      disabled={aprovar.isPending}
+                      title="Aprovar (publicar no mural)"
+                      aria-label="Aprovar"
+                      className="text-emerald-600 hover:text-emerald-600"
+                    >
+                      <CheckCircle2 className="size-4" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"

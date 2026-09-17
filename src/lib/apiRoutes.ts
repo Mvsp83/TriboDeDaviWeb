@@ -283,6 +283,8 @@ export const ApiRotas = {
   recadosDenuncias: "/api/Recado/denuncias",
   recadoResolverDenuncia: (id: number) =>
     `/api/Recado/denuncias/${id}/resolver`,
+  recadoPortalCreate: "/api/Recado/portal",
+  recadoAprovar: (id: number) => `/api/Recado/${id}/aprovar`,
 
   relatoriosMeus: "/api/RelatorioSalvo/get-meus",
   relatorioCreate: "/api/RelatorioSalvo/create",

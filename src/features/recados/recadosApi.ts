@@ -108,3 +108,12 @@ export function useResolverDenuncia() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["recados"] }),
   });
 }
+
+// Aprova um recado pendente (vindo do portal).
+export function useAprovarRecado() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => apiPost(ApiRotas.recadoAprovar(id), {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["recados"] }),
+  });
+}

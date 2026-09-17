@@ -162,6 +162,21 @@ export async function obterMural(): Promise<RecadoMural[]> {
   }
 }
 
+// Publica um recado pelo portal — nasce pendente de aprovação da equipe.
+export async function publicarNoMural(payload: {
+  titulo: string;
+  descricao: string;
+  categoria: number;
+  anunciante: string;
+  contato: string;
+}): Promise<void> {
+  try {
+    await httpResp.post<ResultViewModel<null>>(ApiRotas.recadoPortalCreate, payload);
+  } catch (error) {
+    throw toApiError(error);
+  }
+}
+
 // Denuncia um recado do mural (pelo token do portal). Motivo é opcional.
 export async function denunciarMural(id: number, motivo: string): Promise<void> {
   try {
