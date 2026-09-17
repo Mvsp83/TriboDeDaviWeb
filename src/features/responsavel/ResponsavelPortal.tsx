@@ -32,6 +32,7 @@ import {
   ehErroDeRede,
   obterMural,
   obterMuralFoto,
+  denunciarMural,
   type PainelResponsavel,
   type PresencaItem,
   type RecadoMural,
@@ -193,6 +194,10 @@ export function ResponsavelPortal() {
   const [carregando, setCarregando] = useState(false);
   const [painel, setPainel] = useState<PainelResponsavel | null>(null);
   const [mural, setMural] = useState<RecadoMural[]>([]);
+  // Denúncia de um recado do mural (alvo + motivo + envio em curso).
+  const [denunciarAlvo, setDenunciarAlvo] = useState<RecadoMural | null>(null);
+  const [motivoDenuncia, setMotivoDenuncia] = useState("");
+  const [enviandoDenuncia, setEnviandoDenuncia] = useState(false);
   // Ano do ciclo em exibição (índices reiniciam por ano).
   const [anoSel, setAnoSel] = useState(new Date().getFullYear());
   // Ids das faltas com justificativa aguardando envio (fila offline).
@@ -277,6 +282,21 @@ export function ResponsavelPortal() {
     setMural([]);
     setCodigo("");
     setNascimento("");
+  }
+
+  async function enviarDenuncia() {
+    if (!denunciarAlvo) return;
+    setEnviandoDenuncia(true);
+    try {
+      await denunciarMural(denunciarAlvo.id, motivoDenuncia.trim());
+      toast.success("Denúncia enviada. A equipe vai analisar.");
+      setDenunciarAlvo(null);
+      setMotivoDenuncia("");
+    } catch {
+      toast.error("Não foi possível enviar a denúncia.");
+    } finally {
+      setEnviandoDenuncia(false);
+    }
   }
 
   // Justificar falta
@@ -847,6 +867,18 @@ export function ResponsavelPortal() {
                       {r.anunciante ? <span>{r.anunciante} · </span> : null}
                       <span className="font-medium">{r.contato}</span>
                     </p>
+                    <div className="mt-2">
+                      <button
+                        type="button"
+                        className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                        onClick={() => {
+                          setMotivoDenuncia("");
+                          setDenunciarAlvo(r);
+                        }}
+                      >
+                        Denunciar
+                      </button>
+                    </div>
                   </div>
                 ))}
                 <p className="text-xs text-muted-foreground">
@@ -905,6 +937,40 @@ export function ResponsavelPortal() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Denunciar um recado do mural */}
+      <Dialog
+        open={denunciarAlvo !== null}
+        onOpenChange={(v) => !v && setDenunciarAlvo(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Denunciar recado</DialogTitle>
+            <DialogDescription>
+              {denunciarAlvo?.titulo}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="motivo-denuncia">Motivo (opcional)</Label>
+            <Textarea
+              id="motivo-denuncia"
+              rows={3}
+              value={motivoDenuncia}
+              onChange={(e) => setMotivoDenuncia(e.target.value)}
+              placeholder="Conte por que este anúncio é impróprio."
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDenunciarAlvo(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={enviarDenuncia} disabled={enviandoDenuncia}>
+              {enviandoDenuncia && <Loader2 className="size-4 animate-spin" />}
+              Enviar denúncia
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Confirmar mudança de autorização de imagem (LGPD) */}
       <Dialog

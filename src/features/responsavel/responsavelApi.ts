@@ -162,6 +162,17 @@ export async function obterMural(): Promise<RecadoMural[]> {
   }
 }
 
+// Denuncia um recado do mural (pelo token do portal). Motivo é opcional.
+export async function denunciarMural(id: number, motivo: string): Promise<void> {
+  try {
+    await httpResp.post<ResultViewModel<null>>(ApiRotas.recadoDenunciar(id), {
+      motivo,
+    });
+  } catch (error) {
+    throw toApiError(error);
+  }
+}
+
 // Miniatura (data URI) de um recado, pelo token do portal. Vazio = sem foto.
 export async function obterMuralFoto(id: number): Promise<string> {
   try {

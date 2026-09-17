@@ -1,11 +1,13 @@
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Loader2, Megaphone, Upload, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Megaphone, Upload, X, Flag } from "lucide-react";
 import { usePolos } from "@/features/polos/polosApi";
 import {
   useRecadosGerenciar,
   useSalvarRecado,
   useExcluirRecado,
+  useDenuncias,
+  useResolverDenuncia,
   uploadRecadoFoto,
   obterRecadoFoto,
   type RecadoForm,
@@ -52,8 +54,28 @@ const VAZIO: RecadoForm = {
 export function RecadosPage() {
   const { data: recados, isLoading } = useRecadosGerenciar();
   const { data: polos } = usePolos();
+  const { data: denuncias } = useDenuncias();
   const salvar = useSalvarRecado();
   const excluir = useExcluirRecado();
+  const resolver = useResolverDenuncia();
+
+  async function removerPorDenuncia(recadoId: number) {
+    try {
+      await excluir.mutateAsync(recadoId);
+      toast.success("Recado removido.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Erro ao remover.");
+    }
+  }
+
+  async function ignorarDenuncia(id: number) {
+    try {
+      await resolver.mutateAsync(id);
+      toast.success("Denúncia ignorada.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Erro ao resolver.");
+    }
+  }
 
   const [dialog, setDialog] = useState(false);
   const [form, setForm] = useState<RecadoForm>(VAZIO);
@@ -170,6 +192,55 @@ export function RecadosPage() {
           <Plus className="size-4" /> Novo recado
         </Button>
       </div>
+
+      {(denuncias?.length ?? 0) > 0 && (
+        <Card className="border-destructive/40">
+          <CardContent className="p-4">
+            <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-destructive">
+              <Flag className="size-4" /> Denúncias pendentes ({denuncias!.length})
+            </p>
+            <ul className="space-y-2">
+              {denuncias!.map((d) => (
+                <li
+                  key={d.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-2.5 text-sm"
+                >
+                  <div className="min-w-0">
+                    <span className="font-medium">{d.recadoTitulo}</span>
+                    {d.motivo ? (
+                      <span className="text-muted-foreground"> — {d.motivo}</span>
+                    ) : (
+                      <span className="text-muted-foreground"> — (sem motivo)</span>
+                    )}
+                    <span className="block text-xs text-muted-foreground">
+                      por {d.denunciadoPor || "—"} · {dataCurtaBR(d.dataCriacao)}
+                    </span>
+                  </div>
+                  <div className="flex shrink-0 gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => ignorarDenuncia(d.id)}
+                      disabled={resolver.isPending}
+                    >
+                      Ignorar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => removerPorDenuncia(d.recadoId)}
+                      disabled={excluir.isPending}
+                    >
+                      <Trash2 className="size-4" /> Remover recado
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
 
       {isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -9,7 +9,7 @@ import {
   type ResultViewModel,
 } from "@/lib/api";
 import { ApiRotas } from "@/lib/apiRoutes";
-import type { Recado } from "@/types";
+import type { Recado, DenunciaRecado } from "@/types";
 
 // Envia a foto do recado (multipart) e devolve o id do storage.
 export async function uploadRecadoFoto(file: File): Promise<string> {
@@ -85,6 +85,26 @@ export function useExcluirRecado() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => apiDelete(ApiRotas.recadoDelete(id)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["recados"] }),
+  });
+}
+
+// ── Denúncias (moderação da equipe) ─────────────────────────────────────────
+export function useDenuncias(habilitado = true) {
+  return useQuery({
+    queryKey: ["recados", "denuncias"],
+    enabled: habilitado,
+    queryFn: async (): Promise<DenunciaRecado[]> => {
+      const lista = await apiGet<DenunciaRecado[] | null>(ApiRotas.recadosDenuncias);
+      return lista ?? [];
+    },
+  });
+}
+
+export function useResolverDenuncia() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => apiPost(ApiRotas.recadoResolverDenuncia(id), {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["recados"] }),
   });
 }

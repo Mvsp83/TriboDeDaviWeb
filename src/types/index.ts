@@ -307,6 +307,16 @@ export interface Recado {
   ativo: boolean;
 }
 
+// Denúncia de um recado (fila de moderação da equipe).
+export interface DenunciaRecado {
+  id: number;
+  recadoId: number;
+  recadoTitulo: string;
+  motivo?: string | null;
+  denunciadoPor?: string | null;
+  dataCriacao: string;
+}
+
 export interface AuthData {
   token: string;
   tokenExpires: string;
