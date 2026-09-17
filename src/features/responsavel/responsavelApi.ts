@@ -146,6 +146,7 @@ export interface RecadoMural {
   anunciante?: string | null;
   contato: string;
   poloId?: number | null;
+  fotoArquivoId?: string | null;
   dataCriacao: string;
   expiraEm?: string | null;
 }
@@ -158,6 +159,18 @@ export async function obterMural(): Promise<RecadoMural[]> {
     return (unwrap(data) as RecadoMural[] | null) ?? [];
   } catch (error) {
     throw toApiError(error);
+  }
+}
+
+// Miniatura (data URI) de um recado, pelo token do portal. Vazio = sem foto.
+export async function obterMuralFoto(id: number): Promise<string> {
+  try {
+    const { data } = await httpResp.get<ResultViewModel<{ dataUri: string }>>(
+      ApiRotas.recadoFoto(id),
+    );
+    return unwrap(data)?.dataUri ?? "";
+  } catch {
+    return "";
   }
 }
 

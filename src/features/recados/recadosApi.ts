@@ -1,7 +1,38 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
+import {
+  apiDelete,
+  apiGet,
+  apiPost,
+  apiPut,
+  http,
+  ApiError,
+  type ResultViewModel,
+} from "@/lib/api";
 import { ApiRotas } from "@/lib/apiRoutes";
 import type { Recado } from "@/types";
+
+// Envia a foto do recado (multipart) e devolve o id do storage.
+export async function uploadRecadoFoto(file: File): Promise<string> {
+  const form = new FormData();
+  form.append("arquivo", file);
+  const { data } = await http.post<ResultViewModel<{ fotoArquivoId: string }>>(
+    ApiRotas.recadoFotoUpload,
+    form,
+  );
+  if (data && data.success === false)
+    throw new ApiError(data.message ?? "Falha ao enviar a foto.");
+  return data?.data?.fotoArquivoId ?? "";
+}
+
+// Miniatura (data URI) da foto de um recado. String vazia = sem foto.
+export async function obterRecadoFoto(id: number): Promise<string> {
+  try {
+    const d = await apiGet<{ dataUri: string } | null>(ApiRotas.recadoFoto(id));
+    return d?.dataUri ?? "";
+  } catch {
+    return "";
+  }
+}
 
 // Mural (vigentes) — visível a quem está logado, inclusive o portal.
 export function useMural(habilitado = true) {
@@ -34,6 +65,7 @@ export type RecadoForm = {
   categoria: number;
   anunciante: string;
   contato: string;
+  fotoArquivoId?: string;
   expiraEm?: string | null;
   ativo?: boolean;
 };

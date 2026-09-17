@@ -300,6 +300,7 @@ export interface Recado {
   anunciante?: string | null;
   contato: string;
   poloId?: number | null;
+  fotoArquivoId?: string | null;
   dataCriacao: string;
   expiraEm?: string | null;
   criadoPor?: string | null;

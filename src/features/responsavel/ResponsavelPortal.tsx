@@ -31,11 +31,13 @@ import {
   sincronizarJustificativas,
   ehErroDeRede,
   obterMural,
+  obterMuralFoto,
   type PainelResponsavel,
   type PresencaItem,
   type RecadoMural,
 } from "@/features/responsavel/responsavelApi";
 import { CATEGORIA_RECADO_LABEL } from "@/features/recados/tipos";
+import { RecadoFoto } from "@/features/recados/RecadoFoto";
 import {
   calcularSelos,
   proximoSelo,
@@ -830,6 +832,13 @@ export function ResponsavelPortal() {
                         {dataBR(r.dataCriacao)}
                       </span>
                     </div>
+                    {r.fotoArquivoId ? (
+                      <RecadoFoto
+                        recadoId={r.id}
+                        buscar={obterMuralFoto}
+                        className="mb-1 h-36 w-full rounded-md object-cover"
+                      />
+                    ) : null}
                     <p className="font-semibold leading-tight">{r.titulo}</p>
                     <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
                       {r.descricao}

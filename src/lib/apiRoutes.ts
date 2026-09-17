@@ -277,6 +277,8 @@ export const ApiRotas = {
   recadoCreate: "/api/Recado/create",
   recadoUpdate: "/api/Recado/update",
   recadoDelete: (id: number) => `/api/Recado/delete/${id}`,
+  recadoFotoUpload: "/api/Recado/foto",
+  recadoFoto: (id: number) => `/api/Recado/${id}/foto`,
 
   relatoriosMeus: "/api/RelatorioSalvo/get-meus",
   relatorioCreate: "/api/RelatorioSalvo/create",

@@ -1,13 +1,16 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Loader2, Megaphone } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Megaphone, Upload, X } from "lucide-react";
 import { usePolos } from "@/features/polos/polosApi";
 import {
   useRecadosGerenciar,
   useSalvarRecado,
   useExcluirRecado,
+  uploadRecadoFoto,
+  obterRecadoFoto,
   type RecadoForm,
 } from "@/features/recados/recadosApi";
+import { RecadoFoto } from "@/features/recados/RecadoFoto";
 import { CATEGORIA_RECADO_LABEL, CATEGORIAS_RECADO } from "@/features/recados/tipos";
 import { dataCurtaBR } from "@/lib/format";
 import { ApiError } from "@/lib/api";
@@ -41,6 +44,7 @@ const VAZIO: RecadoForm = {
   categoria: 0,
   anunciante: "",
   contato: "",
+  fotoArquivoId: "",
   expiraEm: "",
   ativo: true,
 };
@@ -54,6 +58,10 @@ export function RecadosPage() {
   const [dialog, setDialog] = useState(false);
   const [form, setForm] = useState<RecadoForm>(VAZIO);
   const [paraExcluir, setParaExcluir] = useState<Recado | null>(null);
+  // Prévia local da foto recém-escolhida (objectURL) e estado de envio.
+  const [fotoPreview, setFotoPreview] = useState("");
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
+  const inputFoto = useRef<HTMLInputElement>(null);
 
   const nomePorPolo = useMemo(
     () => new Map((polos ?? []).map((p) => [p.id, p.nome])),
@@ -64,6 +72,7 @@ export function RecadosPage() {
 
   function abrirNovo() {
     setForm(VAZIO);
+    setFotoPreview("");
     setDialog(true);
   }
 
@@ -75,10 +84,38 @@ export function RecadosPage() {
       categoria: r.categoria,
       anunciante: r.anunciante ?? "",
       contato: r.contato,
+      fotoArquivoId: r.fotoArquivoId ?? "",
       expiraEm: r.expiraEm ? r.expiraEm.slice(0, 10) : "",
       ativo: r.ativo,
     });
+    setFotoPreview("");
     setDialog(true);
+  }
+
+  async function aoEscolherFoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione uma imagem.");
+      return;
+    }
+    setEnviandoFoto(true);
+    try {
+      const fotoArquivoId = await uploadRecadoFoto(file);
+      setForm((f) => ({ ...f, fotoArquivoId }));
+      setFotoPreview(URL.createObjectURL(file));
+      toast.success("Foto anexada.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Erro ao enviar a foto.");
+    } finally {
+      setEnviandoFoto(false);
+    }
+  }
+
+  function removerFoto() {
+    setForm((f) => ({ ...f, fotoArquivoId: "" }));
+    setFotoPreview("");
   }
 
   async function onSalvar() {
@@ -155,6 +192,13 @@ export function RecadosPage() {
                   <Badge variant="outline">{CATEGORIA_RECADO_LABEL[r.categoria]}</Badge>
                   {statusDoRecado(r)}
                 </div>
+                {r.fotoArquivoId ? (
+                  <RecadoFoto
+                    recadoId={r.id}
+                    buscar={obterRecadoFoto}
+                    className="h-32 w-full rounded-md object-cover"
+                  />
+                ) : null}
                 <h3 className="font-semibold leading-tight">{r.titulo}</h3>
                 <p className="whitespace-pre-wrap text-sm text-muted-foreground">
                   {r.descricao}
@@ -269,6 +313,50 @@ export function RecadosPage() {
                   Ativo (aparece no mural)
                 </label>
               )}
+            </div>
+
+            <div>
+              <Label className="mb-1.5">Foto (opcional)</Label>
+              {fotoPreview || form.fotoArquivoId ? (
+                <div className="flex items-center gap-3">
+                  <div className="size-20 shrink-0 overflow-hidden rounded-md border border-border bg-secondary">
+                    {fotoPreview ? (
+                      <img src={fotoPreview} alt="" className="size-full object-cover" />
+                    ) : form.id ? (
+                      <RecadoFoto
+                        recadoId={form.id}
+                        buscar={obterRecadoFoto}
+                        className="size-full object-cover"
+                      />
+                    ) : null}
+                  </div>
+                  <Button type="button" variant="ghost" size="sm" onClick={removerFoto}>
+                    <X className="size-4" /> Remover foto
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => inputFoto.current?.click()}
+                  disabled={enviandoFoto}
+                >
+                  {enviandoFoto ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Upload className="size-4" />
+                  )}
+                  Enviar foto
+                </Button>
+              )}
+              <input
+                ref={inputFoto}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={aoEscolherFoto}
+              />
             </div>
           </div>
           <DialogFooter>
