@@ -291,6 +291,21 @@ export interface BemPatrimonial {
   alocadosAbertos?: number;
 }
 
+// Mural de recados (classificados da comunidade entre polos).
+export interface Recado {
+  id: number;
+  titulo: string;
+  descricao: string;
+  categoria: number;
+  anunciante?: string | null;
+  contato: string;
+  poloId?: number | null;
+  dataCriacao: string;
+  expiraEm?: string | null;
+  criadoPor?: string | null;
+  ativo: boolean;
+}
+
 export interface AuthData {
   token: string;
   tokenExpires: string;

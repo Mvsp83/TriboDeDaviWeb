@@ -118,6 +118,9 @@ const PatrimonioPage = lazy(() =>
 const AvisosPage = lazy(() =>
   import("@/features/avisos/AvisosPage").then((m) => ({ default: m.AvisosPage })),
 );
+const RecadosPage = lazy(() =>
+  import("@/features/recados/RecadosPage").then((m) => ({ default: m.RecadosPage })),
+);
 const MensagensContatoPage = lazy(() =>
   import("@/features/contato/MensagensContatoPage").then((m) => ({
     default: m.MensagensContatoPage,
@@ -394,6 +397,7 @@ export default function App() {
           <Route path="chamada/:aulaId" element={<ChamadaAulaPage />} />
           {/* Relacionamento */}
           <Route element={<ProtectedRoute modulo="relacionamento" />}>
+            <Route path="recados" element={<RecadosPage />} />
             <Route path="calendario" element={<CalendarioPage />} />
             <Route path="fotos-treino/postar" element={<PostarFotoTreinoPage />} />
             <Route path="fotos-treino/moderacao" element={<ModeracaoFotosPage />} />

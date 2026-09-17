@@ -271,6 +271,13 @@ export const ApiRotas = {
   avisoCreate: "/api/Aviso/create",
   avisoDelete: (id: number) => `/api/Aviso/delete/${id}`,
 
+  // Mural de recados (classificados da comunidade).
+  recadosMural: "/api/Recado/mural",
+  recadosGerenciar: "/api/Recado/gerenciar",
+  recadoCreate: "/api/Recado/create",
+  recadoUpdate: "/api/Recado/update",
+  recadoDelete: (id: number) => `/api/Recado/delete/${id}`,
+
   relatoriosMeus: "/api/RelatorioSalvo/get-meus",
   relatorioCreate: "/api/RelatorioSalvo/create",
   relatorioDelete: (id: number) => `/api/RelatorioSalvo/delete/${id}`,

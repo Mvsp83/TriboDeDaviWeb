@@ -225,6 +225,12 @@ export const navGroups: NavGroup[] = [
             modulo: "relacionamento",
           },
           {
+            label: "Mural de Recados",
+            href: "/recados",
+            icon: Megaphone,
+            modulo: "relacionamento",
+          },
+          {
             label: "Documentos",
             icon: FileText,
             adminOnly: true,
