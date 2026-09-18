@@ -109,7 +109,9 @@ export function SitePublico() {
             Projeto social cristão · Jiu-jitsu · Desde {fundacao}
           </span>
           <h1 className="entra atraso-1 mt-5 max-w-3xl text-balance font-display text-5xl font-bold uppercase leading-[0.96] md:text-7xl">
-            {SITE.chamada}
+            Jiu-Jitsu que transforma{" "}
+            <span className="text-brand-red">vidas</span>, Propósito que
+            transforma <span className="text-primary">histórias</span>
           </h1>
           <p className="entra atraso-2 mt-5 max-w-xl text-pretty text-base text-muted-foreground md:text-lg">
             Aulas 100% gratuitas para crianças, adolescentes e adultos em{" "}
@@ -159,7 +161,9 @@ export function SitePublico() {
           {pilares.map((p, i) => (
             <div
               key={p.titulo}
-              className={`revela-${(i % 3) + 1} group rounded-xl border border-border bg-card p-6 transition-[transform,border-color,background-color] duration-[var(--dur-base)] ease-[var(--ease-out-premium)] hover:-translate-y-1.5 hover:border-primary`}
+              className={`revela-${
+                (i % 3) + 1
+              } group rounded-xl border border-border bg-card p-6 transition-[transform,border-color,background-color] duration-[var(--dur-base)] ease-[var(--ease-out-premium)] hover:-translate-y-1.5 hover:border-primary`}
             >
               <div className="font-display text-4xl font-bold leading-none text-secondary">
                 {String(i + 1).padStart(2, "0")}
@@ -219,13 +223,11 @@ export function SitePublico() {
 
       {/* ── Doação ───────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[linear-gradient(115deg,var(--color-background)_52%,color-mix(in_oklab,var(--color-brand-red)_16%,var(--color-background))_100%)]">
-        <MarcaTribo
-          className="marca-flutua pointer-events-none absolute -right-16 top-1/2 hidden w-[380px] -translate-y-1/2 text-primary opacity-10 md:block"
-        />
+        <MarcaTribo className="marca-flutua pointer-events-none absolute -right-16 top-1/2 hidden w-[380px] -translate-y-1/2 text-primary opacity-10 md:block" />
         <div className="revela relative mx-auto max-w-5xl px-4 py-16 md:px-8 md:py-24">
           <h2 className="max-w-2xl font-display text-3xl font-bold uppercase leading-[1.02] md:text-5xl">
-            Sua doação vira um <span className="text-primary">quimono</span>, uma{" "}
-            <span className="text-brand-red">faixa</span>, um tatame
+            Ajude-nos a continuar{" "}
+            <span className="text-primary">transformando vidas</span>
           </h2>
           <p className="mt-5 max-w-2xl text-pretty leading-relaxed text-muted-foreground">
             O instituto se mantém através de doações. Cada contribuição amplia o

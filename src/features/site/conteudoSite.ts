@@ -43,7 +43,7 @@ export interface CategoriaFaq {
 export const SITE = {
   nome: "Instituto Tribo de Davi",
   // Frase de efeito do topo.
-  chamada: "Jiu-Jitsu que transforma vidas. Propósito que transforma histórias",
+  chamada: "",
   subChamada:
     "Projeto social sem fins lucrativos que oferta Jiu-Jitsu para crianças, adolescentes e adultos, norteado pelos princípios cristãos, pela disciplina e pelo respeito. Em parceria com a comunidade, trabalhamos na formação de cidadãos e na prevenção e combate às drogas.",
 
