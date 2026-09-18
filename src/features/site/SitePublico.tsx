@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { HeartHandshake, ArrowRight, BookOpen } from "lucide-react";
+import { HeartHandshake, ArrowRight, ArrowUpRight } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import { useEstatisticasSite } from "@/features/site/siteApi";
 import { registrarEvento } from "@/features/metricas/metricaApi";
@@ -7,58 +7,50 @@ import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { CabecalhoSite } from "@/components/site/CabecalhoSite";
 import { RodapeSite } from "@/components/site/RodapeSite";
 import { MarcaTribo } from "@/components/site/MarcaTribo";
+import { FotoSite } from "@/components/site/FotoSite";
+import {
+  TrilhaFaixas,
+  LetreiroValores,
+  BotaoSite,
+} from "@/components/site/ElementosSite";
 import { BotaoVoltarAoTopo } from "@/components/BotaoVoltarAoTopo";
+import { useContador } from "@/lib/useContador";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
-import { Button } from "@/components/ui/button";
 
-// Faixas do jiu-jitsu infantil, com cores mais vivas para o herói do site.
-// `ponta` = cor do friso (onde ficam os graus); a preta tem ponta vermelha,
-// como a faixa preta real.
-const FAIXAS: { nome: string; cor: string; ponta?: string }[] = [
-  { nome: "Branca", cor: "#fbfbfa" },
-  { nome: "Cinza", cor: "#9aa1ac" },
-  { nome: "Amarela", cor: "#ffd60a" },
-  { nome: "Laranja", cor: "#ff7a1a" },
-  { nome: "Verde", cor: "#17c34a" },
-  { nome: "Azul", cor: "#2563ff" },
-  { nome: "Roxa", cor: "#9327ff" },
-  { nome: "Marrom", cor: "#7a3d15" },
-  { nome: "Preta", cor: "#161618", ponta: "#e11d2a" },
-];
-
-// Uma faixa "realista": barra com brilho de couro, friso (ponta) e 4 graus.
-// Tudo em CSS, sem imagens.
-function FaixaBelt({
-  nome,
-  cor,
-  ponta = "#141416",
+// Um número do herói: conta de 0 até o valor quando entra em tela.
+function NumeroHeroi({
+  alvo,
+  antes,
+  depois,
+  destaque,
 }: {
-  nome: string;
-  cor: string;
-  ponta?: string;
+  alvo: number;
+  antes?: string;
+  depois: string;
+  destaque?: boolean;
 }) {
-  const relevo = (c: string) =>
-    `linear-gradient(180deg, color-mix(in srgb, ${c} 78%, #fff) 0%, ${c} 46%, color-mix(in srgb, ${c} 82%, #000) 100%)`;
+  const { ref, valor } = useContador(alvo);
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      <div
-        className="relative h-6 w-full overflow-hidden rounded-[3px] shadow-md ring-1 ring-black/25"
-        style={{ background: relevo(cor) }}
-      >
-        {/* Friso com os 4 graus */}
-        <div
-          className="absolute inset-y-0 right-1.5 flex w-[30%] items-center justify-evenly px-1"
-          style={{ background: relevo(ponta) }}
-        >
-          {[0, 1, 2, 3].map((i) => (
-            <span
-              key={i}
-              className="h-full w-[2px] rounded-[1px] bg-white/90"
-            />
-          ))}
+    <div
+      ref={ref}
+      className="relative px-8 py-8 before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-brand-red data-[destaque=true]:before:bg-primary"
+      data-destaque={destaque}
+    >
+      {antes && (
+        <div className="font-display text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+          {antes}
         </div>
+      )}
+      <div
+        className={`font-display text-5xl font-bold leading-none tabular-nums md:text-6xl ${
+          destaque ? "text-primary" : "text-foreground"
+        }`}
+      >
+        {valor}
       </div>
-      <span className="text-xs font-medium text-muted-foreground">{nome}</span>
+      <div className="mt-1 font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
+        {depois}
+      </div>
     </div>
   );
 }
@@ -66,8 +58,9 @@ function FaixaBelt({
 // Site público do instituto: apresenta o projeto, recebe doações e dá acesso
 // ao portal. É a página que qualquer pessoa vê ao abrir o endereço.
 export function SitePublico() {
-  const { numeros, historia } = SITE;
+  const { numeros, historia, pilares } = SITE;
   const anoAtual = new Date().getFullYear();
+  const fundacao = numeros.desde || 2013;
   useDocumentTitle(`${SITE.nome} — Jiu-jitsu gratuito para crianças`);
 
   // Números reais do banco (crianças atendidas e polos); cai no valor estático
@@ -88,162 +81,164 @@ export function SitePublico() {
 
       <CabecalhoSite />
 
-      {/* Herói */}
+      {/* ── Herói ──────────────────────────────────────────────────────────
+          Foto de fundo com parallax (o fundo sobe enquanto a página desce),
+          dois véus de gradiente para garantir contraste do texto sobre
+          qualquer foto, e o filete dourado→vermelho da marca na lateral. */}
       <section
         id="conteudo"
         tabIndex={-1}
-        className="relative overflow-hidden outline-none"
-        style={{
-          background:
-            "linear-gradient(115deg, var(--color-background) 58%, color-mix(in oklab, var(--color-brand-red) 14%, var(--color-background)) 100%)",
-        }}
+        className="relative flex min-h-[560px] items-end overflow-hidden outline-none md:min-h-[640px]"
       >
-        {/* Barra diagonal dourado → vermelho da faixa */}
-        <div className="absolute left-0 top-20 hidden h-56 w-1.5 bg-gradient-to-b from-primary to-brand-red md:block" />
-
-        <div className="mx-auto grid max-w-5xl items-center gap-8 px-4 py-10 md:grid-cols-[1.1fr_0.9fr] md:py-16">
-          <div className="animate-page-enter">
-            <span className="inline-flex bg-primary px-3 py-1.5 font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground">
-              Projeto social cristão · Jiu-jitsu · Desde {numeros.desde || 2013}
-            </span>
-            <h1 className="mt-5 font-display text-4xl font-bold uppercase leading-[0.98] md:text-6xl lg:text-7xl">
-              {SITE.chamada}
-            </h1>
-            <p className="mt-5 max-w-xl text-pretty text-base text-muted-foreground md:text-lg">
-              {SITE.subChamada}
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <div className="border-l-4 border-primary bg-card px-4 py-3">
-                <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Atualmente são
-                </div>
-                <div className="font-display text-3xl font-bold leading-none text-primary">
-                  {totalAlunos}
-                </div>
-                <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
-                  alunos atendidos
-                </div>
-              </div>
-              <div className="border-l-4 border-brand-red bg-card px-4 py-3">
-                <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Em
-                </div>
-                <div className="font-display text-3xl font-bold leading-none">
-                  {totalPolos}
-                </div>
-                <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
-                  polos
-                </div>
-              </div>
-              {numeros.desde > 0 && (
-                <div className="border-l-4 border-brand-red bg-card px-4 py-3">
-                  <div className="font-display text-3xl font-bold leading-none">
-                    +{anoAtual - numeros.desde}
-                  </div>
-                  <div className="font-display text-[11px] uppercase tracking-wider text-muted-foreground">
-                    anos
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild variant="outline" size="lg">
-                <Link to="/informacoes#enderecos">Conheça os polos</Link>
-              </Button>
-            </div>
-          </div>
-
-          {/* Símbolo do instituto como marca central (desktop) */}
-          <div className="relative hidden min-h-[360px] items-center justify-center md:flex">
-            <div
-              className="absolute size-[420px] rounded-full"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(225,29,42,0.28), rgba(245,197,24,0.10) 45%, transparent 70%)",
-              }}
+        <div className="absolute inset-0">
+          <div className="parallax-heroi absolute -inset-[8%]">
+            <FotoSite
+              src="/heroi.jpg"
+              descricao="foto do treino — plano aberto no tatame"
+              alt="Crianças treinando jiu-jitsu no tatame do Instituto"
             />
-            <MarcaTribo className="marca-flutua relative w-[320px] text-primary" />
           </div>
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--color-background)_8%,color-mix(in_oklab,var(--color-background)_92%,transparent)_44%,transparent_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(0deg,var(--color-background)_0%,transparent_42%)]" />
         </div>
 
-        {/* Faixas: da branca à preta */}
-        <div className="mx-auto max-w-5xl px-4 pb-14 text-center md:pb-20">
-          <p className="mb-3 font-display text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Sua trajetória da faixa branca à preta
+        <div className="absolute left-0 top-24 hidden h-60 w-1.5 origin-top bg-gradient-to-b from-primary to-brand-red md:block" />
+
+        <div className="relative mx-auto w-full max-w-5xl px-4 pb-16 pt-24 md:px-8">
+          <span className="entra-curto inline-flex bg-primary px-3 py-1.5 font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground">
+            Projeto social cristão · Jiu-jitsu · Desde {fundacao}
+          </span>
+          <h1 className="entra atraso-1 mt-5 max-w-3xl text-balance font-display text-5xl font-bold uppercase leading-[0.96] md:text-7xl">
+            {SITE.chamada}
+          </h1>
+          <p className="entra atraso-2 mt-5 max-w-xl text-pretty text-base text-muted-foreground md:text-lg">
+            Aulas 100% gratuitas para crianças, adolescentes e adultos em{" "}
+            {SITE.contato.cidade || "Blumenau/SC"}. Disciplina, respeito e
+            acolhimento — dentro e fora do tatame.
           </p>
-          <div className="mx-auto grid max-w-3xl grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-x-1.5">
-            {FAIXAS.map((f) => (
-              <FaixaBelt
-                key={f.nome}
-                nome={f.nome}
-                cor={f.cor}
-                ponta={f.ponta}
-              />
-            ))}
+          <div className="entra atraso-3 mt-9 flex flex-wrap gap-3">
+            <BotaoSite to="/matricula">
+              Quero me inscrever
+              <ArrowRight className="size-4" />
+            </BotaoSite>
+            <BotaoSite to="/informacoes#enderecos" variante="contorno">
+              Conheça os polos
+            </BotaoSite>
           </div>
         </div>
       </section>
 
-      {/* Versículo do dia */}
-      <section className="mx-auto max-w-3xl px-4 pt-12 md:pt-16">
-        <VersiculoDoDia />
+      {/* ── Números ──────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 divide-y divide-border border-y border-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <NumeroHeroi
+          alvo={totalAlunos}
+          antes="Atualmente são"
+          depois="alunos atendidos"
+          destaque
+        />
+        <NumeroHeroi alvo={totalPolos} antes="Em" depois="polos" />
+        <NumeroHeroi
+          alvo={anoAtual - fundacao}
+          antes="Há mais de"
+          depois="anos transformando histórias"
+        />
+      </div>
+
+      {/* ── Faixas ───────────────────────────────────────────────────────── */}
+      <section className="mx-auto max-w-5xl px-4 py-16 md:px-8 md:py-20">
+        <TrilhaFaixas />
       </section>
 
-      {/* Pilares */}
-      <section className="mx-auto max-w-5xl px-4 py-14 md:py-20">
+      {/* ── Pilares ──────────────────────────────────────────────────────── */}
+      <section className="mx-auto max-w-5xl px-4 pb-16 md:px-8 md:pb-20">
         <h2 className="font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
-          O que fazemos?
+          O que fazemos
         </h2>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {SITE.pilares.map((p) => (
+        <div className="revela-regua mt-2 h-[3px] w-20 bg-brand-red" />
+        <div className="mt-9 grid gap-5 md:grid-cols-3">
+          {pilares.map((p, i) => (
             <div
               key={p.titulo}
-              className="rounded-xl border border-border bg-card p-5"
+              className={`revela-${(i % 3) + 1} group rounded-xl border border-border bg-card p-6 transition-[transform,border-color,background-color] duration-[var(--dur-base)] ease-[var(--ease-out-premium)] hover:-translate-y-1.5 hover:border-primary`}
             >
-              <h3 className="font-semibold">{p.titulo}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{p.texto}</p>
+              <div className="font-display text-4xl font-bold leading-none text-secondary">
+                {String(i + 1).padStart(2, "0")}
+              </div>
+              <h3 className="mt-3 font-display text-lg font-semibold uppercase tracking-tight text-primary">
+                {p.titulo}
+              </h3>
+              <p className="mt-3 text-pretty text-sm leading-relaxed text-muted-foreground">
+                {p.texto}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* História — resumida na home; o texto completo fica em /historia. */}
+      <LetreiroValores />
+
+      {/* ── Versículo ────────────────────────────────────────────────────── */}
+      <section className="mx-auto max-w-3xl px-4 py-16 md:py-20">
+        <VersiculoDoDia className="revela" />
+      </section>
+
+      {/* ── História ─────────────────────────────────────────────────────── */}
       {historia.length > 0 && (
-        <section className="border-t border-border">
-          <div className="mx-auto max-w-3xl px-4 py-12 text-center md:py-16">
-            <h2 className="flex items-center justify-center gap-2 font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
-              <BookOpen className="size-6 text-primary" />
-              Quem somos?
+        <section className="grid border-y border-border md:grid-cols-2">
+          <div className="relative min-h-[280px] md:min-h-[420px]">
+            <FotoSite
+              src="/historia.jpg"
+              descricao="foto de arquivo — primeira turma"
+              alt="Primeira turma do Instituto Tribo de Davi"
+              posicaoLegenda="centro"
+            />
+          </div>
+          <div className="revela flex flex-col justify-center px-4 py-14 md:px-12 md:py-16">
+            <span className="font-mono text-xs tracking-[0.16em] text-primary">
+              {fundacao} → hoje
+            </span>
+            <h2 className="mt-3 font-display text-3xl font-semibold uppercase leading-tight tracking-tight md:text-4xl">
+              Um sonho que virou missão
             </h2>
-            <Button asChild size="lg" className="mt-6">
-              <Link to="/historia">
-                Conheça nossa história
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
+            <p className="mt-4 text-pretty leading-relaxed text-muted-foreground">
+              Nascemos em {SITE.contato.cidade || "Blumenau/SC"} com a missão de
+              abrir oportunidades pelo esporte, pela cultura e pela assistência
+              social. Mais de uma década depois, centenas de alunos já passaram
+              pelos nossos tatames.
+            </p>
+            <Link
+              to="/historia"
+              className="mt-7 inline-flex w-fit items-center gap-2 border-b-2 border-primary pb-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em] transition-[gap,color] duration-[var(--dur-fast)] hover:gap-4 hover:text-primary"
+            >
+              Conheça nossa história
+              <ArrowUpRight className="size-4" />
+            </Link>
           </div>
         </section>
       )}
 
-      {/* Doação — no fundo mais claro, em destaque */}
-      <section className="border-t border-border bg-secondary/20">
-        <div className="mx-auto max-w-5xl px-4 py-14 md:py-20">
-          <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 md:p-10">
-            <h2 className="font-display text-2xl font-semibold uppercase tracking-tight md:text-3xl">
-              Ajude-nos a continuar transformando vidas
-            </h2>
-            <p className="mt-3 max-w-2xl text-muted-foreground">
-              O instituto se mantém através de doações. E sua contribuição pode
-              proporcionar um quimono, uma faixa e um tatame para podermos
-              atender a cada dia mais crianças.
-            </p>
-            <Button asChild size="lg" className="mt-6">
-              <Link to="/doar" onClick={() => registrarEvento("doar_click")}>
-                <HeartHandshake className="size-5" />
-                Seja um doador
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
+      {/* ── Doação ───────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-[linear-gradient(115deg,var(--color-background)_52%,color-mix(in_oklab,var(--color-brand-red)_16%,var(--color-background))_100%)]">
+        <MarcaTribo
+          className="marca-flutua pointer-events-none absolute -right-16 top-1/2 hidden w-[380px] -translate-y-1/2 text-primary opacity-10 md:block"
+        />
+        <div className="revela relative mx-auto max-w-5xl px-4 py-16 md:px-8 md:py-24">
+          <h2 className="max-w-2xl font-display text-3xl font-bold uppercase leading-[1.02] md:text-5xl">
+            Sua doação vira um <span className="text-primary">quimono</span>, uma{" "}
+            <span className="text-brand-red">faixa</span>, um tatame
+          </h2>
+          <p className="mt-5 max-w-2xl text-pretty leading-relaxed text-muted-foreground">
+            O instituto se mantém através de doações. Cada contribuição amplia o
+            número de crianças que conseguimos atender.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <BotaoSite to="/doar" onClick={() => registrarEvento("doar_click")}>
+              <HeartHandshake className="size-5" />
+              Doar por Pix
+            </BotaoSite>
+            <BotaoSite to="/transparencia" variante="contorno">
+              Ver transparência
+            </BotaoSite>
           </div>
         </div>
       </section>

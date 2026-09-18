@@ -324,3 +324,190 @@
     animation: none !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Site público — movimento de entrada por rolagem (scroll-driven animations).
+
+   `animation-timeline: view()` liga o progresso da animação à posição do
+   elemento na viewport: nada de IntersectionObserver, nada de JS, nada de
+   re-render. Onde o navegador não suporta (Safari < 26, Firefox), a animação
+   simplesmente roda uma vez no tempo — degradação limpa, nunca conteúdo
+   invisível.
+--------------------------------------------------------------------------- */
+
+@keyframes surge {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes surge-curto {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cresce-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes cresce-y {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* Parallax do fundo do herói: o fundo sobe devagar enquanto a página desce. */
+@keyframes parallax-heroi {
+  from {
+    transform: translateY(6%) scale(1.12);
+  }
+  to {
+    transform: translateY(-6%) scale(1.12);
+  }
+}
+
+/* Brilho que atravessa a faixa (couro polido). */
+@keyframes brilho-faixa {
+  to {
+    transform: translateX(220%);
+  }
+}
+
+/* Letreiro de valores, em loop. O conteúdo é duplicado no JSX: -50% = 1 volta. */
+@keyframes letreiro {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Anel que pulsa em volta do QR do Pix — chama a atenção sem piscar. */
+@keyframes anel-pix {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-primary) 35%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 16px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* Entrada ao rolar. `revela` é o caso geral; as variantes só mudam o trecho da
+   rolagem em que a animação acontece, para escalonar itens de uma mesma grade. */
+.revela,
+.revela-1,
+.revela-2,
+.revela-3 {
+  animation: surge 0.01s linear both;
+  animation-timeline: view();
+}
+.revela {
+  animation-range: entry 0% cover 30%;
+}
+.revela-1 {
+  animation-range: entry 0% cover 34%;
+}
+.revela-2 {
+  animation-range: entry 0% cover 40%;
+}
+.revela-3 {
+  animation-range: entry 0% cover 46%;
+}
+
+/* Régua/filete que "desenha" da esquerda para a direita ao entrar em tela. */
+.revela-regua {
+  transform-origin: left;
+  animation: cresce-x 0.01s linear both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 25%;
+}
+
+/* Entradas imediatas (herói): rodam ao montar, com atraso em cascata. */
+.entra {
+  animation: surge 0.8s var(--ease-out-premium) both;
+}
+.entra-curto {
+  animation: surge-curto 0.6s var(--ease-out-premium) both;
+}
+.atraso-1 {
+  animation-delay: 80ms;
+}
+.atraso-2 {
+  animation-delay: 180ms;
+}
+.atraso-3 {
+  animation-delay: 280ms;
+}
+
+.parallax-heroi {
+  animation: parallax-heroi linear both;
+  animation-timeline: view();
+  animation-range: cover 0% cover 100%;
+}
+
+.brilho-faixa::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: -40%;
+  width: 30%;
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.35),
+    transparent
+  );
+  animation: brilho-faixa 2.6s var(--ease-standard) infinite;
+}
+
+.letreiro {
+  width: max-content;
+  animation: letreiro 38s linear infinite;
+}
+
+.anel-pix {
+  animation: anel-pix 2.6s ease-out infinite;
+}
+
+/* Acessibilidade: quem pede menos movimento não vê nada disso rodar. O
+   conteúdo fica no estado final (visível), nunca escondido. */
+@media (prefers-reduced-motion: reduce) {
+  .revela,
+  .revela-1,
+  .revela-2,
+  .revela-3,
+  .revela-regua,
+  .entra,
+  .entra-curto,
+  .parallax-heroi,
+  .letreiro,
+  .anel-pix,
+  .brilho-faixa::after {
+    animation: none !important;
+  }
+}
