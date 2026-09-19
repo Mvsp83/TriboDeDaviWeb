@@ -49,7 +49,8 @@ import {
   type Selo,
   type ResumoFrequencia,
 } from "@/features/responsavel/conquistas";
-import { faixaInfo, proximaCorBase } from "@/features/alunos/faixa";
+import { faixaInfo, proximaCorBase, baseDaCor } from "@/features/alunos/faixa";
+import { CartaoAluno } from "@/features/responsavel/CartaoAluno";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { VersiculoDoDia } from "@/components/VersiculoDoDia";
 import { LogoLockup } from "@/components/Logo";
@@ -505,8 +506,14 @@ export function ResponsavelPortal() {
   // `?? []` protege enquanto a API não estiver atualizada (campos novos ausentes).
   const advertencias = painel.advertencias ?? [];
   const recados = painel.recados ?? [];
-  const faixaAtual = faixaInfo(aluno.faixa);
-  const proxFaixaBase = proximaCorBase(aluno.faixa, aluno.ehAdulto ?? false);
+  // Faixa para o CartaoAluno: índice da cor em FAIXAS (0=Branca..8=Preta),
+  // graus dentro da cor e a próxima cor pela progressão do público (adulto pula
+  // as cores infantis) — mantém a mesma regra do FaixaBadge anterior.
+  const baseCor = baseDaCor(aluno.faixa);
+  const indiceFaixa = baseCor / 5;
+  const grausFaixa = aluno.faixa - baseCor;
+  const proxBase = proximaCorBase(aluno.faixa, aluno.ehAdulto ?? false);
+  const indiceProxima = proxBase == null ? null : proxBase / 5;
 
   // Índices reiniciam por ano (ciclo anual): frequência, presenças e conquistas
   // contam só o ano selecionado. O seletor mostra os anos com registro.
@@ -528,43 +535,16 @@ export function ResponsavelPortal() {
       <main className="mx-auto flex max-w-2xl flex-col gap-4 p-4">
         <VersiculoDoDia />
 
-        {/* Aluno — cabeçalho com a cor da faixa em destaque. */}
-        <Card className="overflow-hidden">
-          <div className="h-2 w-full" style={{ backgroundColor: faixaAtual.cor }} />
-          <CardContent className="flex flex-wrap items-center gap-4 p-5">
-            {aluno.fotoDataUri ? (
-              <img
-                src={aluno.fotoDataUri}
-                alt={aluno.nome}
-                className="size-16 shrink-0 rounded-full border-2 object-cover"
-                style={{ borderColor: faixaAtual.cor }}
-              />
-            ) : (
-              <div
-                className="flex size-16 shrink-0 items-center justify-center rounded-full text-3xl"
-                style={{ backgroundColor: faixaAtual.cor, color: faixaAtual.texto }}
-                aria-hidden
-              >
-                🥋
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm text-muted-foreground">Oi! 👋</p>
-              <h1 className="truncate text-xl font-bold">{aluno.nome}</h1>
-              <p className="text-sm text-muted-foreground">
-                {aluno.polo || "—"} · Turma {aluno.turma}
-              </p>
-            </div>
-            <FaixaBadge faixa={aluno.faixa} />
-          </CardContent>
-          {proxFaixaBase != null && (
-            <div className="flex items-center gap-2 border-t border-border px-5 py-2.5 text-sm">
-              <span aria-hidden>🎯</span>
-              <span className="text-muted-foreground">Próxima faixa:</span>
-              <FaixaBadge faixa={proxFaixaBase} />
-            </div>
-          )}
-        </Card>
+        {/* Aluno — cabeçalho com a faixa desenhada (novo visual). */}
+        <CartaoAluno
+          nome={aluno.nome}
+          polo={aluno.polo || undefined}
+          turma={aluno.turma ? `Turma ${aluno.turma}` : undefined}
+          foto={aluno.fotoDataUri ?? undefined}
+          indiceFaixa={indiceFaixa}
+          graus={grausFaixa}
+          indiceProxima={indiceProxima}
+        />
 
         {/* Frequência (do ano selecionado) */}
         <Card>
