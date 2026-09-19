@@ -2,10 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  ArrowLeft,
-  ArrowRight,
   Camera,
-  Check,
   CircleAlert,
   Loader2,
   PartyPopper,
@@ -14,6 +11,11 @@ import {
   Copy,
   UserSearch,
 } from "lucide-react";
+import {
+  ProgressoEtapas,
+  CartaoEtapa,
+  NavegacaoEtapas,
+} from "@/features/matricula/PassosInscricao";
 import { ApiError } from "@/lib/api";
 import { OPCOES_FAIXA_BASE, baseDaCor } from "@/features/alunos/faixa";
 import {
@@ -52,7 +54,6 @@ import {
 } from "@/features/matricula/termos";
 import { PaginaPublica } from "@/components/PaginaPublica";
 import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -536,25 +537,9 @@ export function MatriculaPage() {
       </div>
 
       {/* Progresso */}
-      <div className="mb-5">
-        <div className="flex gap-1">
-          {ETAPAS.map((_, i) => (
-            <div
-              key={i}
-              className={cn(
-                "h-1.5 flex-1 rounded-full",
-                i <= etapa ? "bg-primary" : "bg-secondary",
-              )}
-            />
-          ))}
-        </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Etapa {etapa + 1} de {ETAPAS.length} · {ETAPAS[etapa]}
-        </p>
-      </div>
+      <ProgressoEtapas etapas={ETAPAS} atual={etapa} />
 
-      <Card>
-        <CardContent className="space-y-4 p-4 md:p-5">
+      <CartaoEtapa numero={etapa + 1} titulo={ETAPAS[etapa]}>
           {/* 1. Polo */}
           {etapa === 0 && (
             <>
@@ -1091,38 +1076,17 @@ export function MatriculaPage() {
               </Campo>
             </>
           )}
-        </CardContent>
-      </Card>
+      </CartaoEtapa>
 
       {/* Navegação */}
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <Button
-          variant="outline"
-          onClick={() =>
-            etapa === 0 ? navigate("/") : setEtapa((e) => Math.max(e - 1, 0))
-          }
-          disabled={enviar.isPending}
-        >
-          <ArrowLeft className="size-4" />
-          {etapa === 0 ? "Voltar ao início" : "Voltar"}
-        </Button>
-
-        {etapa < ETAPAS.length - 1 ? (
-          <Button onClick={avancar}>
-            Continuar
-            <ArrowRight className="size-4" />
-          </Button>
-        ) : (
-          <Button onClick={submeter} disabled={enviar.isPending}>
-            {enviar.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Check className="size-4" />
-            )}
-            Enviar inscrição
-          </Button>
-        )}
-      </div>
+      <NavegacaoEtapas
+        onAnterior={() =>
+          etapa === 0 ? navigate("/") : setEtapa((e) => Math.max(e - 1, 0))
+        }
+        onProximo={etapa < ETAPAS.length - 1 ? avancar : submeter}
+        ultima={etapa === ETAPAS.length - 1}
+        enviando={enviar.isPending}
+      />
     </div>
     </PaginaPublica>
   );
