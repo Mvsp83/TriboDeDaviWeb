@@ -1,18 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import {
-  HeartHandshake,
-  ArrowRight,
-  Users,
-  MapPin,
-  BarChart3,
-  Wallet,
-  FileText,
-  Building2,
-  ShieldCheck,
-  Landmark,
-} from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import {
   TRANSPARENCIA,
   temIdentificacao,
@@ -23,15 +11,18 @@ import {
 import { SITE } from "@/features/site/conteudoSite";
 import { useEstatisticasSite } from "@/features/site/siteApi";
 import { ApiRotas } from "@/lib/apiRoutes";
-import {
-  useGovernancaPublica,
-  ORGAO,
-} from "@/features/governanca/governancaApi";
+import { useGovernancaPublica, ORGAO } from "@/features/governanca/governancaApi";
 import { moeda } from "@/lib/format";
 import { urlSegura } from "@/lib/utils";
-import { useDocumentTitle } from "@/lib/useDocumentTitle";
-import { Button } from "@/components/ui/button";
-import { PaginaPublica } from "@/components/PaginaPublica";
+import {
+  PaginaSite,
+  SecaoSite,
+  BarraProporcao,
+  LinkDocumento,
+} from "@/components/site/PecasSite";
+import { BotaoSite } from "@/components/site/ElementosSite";
+import { useContador } from "@/lib/useContador";
+import { cn } from "@/lib/utils";
 
 // Balanço cadastrado (categoria Balanço do DocumentoContabil), exposto público.
 interface BalancoPublico {
@@ -40,8 +31,6 @@ interface BalancoPublico {
   dataCriacao: string | null;
 }
 
-// Ano do balanço: do nome do arquivo ("Balanço 2025.pdf") e, na falta, da data
-// de envio. 0 = sem ano identificável.
 function anoDoBalanco(b: BalancoPublico): number {
   const m = /(20\d{2})/.exec(b.nome);
   if (m) return Number(m[1]);
@@ -49,70 +38,41 @@ function anoDoBalanco(b: BalancoPublico): number {
   return 0;
 }
 
-function Numero({ valor, rotulo }: { valor: string; rotulo: string }) {
-  return (
-    <div className="text-center">
-      <div className="text-3xl font-bold tabular-nums text-primary md:text-4xl">
-        {valor}
-      </div>
-      <div className="mt-1 text-sm text-muted-foreground">{rotulo}</div>
-    </div>
-  );
-}
-
-// Barra proporcional simples (espelha a do Relatório de Impacto interno), sem
-// dependência de biblioteca de gráfico.
-function Distribuicao({
-  titulo,
-  itens,
+// Número grande que conta ao entrar em tela (sufixo opcional, ex.: "%").
+function NumeroImpacto({
+  alvo,
+  rotulo,
+  sufixo = "",
 }: {
-  titulo: string;
-  itens: { nome: string; quantidade: number }[];
+  alvo: number;
+  rotulo: string;
+  sufixo?: string;
 }) {
-  if (itens.length === 0) return null;
-  const total = itens.reduce((s, i) => s + i.quantidade, 0);
+  const { ref, valor } = useContador(alvo);
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <p className="mb-3 text-sm font-semibold">{titulo}</p>
-      <div className="space-y-2.5">
-        {itens.map((i) => {
-          const pct = total > 0 ? Math.round((i.quantidade * 100) / total) : 0;
-          return (
-            <div key={i.nome}>
-              <div className="flex justify-between text-sm">
-                <span className="truncate">{i.nome}</span>
-                <span className="shrink-0 tabular-nums text-muted-foreground">
-                  {i.quantidade} ({pct}%)
-                </span>
-              </div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-secondary">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-          );
-        })}
+    <div ref={ref} className="px-4 py-7 text-center md:px-6">
+      <div className="font-display text-4xl font-bold leading-none tabular-nums text-primary md:text-5xl">
+        {valor.toLocaleString("pt-BR")}
+        {sufixo}
       </div>
+      <div className="mt-2 text-[13px] text-muted-foreground">{rotulo}</div>
     </div>
   );
 }
 
-// Página pública de transparência e impacto: mostra o alcance do projeto e
-// para onde vão os recursos, voltada a doadores, parceiros e editais. Não usa
-// dados ao vivo — o conteúdo é curado em conteudoTransparencia.ts.
+// Página pública de transparência e impacto, no visual novo. Dados reais do
+// repo: conteúdo curado (conteudoTransparencia) + estatísticas ao vivo +
+// governança do cadastro + balanços cadastrados.
 export function TransparenciaPage() {
   const { intro, identificacao, impacto, financeiro, documentos, politicas } =
     TRANSPARENCIA;
 
-  // Governança vem do cadastro (admin), por ano de vigência.
   const [anoGov, setAnoGov] = useState<number | undefined>(undefined);
   const { data: gov } = useGovernancaPublica(anoGov);
   const diretoria = (gov?.membros ?? []).filter((m) => m.orgao === ORGAO.diretoria);
   const conselho = (gov?.membros ?? []).filter((m) => m.orgao === ORGAO.conselho);
   const anoAtual = new Date().getFullYear();
-  useDocumentTitle(`Transparência e impacto — ${SITE.nome}`);
 
-  // Atendidos e polos vêm do banco (ao vivo, público) — assim não envelhecem.
-  // O valor curado em conteudoTransparencia serve só de fallback offline.
   const { data: estatisticas } = useEstatisticasSite();
   const atendidos = estatisticas?.alunos ?? impacto.atendidos;
   const polos = estatisticas?.polos ?? impacto.polos;
@@ -121,8 +81,6 @@ export function TransparenciaPage() {
   const totalDespesas = financeiro.despesas.reduce((s, d) => s + d.valor, 0);
   const maxFin = Math.max(totalReceitas, totalDespesas, 1);
 
-  // Agrupa os documentos por ano (mais recente primeiro). Os sem ano vão para o
-  // fim, sob "Outros documentos" — assim o histórico mostra continuidade.
   const documentosPorAno = useMemo(() => {
     const grupos = new Map<number, DocumentoPublico[]>();
     for (const d of documentos) {
@@ -132,14 +90,12 @@ export function TransparenciaPage() {
       grupos.set(ano, lista);
     }
     return [...grupos.entries()].sort(([a], [b]) => {
-      if (a === 0) return 1; // "sem ano" sempre por último
+      if (a === 0) return 1;
       if (b === 0) return -1;
-      return b - a; // anos em ordem decrescente
+      return b - a;
     });
   }, [documentos]);
 
-  // Balanços cadastrados (público). fetch puro: página pública não pode ser
-  // redirecionada ao /login se a API responder erro.
   const { data: balancos = [] } = useQuery({
     queryKey: ["balancos-publicos"],
     queryFn: async (): Promise<BalancoPublico[]> => {
@@ -172,205 +128,200 @@ export function TransparenciaPage() {
 
   const baseApi = import.meta.env.VITE_API_BASE_URL || "";
 
+  // Números de impacto disponíveis (só os > 0 entram).
+  const numeros: { alvo: number; rotulo: string; sufixo?: string }[] = [
+    atendidos > 0 && { alvo: atendidos, rotulo: "crianças e adolescentes" },
+    polos > 0 && { alvo: polos, rotulo: "polos em funcionamento" },
+    impacto.aulas > 0 && { alvo: impacto.aulas, rotulo: "aulas realizadas" },
+    impacto.frequenciaMedia > 0 && {
+      alvo: impacto.frequenciaMedia,
+      rotulo: "frequência média",
+      sufixo: "%",
+    },
+    impacto.bairros > 0 && { alvo: impacto.bairros, rotulo: "bairros alcançados" },
+    impacto.escolas > 0 && { alvo: impacto.escolas, rotulo: "escolas de origem" },
+  ].filter(Boolean) as { alvo: number; rotulo: string; sufixo?: string }[];
+
+  const distribuicoes = [
+    { titulo: "Faixa etária", itens: impacto.faixasEtarias },
+    { titulo: "Graduação (faixa)", itens: impacto.graduacoes },
+  ].filter((b) => b.itens.length > 0);
+
   return (
-    <PaginaPublica>
-      {/* Herói */}
-      <section className="mx-auto max-w-5xl px-4 pb-10 pt-4 md:pb-14 md:pt-8">
-        <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-            <ShieldCheck className="size-3.5" />
-            Transparência e impacto
-          </span>
-          <h1 className="mt-4 text-balance text-3xl font-bold leading-tight tracking-tight md:text-5xl">
-            De onde vêm e para onde vão os recursos
-          </h1>
-          <p className="mt-4 text-pretty text-base text-muted-foreground md:text-lg">
-            {intro}
-          </p>
+    <PaginaSite
+      etiqueta={
+        <>
+          <ShieldCheck className="size-3.5" />
+          Transparência e impacto
+        </>
+      }
+      titulo={
+        <>
+          De onde vêm e <span className="text-primary">para onde vão</span> os recursos
+        </>
+      }
+      subtitulo={intro}
+      tituloDocumento={`Transparência e impacto — ${SITE.nome}`}
+    >
+      {/* Impacto */}
+      {temImpacto() && numeros.length > 0 && (
+        <div className="grid grid-cols-2 divide-x divide-y divide-border border-b border-border bg-card/40 md:grid-cols-4 md:divide-y-0">
+          {numeros.map((n) => (
+            <NumeroImpacto key={n.rotulo} alvo={n.alvo} rotulo={n.rotulo} sufixo={n.sufixo} />
+          ))}
         </div>
-      </section>
-
-      {/* Números de impacto */}
-      {temImpacto() && (
-        <section className="border-y border-border bg-secondary/30">
-          <div className="mx-auto max-w-5xl px-4 py-10">
-            <p className="mb-6 text-center text-sm text-muted-foreground">
-              Nossos números em {impacto.ano}
-            </p>
-            <div className="flex flex-wrap items-start justify-center gap-10 md:gap-16">
-              {atendidos > 0 && (
-                <Numero valor={String(atendidos)} rotulo="crianças e adolescentes" />
-              )}
-              {polos > 0 && (
-                <Numero valor={String(polos)} rotulo="polos em funcionamento" />
-              )}
-              {impacto.aulas > 0 && (
-                <Numero valor={String(impacto.aulas)} rotulo="aulas realizadas" />
-              )}
-              {impacto.frequenciaMedia > 0 && (
-                <Numero valor={`${impacto.frequenciaMedia}%`} rotulo="frequência média" />
-              )}
-            </div>
-
-            {/* Alcance territorial e escolar */}
-            {(impacto.bairros > 0 || impacto.escolas > 0) && (
-              <div className="mx-auto mt-8 flex max-w-md flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
-                {impacto.bairros > 0 && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <MapPin className="size-4 text-primary" />
-                    {impacto.bairros} bairros alcançados
-                  </span>
-                )}
-                {impacto.escolas > 0 && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Building2 className="size-4 text-primary" />
-                    {impacto.escolas} escolas de origem
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
       )}
 
-      {/* Distribuições */}
-      {(impacto.faixasEtarias.length > 0 || impacto.graduacoes.length > 0) && (
-        <section className="mx-auto max-w-5xl px-4 py-12 md:py-16">
-          <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
-            <BarChart3 className="size-6 text-primary" />
-            Quem atendemos
-          </h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <Distribuicao titulo="Faixa etária" itens={impacto.faixasEtarias} />
-            <Distribuicao titulo="Graduação (faixa)" itens={impacto.graduacoes} />
+      {/* Quem atendemos */}
+      {distribuicoes.length > 0 && (
+        <SecaoSite titulo="Quem atendemos">
+          <div className="grid gap-5 md:grid-cols-2">
+            {distribuicoes.map((b) => {
+              const total = b.itens.reduce((s, i) => s + i.quantidade, 0) || 1;
+              return (
+                <div key={b.titulo} className="rounded-2xl border border-border bg-card p-6">
+                  <p className="mb-5 font-display text-[13px] uppercase tracking-[0.14em] text-muted-foreground">
+                    {b.titulo}
+                  </p>
+                  {b.itens.map((d) => {
+                    const pct = Math.round((d.quantidade * 100) / total);
+                    return (
+                      <BarraProporcao
+                        key={d.nome}
+                        rotulo={d.nome}
+                        valor={`${d.quantidade} (${pct}%)`}
+                        porcentagem={pct}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            })}
           </div>
-        </section>
+        </SecaoSite>
       )}
 
-      {/* Transparência financeira */}
+      {/* Financeiro */}
       {temFinanceiro() && (
-        <section className="border-t border-border bg-secondary/20">
-          <div className="mx-auto max-w-5xl px-4 py-12 md:py-16">
-            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
-              <Wallet className="size-6 text-primary" />
-              Transparência financeira
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Exercício de {financeiro.ano}
-            </p>
-
-            <div className="mt-8 grid gap-8 md:grid-cols-2">
-              {financeiro.receitas.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">Receitas</h3>
-                    <span className="font-semibold tabular-nums text-success">
-                      {moeda(totalReceitas)}
+        <SecaoSite
+          titulo="Financeiro"
+          acessorio={
+            <span className="font-mono text-xs text-muted-foreground">
+              exercício de {financeiro.ano}
+            </span>
+          }
+        >
+          <div className="grid gap-9 md:grid-cols-2">
+            {[
+              {
+                titulo: "Receitas",
+                itens: financeiro.receitas,
+                total: totalReceitas,
+                cor: "var(--color-success, #22c55e)",
+                classeTotal: "text-success",
+              },
+              {
+                titulo: "Despesas",
+                itens: financeiro.despesas,
+                total: totalDespesas,
+                cor: "var(--color-destructive)",
+                classeTotal: "text-destructive",
+              },
+            ]
+              .filter((col) => col.itens.length > 0)
+              .map((col) => (
+                <div key={col.titulo}>
+                  <div className="flex items-baseline justify-between border-b border-border pb-3">
+                    <h3 className="font-display text-lg font-semibold uppercase tracking-wide">
+                      {col.titulo}
+                    </h3>
+                    <span
+                      className={cn(
+                        "font-display text-xl font-semibold tabular-nums",
+                        col.classeTotal,
+                      )}
+                    >
+                      {moeda(col.total)}
                     </span>
                   </div>
-                  <ul className="mt-4 space-y-3">
-                    {financeiro.receitas.map((r) => (
-                      <li key={r.categoria}>
-                        <div className="flex justify-between text-sm">
-                          <span className="truncate">{r.categoria}</span>
-                          <span className="shrink-0 tabular-nums text-muted-foreground">
-                            {moeda(r.valor)}
-                          </span>
-                        </div>
-                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-secondary">
-                          <div
-                            className="h-full rounded-full bg-success"
-                            style={{ width: `${(r.valor * 100) / maxFin}%` }}
-                          />
-                        </div>
-                      </li>
+                  <div className="mt-4">
+                    {col.itens.map((l) => (
+                      <BarraProporcao
+                        key={l.categoria}
+                        rotulo={l.categoria}
+                        valor={moeda(l.valor)}
+                        porcentagem={(l.valor * 100) / maxFin}
+                        cor={col.cor}
+                      />
                     ))}
-                  </ul>
-                </div>
-              )}
-
-              {financeiro.despesas.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">Despesas</h3>
-                    <span className="font-semibold tabular-nums text-destructive">
-                      {moeda(totalDespesas)}
-                    </span>
                   </div>
-                  <ul className="mt-4 space-y-3">
-                    {financeiro.despesas.map((d) => (
-                      <li key={d.categoria}>
-                        <div className="flex justify-between text-sm">
-                          <span className="truncate">{d.categoria}</span>
-                          <span className="shrink-0 tabular-nums text-muted-foreground">
-                            {moeda(d.valor)}
-                          </span>
-                        </div>
-                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-secondary">
-                          <div
-                            className="h-full rounded-full bg-destructive"
-                            style={{ width: `${(d.valor * 100) / maxFin}%` }}
-                          />
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
-              )}
-            </div>
-
-            {financeiro.observacao && (
-              <p className="mt-6 text-sm text-muted-foreground">{financeiro.observacao}</p>
-            )}
+              ))}
           </div>
-        </section>
+          {financeiro.observacao && (
+            <p className="mt-6 text-sm text-muted-foreground">{financeiro.observacao}</p>
+          )}
+        </SecaoSite>
       )}
 
-      {/* Documentos — agrupados por ano (histórico) */}
-      {documentos.length > 0 && (
-        <section className="mx-auto max-w-3xl px-4 py-12 md:py-16">
-          <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
-            <FileText className="size-6 text-primary" />
+      {/* Documentos + governança */}
+      <div className="grid border-t border-border md:grid-cols-2">
+        <div className="border-b border-border px-4 py-10 md:border-b-0 md:border-r md:px-8 md:py-12">
+          <h2 className="mb-5 font-display text-2xl font-semibold uppercase tracking-tight">
             Documentos
           </h2>
-          <div className="mt-6 space-y-8">
-            {documentosPorAno.map(([ano, itens]) => (
-              <div key={ano}>
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  {ano === 0 ? "Outros documentos" : ano}
-                </h3>
-                <ul className="flex flex-col gap-2">
+          {documentos.length === 0 && balancos.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nenhum documento publicado ainda.
+            </p>
+          ) : (
+            <>
+              {documentosPorAno.map(([ano, itens]) => (
+                <div key={`doc-${ano}`} className="mb-6">
+                  <p className="mb-2.5 font-mono text-xs tracking-[0.14em] text-primary">
+                    {ano === 0 ? "Outros documentos" : ano}
+                  </p>
                   {itens.map((d, i) => (
-                    <li key={i}>
-                      <a
-                        href={urlSegura(d.url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
-                      >
-                        <FileText className="size-4 shrink-0 text-primary" />
-                        <span className="truncate">{d.nome}</span>
-                        {d.tipo && (
-                          <span className="ml-auto shrink-0 rounded-full border border-border bg-secondary/60 px-2 py-0.5 text-xs text-muted-foreground">
-                            {d.tipo}
-                          </span>
-                        )}
-                      </a>
-                    </li>
+                    <LinkDocumento
+                      key={i}
+                      nome={d.nome}
+                      href={urlSegura(d.url) ?? "#"}
+                      tipo={d.tipo ?? "PDF"}
+                    />
                   ))}
-                </ul>
+                </div>
+              ))}
+              {balancosPorAno.map(([ano, itens]) => (
+                <div key={`bal-${ano}`} className="mb-6">
+                  <p className="mb-2.5 font-mono text-xs tracking-[0.14em] text-primary">
+                    Balanço {ano === 0 ? "" : ano}
+                  </p>
+                  {itens.map((b) => (
+                    <LinkDocumento
+                      key={b.id}
+                      nome={b.nome}
+                      href={`${baseApi}${ApiRotas.balancoPublicoDownload(b.id)}`}
+                    />
+                  ))}
+                </div>
+              ))}
+              {/* Políticas institucionais */}
+              <div className="mt-2">
+                <p className="mb-2.5 font-mono text-xs tracking-[0.14em] text-primary">
+                  Políticas
+                </p>
+                <LinkDocumento nome="Política de Privacidade" href="/politica-privacidade" tipo="PÁGINA" />
+                {politicas.codigoEtica && (
+                  <LinkDocumento nome="Código de Ética" href={urlSegura(politicas.codigoEtica) ?? "#"} />
+                )}
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+            </>
+          )}
+        </div>
 
-      {/* Governança — do cadastro, por ano de vigência */}
-      {(gov?.membros.length ?? 0) > 0 && (
-        <section className="mx-auto max-w-5xl px-4 py-12 md:py-16">
+        <div className="bg-card/40 px-4 py-10 md:px-8 md:py-12">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
-              <Landmark className="size-6 text-primary" />
+            <h2 className="font-display text-2xl font-semibold uppercase tracking-tight">
               Governança
             </h2>
             {(gov?.anos.length ?? 0) > 1 && (
@@ -380,11 +331,13 @@ export function TransparenciaPage() {
                     key={a}
                     type="button"
                     onClick={() => setAnoGov(a)}
-                    className={`rounded-full border px-3 py-1 text-sm ${
+                    aria-pressed={a === gov!.ano}
+                    className={cn(
+                      "rounded-full border px-3.5 py-1.5 font-mono text-xs transition-colors duration-[var(--dur-fast)]",
                       a === gov!.ano
-                        ? "border-primary/40 bg-primary/5 text-primary"
-                        : "border-border text-muted-foreground hover:text-foreground"
-                    }`}
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary",
+                    )}
                   >
                     {a}
                   </button>
@@ -392,185 +345,90 @@ export function TransparenciaPage() {
               </div>
             )}
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Quem dirige e fiscaliza o instituto — gestão {gov?.ano}.
+          <p className="mb-5 mt-2 text-[13px] text-muted-foreground">
+            Quem dirige e fiscaliza o instituto{gov?.ano ? ` — gestão ${gov.ano}` : ""}.
           </p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {diretoria.length > 0 && (
-              <div className="rounded-xl border border-border bg-card p-5">
-                <p className="mb-3 text-sm font-semibold">Diretoria</p>
-                <ul className="space-y-2.5">
-                  {diretoria.map((m) => (
-                    <li key={m.id} className="flex flex-wrap justify-between gap-x-4 text-sm">
-                      <span className="font-medium">{m.nome}</span>
-                      <span className="text-muted-foreground">{m.cargo}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {conselho.length > 0 && (
-              <div className="rounded-xl border border-border bg-card p-5">
-                <p className="mb-3 text-sm font-semibold">Conselho fiscal</p>
-                <ul className="space-y-2.5">
-                  {conselho.map((m) => (
-                    <li key={m.id} className="flex flex-wrap justify-between gap-x-4 text-sm">
-                      <span className="font-medium">{m.nome}</span>
-                      <span className="text-muted-foreground">{m.cargo}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
 
-      {/* Identificação legal */}
-      {temIdentificacao() && (
-        <section className="border-t border-border bg-secondary/20">
-          <div className="mx-auto max-w-5xl px-4 py-12 md:py-16">
-            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
-              <Building2 className="size-6 text-primary" />
-              Identificação
-            </h2>
-            <dl className="mt-6 grid gap-x-8 gap-y-4 text-sm sm:grid-cols-2">
-              {identificacao.razaoSocial && (
-                <div>
-                  <dt className="text-muted-foreground">Razão social</dt>
-                  <dd className="mt-0.5 font-medium">{identificacao.razaoSocial}</dd>
-                </div>
-              )}
-              {identificacao.cnpj && (
-                <div>
-                  <dt className="text-muted-foreground">CNPJ</dt>
-                  <dd className="mt-0.5 font-medium tabular-nums">{identificacao.cnpj}</dd>
-                </div>
-              )}
-              {identificacao.endereco && (
-                <div className="sm:col-span-2">
-                  <dt className="text-muted-foreground">Endereço</dt>
-                  <dd className="mt-0.5 font-medium">{identificacao.endereco}</dd>
-                </div>
-              )}
-              {identificacao.presidente && (
-                <div>
-                  <dt className="text-muted-foreground">Responsável legal</dt>
-                  <dd className="mt-0.5 font-medium">{identificacao.presidente}</dd>
-                </div>
-              )}
-              {identificacao.fundacao > 0 && (
-                <div>
-                  <dt className="text-muted-foreground">Em atividade desde</dt>
-                  <dd className="mt-0.5 font-medium tabular-nums">
-                    {identificacao.fundacao} ({anoAtual - identificacao.fundacao} anos)
-                  </dd>
-                </div>
-              )}
-            </dl>
-          </div>
-        </section>
-      )}
-
-      {/* Políticas institucionais */}
-      <section className="mx-auto max-w-3xl px-4 py-12 md:py-16">
-        <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
-          <ShieldCheck className="size-6 text-primary" />
-          Políticas
-        </h2>
-        <ul className="mt-6 flex flex-col gap-2">
-          {/* Política de Privacidade: página própria do site. */}
-          <li>
-            <Link
-              to="/politica-privacidade"
-              className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
-            >
-              <ShieldCheck className="size-4 shrink-0 text-primary" />
-              Política de Privacidade
-            </Link>
-          </li>
-          {politicas.codigoEtica && (
-            <li>
-              <a
-                href={urlSegura(politicas.codigoEtica)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
-              >
-                <FileText className="size-4 shrink-0 text-primary" />
-                Código de Ética
-              </a>
-            </li>
-          )}
-        </ul>
-      </section>
-
-      {/* Balanços por ano (cadastrados na contabilidade) */}
-      {balancos.length > 0 && (
-        <section className="border-t border-border bg-secondary/20">
-          <div className="mx-auto max-w-3xl px-4 py-12 md:py-16">
-            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight md:text-3xl">
-              <Landmark className="size-6 text-primary" />
-              Balanços por ano
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Balanços patrimoniais cadastrados, do mais recente ao mais antigo.
+          {(gov?.membros.length ?? 0) === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              A composição será publicada em breve.
             </p>
-            <div className="mt-6 space-y-8">
-              {balancosPorAno.map(([ano, itens]) => (
-                <div key={ano}>
-                  <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    {ano === 0 ? "Sem ano" : ano}
-                  </h3>
-                  <ul className="flex flex-col gap-2">
-                    {itens.map((b) => (
-                      <li key={b.id}>
-                        <a
-                          href={`${baseApi}${ApiRotas.balancoPublicoDownload(b.id)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex w-full items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm hover:border-primary/40 hover:text-foreground"
-                        >
-                          <FileText className="size-4 shrink-0 text-primary" />
-                          <span className="truncate">{b.nome}</span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+          ) : (
+            [
+              { titulo: "Diretoria", membros: diretoria },
+              { titulo: "Conselho fiscal", membros: conselho },
+            ]
+              .filter((g) => g.membros.length > 0)
+              .map((grupo) => (
+                <div
+                  key={grupo.titulo}
+                  className="mb-3.5 rounded-2xl border border-border bg-card p-5"
+                >
+                  <p className="mb-3 font-display text-[13px] uppercase tracking-[0.14em] text-primary">
+                    {grupo.titulo}
+                  </p>
+                  {grupo.membros.map((m) => (
+                    <div key={m.id} className="flex justify-between gap-3 py-1.5 text-sm">
+                      <span className="font-semibold">{m.nome}</span>
+                      <span className="text-muted-foreground">{m.cargo}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+              ))
+          )}
 
-      {/* Doação */}
-      <section className="mx-auto max-w-5xl px-4 py-14 md:py-20">
-        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 md:p-10">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            Cada doação vira aula gratuita
+          {/* Identificação legal */}
+          {temIdentificacao() && (
+            <div className="mt-7">
+              <p className="mb-3 font-display text-[13px] uppercase tracking-[0.14em] text-muted-foreground">
+                Identificação
+              </p>
+              {[
+                identificacao.razaoSocial && { rotulo: "Razão social", valor: identificacao.razaoSocial },
+                identificacao.cnpj && { rotulo: "CNPJ", valor: identificacao.cnpj },
+                identificacao.endereco && { rotulo: "Endereço", valor: identificacao.endereco },
+                identificacao.presidente && { rotulo: "Responsável legal", valor: identificacao.presidente },
+                identificacao.fundacao > 0 && {
+                  rotulo: "Em atividade desde",
+                  valor: `${identificacao.fundacao} (${anoAtual - identificacao.fundacao} anos)`,
+                },
+              ]
+                .filter(Boolean)
+                .map((i) => {
+                  const item = i as { rotulo: string; valor: string };
+                  return (
+                    <div
+                      key={item.rotulo}
+                      className="flex justify-between gap-3 border-b border-border/60 py-2.5 text-sm"
+                    >
+                      <span className="text-muted-foreground">{item.rotulo}</span>
+                      <span className="text-right font-semibold">{item.valor}</span>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Chamada final */}
+      <section className="border-t border-border bg-[linear-gradient(115deg,var(--color-background)_55%,color-mix(in_oklab,var(--color-brand-red)_15%,var(--color-background))_100%)]">
+        <div className="revela mx-auto max-w-5xl px-4 py-14 md:px-8 md:py-20">
+          <h2 className="max-w-2xl font-display text-3xl font-bold uppercase leading-[1.02] md:text-4xl">
+            Cada doação vira <span className="text-primary">aula gratuita</span>
           </h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            Sua contribuição paga quimono, faixa, tatame e o transporte das
-            crianças — e você acompanha por aqui o resultado dela.
+          <p className="mt-4 max-w-xl text-pretty leading-relaxed text-muted-foreground">
+            Sua contribuição paga quimono, faixa e tatame — e você acompanha o
+            resultado por aqui.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link to="/doar">
-                <HeartHandshake className="size-5" />
-                Doar por Pix
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link to="/">
-                <Users className="size-5" />
-                Conhecer o projeto
-              </Link>
-            </Button>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <BotaoSite to="/doar">Doar por Pix</BotaoSite>
+            <BotaoSite to="/historia" variante="contorno">
+              Conhecer o projeto
+            </BotaoSite>
           </div>
         </div>
       </section>
-    </PaginaPublica>
+    </PaginaSite>
   );
 }

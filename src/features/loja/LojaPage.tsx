@@ -1,17 +1,10 @@
 import { useState } from "react";
-import {
-  ShoppingBag,
-  CreditCard,
-  Info,
-  Package,
-  MessageCircle,
-} from "lucide-react";
+import { CreditCard, Info, Package, MessageCircle } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import { moeda } from "@/lib/format";
-import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PaginaPublica } from "@/components/PaginaPublica";
+import { PaginaSite, SecaoSite } from "@/components/site/PecasSite";
 import {
   useVitrine,
   useConfigLoja,
@@ -134,7 +127,7 @@ function CartaoProduto({ produto }: { produto: ProdutoVitrine }) {
     (config?.compraWhatsappHabilitada ?? false) && !!whatsapp;
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card">
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[transform,border-color] duration-[var(--dur-base)] ease-[var(--ease-out-premium)] hover:-translate-y-1.5 hover:border-primary">
       <div className="relative aspect-square w-full bg-secondary/40">
         {produto.temFoto ? (
           <img
@@ -157,8 +150,10 @@ function CartaoProduto({ produto }: { produto: ProdutoVitrine }) {
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold leading-tight">{produto.nome}</h3>
-          <span className="shrink-0 font-semibold text-primary">
+          <h3 className="font-display font-semibold uppercase leading-tight tracking-tight">
+            {produto.nome}
+          </h3>
+          <span className="shrink-0 font-display font-semibold text-primary">
             {moeda(produto.preco)}
           </span>
         </div>
@@ -217,23 +212,15 @@ function CartaoProduto({ produto }: { produto: ProdutoVitrine }) {
 // Vitrine pública da loja: mostra os produtos ativos cadastrados pelo admin.
 // É um mostruário — não há carrinho nem pagamento online.
 export function LojaPage() {
-  useDocumentTitle(`Loja — ${SITE.nome}`);
   const { data: produtos = [], isLoading } = useVitrine();
 
   return (
-    <PaginaPublica larguraMax="max-w-5xl">
-      <section className="mx-auto max-w-5xl px-4 pb-6 pt-4">
-        <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight md:text-4xl">
-          <ShoppingBag className="size-7 text-primary" />
-          Loja
-        </h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          Camisetas, hashguards e outros produtos do Instituto. Cada compra
-          ajuda a manter as aulas gratuitas.
-        </p>
-      </section>
-
-      <section className="mx-auto max-w-5xl px-4 pb-16">
+    <PaginaSite
+      titulo="Loja"
+      subtitulo="Camisetas, rashguards e outros produtos do Instituto. Cada compra ajuda a manter as aulas gratuitas."
+      tituloDocumento={`Loja — ${SITE.nome}`}
+    >
+      <SecaoSite>
         {isLoading ? (
           <p className="py-16 text-center text-sm text-muted-foreground">
             Carregando…
@@ -249,7 +236,7 @@ export function LojaPage() {
             ))}
           </div>
         )}
-      </section>
-    </PaginaPublica>
+      </SecaoSite>
+    </PaginaSite>
   );
 }
