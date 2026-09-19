@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import {
-  Camera,
   CalendarDays,
   X,
-  HeartHandshake,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Image as ImageIcon,
+  Play,
+  PlayCircle,
 } from "lucide-react";
 import {
   useFotosTreinoPublicas,
@@ -21,13 +20,11 @@ import {
   embedYoutube,
   type VideoGaleria,
 } from "@/features/galeria/videosGaleriaApi";
-import { Video, Play, PlayCircle } from "lucide-react";
 import { SITE } from "@/features/site/conteudoSite";
 import { dataBR } from "@/lib/format";
 import { midiaUrl } from "@/lib/api";
-import { useDocumentTitle } from "@/lib/useDocumentTitle";
-import { Button } from "@/components/ui/button";
-import { PaginaPublica } from "@/components/PaginaPublica";
+import { PaginaSite, SecaoSite } from "@/components/site/PecasSite";
+import { BotaoSite } from "@/components/site/ElementosSite";
 
 interface Opcao {
   id: string;
@@ -35,12 +32,10 @@ interface Opcao {
   fotos: FotoTreinoPublica[];
 }
 
-// Galeria pública organizada em opções: um álbum por polo (fotos dos professores)
-// + as coleções do admin (Graduações, Geral, Eventos). Clicar numa opção abre as
-// fotos daquela coleção.
+// Galeria pública no visual novo. Os dados são os reais do repo: um álbum por
+// polo (fotos dos professores) + as coleções do admin (Graduações, Geral,
+// Eventos), com lightbox de fotos e player de vídeos do YouTube.
 export function GaleriaPage() {
-  useDocumentTitle(`Galeria de fotos — ${SITE.nome}`);
-
   const { data: fotos } = useFotosTreinoPublicas();
   const { data: videos } = useVideosGaleria();
   const [selId, setSelId] = useState<string | null>(null);
@@ -52,7 +47,6 @@ export function GaleriaPage() {
   const opcoes = useMemo<Opcao[]>(() => {
     const lista = fotos ?? [];
 
-    // Um álbum por polo (categoria "polo"), na ordem alfabética.
     const nomesPolo = [
       ...new Set(
         lista
@@ -69,7 +63,6 @@ export function GaleriaPage() {
       ),
     }));
 
-    // Coleções do admin, na ordem Graduações → Eventos → Geral.
     const cats = ["graduacoes", "eventos", "geral"] as const;
     const deCategoria: Opcao[] = cats
       .map((cat) => ({
@@ -85,7 +78,7 @@ export function GaleriaPage() {
   const selecionada = opcoes.find((o) => o.id === selId) ?? null;
   const temFotos = opcoes.length > 0;
 
-  // Navegação do lightbox: anterior/próxima dentro da coleção aberta (com giro).
+  // Lightbox: anterior/próxima dentro da coleção aberta (com giro).
   const fotosColecao = selecionada?.fotos ?? [];
   const idxAmpliada = ampliada
     ? fotosColecao.findIndex((f) => f.id === ampliada.id)
@@ -96,7 +89,6 @@ export function GaleriaPage() {
     setAmpliada(fotosColecao[(idxAmpliada + delta + n) % n]);
   };
 
-  // Teclado: ←/→ trocam a foto; Esc fecha.
   useEffect(() => {
     if (!ampliada) return;
     const onKey = (e: KeyboardEvent) => {
@@ -110,28 +102,20 @@ export function GaleriaPage() {
   }, [ampliada, idxAmpliada, fotosColecao]);
 
   return (
-    <PaginaPublica>
-      {/* Título */}
-      <section className="mx-auto max-w-5xl px-4 pb-6 pt-4">
-        <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight md:text-4xl">
-          <Camera className="size-7 text-primary" />
-          Galeria de fotos
-        </h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          Momentos das aulas, graduações e eventos do projeto. Escolha uma coleção.
-        </p>
-      </section>
-
-      <section className="mx-auto max-w-5xl px-4 pb-12">
+    <PaginaSite
+      titulo="Galeria"
+      subtitulo="Treinos, graduações e eventos do projeto. Escolha uma coleção para ver as fotos."
+      tituloDocumento={`Galeria de fotos — ${SITE.nome}`}
+    >
+      <SecaoSite>
         {!temFotos ? (
-          <div className="rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
+          <p className="rounded-xl border border-dashed border-border px-6 py-14 text-center text-sm text-muted-foreground">
             Em breve — as fotos aparecerão aqui.
-          </div>
+          </p>
         ) : !selecionada ? (
-          // Tela principal: as opções (polos + coleções).
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-            {opcoes.map((o) => {
-              // Miniatura na capa (grade) — a foto cheia só ao ampliar.
+          // Álbuns (polos + coleções) no card novo.
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {opcoes.map((o, i) => {
               const capa = o.fotos[0]?.url
                 ? `${midiaUrl(o.fotos[0].url)}?mini=true`
                 : undefined;
@@ -140,47 +124,50 @@ export function GaleriaPage() {
                   key={o.id}
                   type="button"
                   onClick={() => setSelId(o.id)}
-                  className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-colors hover:border-primary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className={`revela-${(i % 3) + 1} group overflow-hidden rounded-xl border border-border bg-card text-left transition-[transform,border-color] duration-[var(--dur-base)] ease-[var(--ease-out-premium)] hover:-translate-y-1.5 hover:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
                 >
-                  <div className="aspect-square w-full overflow-hidden bg-secondary">
+                  <div className="aspect-square overflow-hidden bg-secondary">
                     {capa ? (
                       <img
                         src={capa}
                         alt={o.label}
                         loading="lazy"
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        className="size-full object-cover transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out-premium)] group-hover:scale-105"
                       />
                     ) : (
-                      <span className="flex h-full w-full items-center justify-center text-muted-foreground">
+                      <span className="flex size-full items-center justify-center text-muted-foreground">
                         <ImageIcon className="size-8" />
                       </span>
                     )}
                   </div>
-                  <div className="px-3 py-2">
-                    <span className="block truncate font-semibold text-foreground group-hover:text-primary">
+                  <div className="p-3.5">
+                    <p className="truncate font-display text-[15px] font-semibold uppercase tracking-wide group-hover:text-primary">
                       {o.label}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {o.fotos.length} foto{o.fotos.length > 1 ? "s" : ""}
-                    </span>
+                    </p>
                   </div>
                 </button>
               );
             })}
           </div>
         ) : (
-          // Fotos da opção selecionada.
           <div>
-            <div className="mb-4 flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => setSelId(null)}>
+            <div className="mb-5 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setSelId(null)}
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-[gap,color] duration-[var(--dur-fast)] hover:gap-3.5 hover:text-primary"
+              >
                 <ArrowLeft className="size-4" />
                 Todas as coleções
-              </Button>
-              <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
+              </button>
+              <h2 className="font-display text-xl font-semibold uppercase tracking-tight md:text-2xl">
                 {selecionada.label}
               </h2>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4">
               {selecionada.fotos.map((f) => (
                 <figure
                   key={f.id}
@@ -195,10 +182,10 @@ export function GaleriaPage() {
                       src={`${midiaUrl(f.url)}?mini=true`}
                       alt={f.legenda ?? selecionada.label}
                       loading="lazy"
-                      className="aspect-square w-full object-cover transition-transform hover:scale-105"
+                      className="aspect-square w-full object-cover transition-transform duration-[var(--dur-base)] hover:scale-105"
                     />
                   </button>
-                  <figcaption className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground">
+                  <figcaption className="flex items-center gap-1.5 px-2.5 py-2 text-xs text-muted-foreground">
                     <CalendarDays className="size-3.5 shrink-0" />
                     <span className="truncate">
                       {dataBR(f.dataAula)}
@@ -210,75 +197,60 @@ export function GaleriaPage() {
             </div>
           </div>
         )}
-      </section>
+      </SecaoSite>
 
-      {/* Galeria de vídeos (YouTube) */}
+      {/* Vídeos (YouTube) */}
       {listaVideos.length > 0 && (
-        <section className="mx-auto max-w-5xl px-4 pb-12">
-          <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight md:text-3xl">
-            <Video className="size-6 text-primary" />
-            Galeria de vídeos
-          </h2>
-          <p className="mb-4 mt-2 text-sm text-muted-foreground">
-            Vídeos do canal do instituto no YouTube.
-          </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {listaVideos.map((v) => (
+        <SecaoSite titulo="Vídeos" className="!pt-0">
+          <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
+            {listaVideos.map((v, i) => (
               <button
                 key={v.id}
                 type="button"
                 onClick={() => setVideoAberto(v)}
-                className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-left transition-colors hover:border-primary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={`revela-${(i % 3) + 1} group overflow-hidden rounded-xl border border-border bg-card text-left transition-[transform,border-color] duration-[var(--dur-base)] ease-[var(--ease-out-premium)] hover:-translate-y-1.5 hover:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
               >
-                <div className="relative aspect-video w-full overflow-hidden bg-secondary">
+                <div className="relative aspect-video overflow-hidden bg-secondary">
                   <img
                     src={thumbYoutube(v.youtubeId)}
                     alt={v.titulo}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    className="size-full object-cover transition-transform duration-[var(--dur-base)] group-hover:scale-105"
                   />
                   <span className="absolute inset-0 flex items-center justify-center">
-                    <span className="flex size-12 items-center justify-center rounded-full bg-black/60 text-white transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                      <Play className="size-6" />
+                    <span className="flex size-13 items-center justify-center rounded-full border border-border bg-background/70 transition-transform duration-[var(--dur-base)] ease-[var(--ease-out-premium)] group-hover:scale-110">
+                      <Play className="size-5 fill-primary text-primary" />
                     </span>
                   </span>
                 </div>
-                <div className="px-3 py-2">
-                  <span className="line-clamp-2 font-semibold text-foreground group-hover:text-primary">
+                <div className="p-3.5">
+                  <p className="line-clamp-2 text-sm font-semibold group-hover:text-primary">
                     {v.titulo}
-                  </span>
+                  </p>
                   {v.descricao && (
-                    <span className="line-clamp-1 text-xs text-muted-foreground">
+                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
                       {v.descricao}
-                    </span>
+                    </p>
                   )}
                 </div>
               </button>
             ))}
           </div>
-        </section>
+        </SecaoSite>
       )}
 
-      {/* Nota de consentimento — reforça a base legal (LGPD) */}
-      <section className="mx-auto max-w-5xl px-4 pb-10">
-        <p className="text-xs text-muted-foreground">
+      <SecaoSite className="!pt-0">
+        <p className="text-xs leading-relaxed text-muted-foreground">
           As imagens são publicadas com autorização dos responsáveis. Para
           solicitar a remoção de alguma foto, fale com a coordenação do polo.
         </p>
-      </section>
-
-      {/* Chamada de doação */}
-      <section className="mx-auto max-w-5xl px-4 pb-16">
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-6">
-          <p className="font-medium">Gostou do que vê? Ajude a manter o projeto.</p>
-          <Button asChild>
-            <Link to="/doar">
-              <HeartHandshake className="size-4" />
-              Doar por Pix
-            </Link>
-          </Button>
+        <div className="revela mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-[linear-gradient(115deg,var(--color-card)_55%,color-mix(in_oklab,var(--color-brand-red)_14%,var(--color-card))_100%)] px-7 py-6">
+          <p className="font-display text-xl font-medium uppercase tracking-tight">
+            Gostou do que vê? Ajude a manter o projeto.
+          </p>
+          <BotaoSite to="/doar">Doar por Pix</BotaoSite>
         </div>
-      </section>
+      </SecaoSite>
 
       {/* Lightbox */}
       {ampliada && (
@@ -385,6 +357,6 @@ export function GaleriaPage() {
           </div>
         </div>
       )}
-    </PaginaPublica>
+    </PaginaSite>
   );
 }
