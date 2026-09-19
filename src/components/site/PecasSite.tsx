@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronDown, FileText } from "lucide-react";
+import { ChevronDown, FileText } from "lucide-react";
 import { CabecalhoSite } from "@/components/site/CabecalhoSite";
 import { RodapeSite } from "@/components/site/RodapeSite";
 import { BotaoVoltarAoTopo } from "@/components/BotaoVoltarAoTopo";
@@ -31,7 +30,6 @@ export function PaginaSite({
   capa?: ReactNode;
   children: ReactNode;
 }) {
-  const navigate = useNavigate();
   useDocumentTitle(tituloDocumento ?? (typeof titulo === "string" ? titulo : ""));
 
   return (
@@ -43,17 +41,8 @@ export function PaginaSite({
         <div className="absolute left-0 top-12 hidden h-40 w-1.5 bg-gradient-to-b from-primary to-brand-red md:block" />
 
         <div className="mx-auto max-w-5xl px-4 pb-12 pt-8 md:px-8 md:pb-14 md:pt-10">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-[gap,color] duration-[var(--dur-fast)] hover:gap-3.5 hover:text-primary"
-          >
-            <ArrowLeft className="size-4" />
-            Voltar
-          </button>
-
           {etiqueta && (
-            <span className="entra-curto mt-5 inline-flex items-center gap-2 rounded-full border border-primary/40 px-3.5 py-1.5 font-display text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
+            <span className="entra-curto inline-flex items-center gap-2 rounded-full border border-primary/40 px-3.5 py-1.5 font-display text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
               {etiqueta}
             </span>
           )}

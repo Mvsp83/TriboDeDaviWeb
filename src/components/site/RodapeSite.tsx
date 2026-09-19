@@ -19,7 +19,15 @@ export function RodapeSite() {
           >
             Fale Conosco
           </Link>
-          <SobreApp className="whitespace-nowrap font-medium transition-colors hover:text-foreground" />
+          <SobreApp
+            className="whitespace-nowrap font-medium transition-colors hover:text-foreground"
+            rotulo={
+              <>
+                <span className="sm:hidden">eMeVe ©</span>
+                <span className="hidden sm:inline">Desenvolvido por eMeVe ©</span>
+              </>
+            }
+          />
         </div>
       </div>
     </footer>

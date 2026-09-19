@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,7 +16,14 @@ const VERSAO_APP = "1.0.0";
 // Crédito "Desenvolvido por eMeVe ©" — botão que abre o diálogo "Sobre o
 // Aplicativo" (logo, versão e contato). Mesmo comportamento no login da equipe
 // e no rodapé do site público.
-export function SobreApp({ className }: { className?: string }) {
+export function SobreApp({
+  className,
+  rotulo = "Desenvolvido por eMeVe ©",
+}: {
+  className?: string;
+  /** Texto do botão. Padrão: "Desenvolvido por eMeVe ©". */
+  rotulo?: ReactNode;
+}) {
   const [aberto, setAberto] = useState(false);
 
   return (
@@ -26,7 +33,7 @@ export function SobreApp({ className }: { className?: string }) {
         onClick={() => setAberto(true)}
         className={className ?? "transition-colors hover:text-foreground"}
       >
-        Desenvolvido por eMeVe ©
+        {rotulo}
       </button>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
