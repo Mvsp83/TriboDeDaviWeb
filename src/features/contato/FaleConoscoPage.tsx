@@ -71,10 +71,10 @@ export function FaleConoscoPage() {
             {canais.map((c) => {
               const conteudo = (
                 <>
-                  <span className="min-w-[76px] font-display text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                  <span className="font-display text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                     {c.rotulo}
                   </span>
-                  <span className="min-w-0 break-words text-sm font-semibold">
+                  <span className="mt-1 break-all text-sm font-semibold">
                     {c.valor}
                   </span>
                 </>
@@ -85,14 +85,14 @@ export function FaleConoscoPage() {
                   href={c.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3.5 rounded-xl border border-border bg-card px-4 py-4 transition-[transform,border-color] duration-[var(--dur-base)] ease-[var(--ease-out-premium)] hover:translate-x-1 hover:border-primary"
+                  className="flex flex-col rounded-xl border border-border bg-card px-4 py-3.5 transition-[transform,border-color] duration-[var(--dur-base)] ease-[var(--ease-out-premium)] hover:translate-x-1 hover:border-primary"
                 >
                   {conteudo}
                 </a>
               ) : (
                 <div
                   key={c.rotulo}
-                  className="flex items-center gap-3.5 rounded-xl border border-border bg-card px-4 py-4"
+                  className="flex flex-col rounded-xl border border-border bg-card px-4 py-3.5"
                 >
                   {conteudo}
                 </div>
