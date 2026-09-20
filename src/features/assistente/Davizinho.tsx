@@ -6,7 +6,7 @@ import type { LinkFaq } from "@/features/site/conteudoSite";
 import { Button } from "@/components/ui/button";
 import { registrarEvento } from "@/features/metricas/metricaApi";
 
-// Páginas públicas onde o assistente aparece.
+// Páginas públicas onde o assistente aparece (todas as do site público).
 const ROTAS_PUBLICAS = new Set([
   "/",
   "/site",
@@ -15,9 +15,32 @@ const ROTAS_PUBLICAS = new Set([
   "/galeria",
   "/loja",
   "/informacoes",
+  "/contato",
+  "/historia",
+  "/politica-privacidade",
   "/matricula",
   "/responsavel",
 ]);
+
+// Chave em localStorage para lembrar que o visitante escondeu o assistente.
+const CHAVE_OCULTO = "tribo:davizinho-oculto";
+
+function lerOculto(): boolean {
+  try {
+    return localStorage.getItem(CHAVE_OCULTO) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function gravarOculto(oculto: boolean) {
+  try {
+    if (oculto) localStorage.setItem(CHAVE_OCULTO, "1");
+    else localStorage.removeItem(CHAVE_OCULTO);
+  } catch {
+    /* modo privado / storage bloqueado — segue sem persistir */
+  }
+}
 
 // Atalhos de navegação (aparecem sempre + no rodapé do chat).
 const ATALHOS: { label: string; para: string }[] = [
@@ -74,6 +97,9 @@ export function Davizinho() {
   const location = useLocation();
   const navigate = useNavigate();
   const [aberto, setAberto] = useState(false);
+  // Visitante pode esconder o assistente para não atrapalhar a leitura; a
+  // escolha fica salva no navegador (some o balão, sobra só um botão discreto).
+  const [oculto, setOculto] = useState(lerOculto);
   const [entrada, setEntrada] = useState("");
   // Imagem do Davizinho (logo do instituto em /public); cai no ícone se faltar.
   const [logoOk, setLogoOk] = useState(true);
@@ -180,30 +206,67 @@ export function Davizinho() {
     }
   }
 
+  function esconder() {
+    setAberto(false);
+    setOculto(true);
+    gravarOculto(true);
+  }
+
+  function mostrar() {
+    setOculto(false);
+    gravarOculto(false);
+  }
+
   if (!ROTAS_PUBLICAS.has(location.pathname)) return null;
+
+  // Escondido pelo visitante: mostra só um botão discreto para reabrir.
+  if (oculto) {
+    return (
+      <button
+        onClick={mostrar}
+        aria-label="Mostrar assistente Davizinho"
+        className="fixed bottom-4 right-4 z-40 flex items-center gap-1.5 rounded-full border border-border bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-md backdrop-blur transition-colors hover:text-foreground"
+      >
+        <MessageCircle className="size-3.5" />
+        Ajuda
+      </button>
+    );
+  }
 
   return (
     <>
       {/* Botão flutuante — dourado e chamativo (com pulso) quando fechado. */}
-      <button
-        onClick={() => setAberto((a) => !a)}
-        aria-label={aberto ? "Fechar assistente" : "Abrir assistente Davizinho"}
-        className="fixed bottom-4 right-4 z-50 flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/40 transition-transform hover:scale-105"
-      >
+      <div className="fixed bottom-4 right-4 z-50">
+        {/* "X" para esconder o assistente (só com o painel fechado). */}
         {!aberto && (
-          <span
-            aria-hidden="true"
-            className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-40"
-          />
+          <button
+            onClick={esconder}
+            aria-label="Esconder assistente"
+            className="absolute -right-1 -top-1 z-10 flex size-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow transition-colors hover:text-foreground"
+          >
+            <X className="size-3.5" />
+          </button>
         )}
-        <span className="relative flex items-center justify-center">
-          {aberto ? (
-            <X className="size-7" />
-          ) : (
-            <MessageCircle className="size-8" />
+        <button
+          onClick={() => setAberto((a) => !a)}
+          aria-label={aberto ? "Fechar assistente" : "Abrir assistente Davizinho"}
+          className="relative flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/40 transition-transform hover:scale-105"
+        >
+          {!aberto && (
+            <span
+              aria-hidden="true"
+              className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-40"
+            />
           )}
-        </span>
-      </button>
+          <span className="relative flex items-center justify-center">
+            {aberto ? (
+              <X className="size-7" />
+            ) : (
+              <MessageCircle className="size-8" />
+            )}
+          </span>
+        </button>
+      </div>
 
       {/* Painel */}
       {aberto && (
