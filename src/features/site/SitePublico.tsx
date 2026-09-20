@@ -204,7 +204,7 @@ export function SitePublico() {
             <h2 className="mt-3 font-display text-3xl font-semibold uppercase leading-tight tracking-tight md:text-4xl">
               Um sonho que virou missão
             </h2>
-            <p className="mt-4 text-pretty leading-relaxed text-muted-foreground">
+            <p className="mt-4 text-pretty leading-relaxed text-muted-foreground md:text-justify md:hyphens-auto">
               Nascemos em {SITE.contato.cidade || "Blumenau/SC"} com a missão de
               abrir oportunidades pelo esporte, pela cultura e pela assistência
               social. Mais de uma década depois, centenas de alunos já passaram

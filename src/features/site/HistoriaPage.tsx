@@ -75,7 +75,7 @@ export function HistoriaPage() {
             ) : (
               <p
                 key={i}
-                className="revela mt-4 text-pretty leading-[1.78] text-muted-foreground md:text-[1.02rem]"
+                className="revela mt-4 text-pretty leading-[1.78] text-muted-foreground md:text-justify md:hyphens-auto md:text-[1.02rem]"
               >
                 {b.texto}
               </p>

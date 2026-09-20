@@ -283,7 +283,9 @@ export function InformacoesPage() {
                 pergunta={q.pergunta}
                 aberturaInicial={ci === 0 && qi === 0}
               >
-                <p className="whitespace-pre-line">{q.resposta}</p>
+                <p className="whitespace-pre-line md:text-justify md:hyphens-auto">
+                  {q.resposta}
+                </p>
                 {q.link && <LinkResposta link={q.link} />}
               </ItemAcordeao>
             ))}
