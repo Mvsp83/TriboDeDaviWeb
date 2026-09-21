@@ -61,8 +61,8 @@ export function HistoriaPage() {
         <article>
           {blocos.map((b, i) =>
             b.ehTitulo ? (
-              <div key={i} className="revela scroll-mt-28" id={idDe(b.texto)}>
-                <div className="mt-10 flex items-center gap-3.5 first:mt-0">
+              <div key={i} className="revela mt-16 scroll-mt-28 first:mt-0" id={idDe(b.texto)}>
+                <div className="flex items-center gap-3.5">
                   <span className="font-display text-sm font-semibold tabular-nums text-brand-red">
                     {String((n += 1)).padStart(2, "0")}
                   </span>
